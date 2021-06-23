@@ -1,0 +1,17 @@
+[
+ {
+  "path": "/packages/tools/EasyFlash", 
+  "ver": "v4.1.0", 
+  "name": "EASYFLASH"
+ }, 
+ {
+  "path": "/packages/peripherals/button", 
+  "ver": "v1.0.1", 
+  "name": "BUTTON"
+ }, 
+ {
+  "path": "/packages/peripherals/agile_led", 
+  "ver": "latest", 
+  "name": "AGILE_LED"
+ }
+]
