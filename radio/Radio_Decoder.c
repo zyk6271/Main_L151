@@ -195,14 +195,25 @@ void DataSolve(Message buf)
         {
             if(buf.Data==2)
             {
-                RadioEnqueue(0,buf.From_ID,buf.Counter,2,2);
-                Warning_Enable_Num(1);
+                if(buf.From_ID!=GetDoorID())
+                {
+                    RadioEnqueue(0,buf.From_ID,buf.Counter,2,2);
+                    Warning_Enable_Num(1);
+                }
+                else
+                {
+                    RadioEnqueue(0,buf.From_ID,buf.Counter,2,2);
+                }
+            }
+            else if(buf.Data==1)
+            {
+                RadioEnqueue(0,buf.From_ID,buf.Counter,2,1);
+                Warning_Enable_Num(7);
             }
             else
             {
                 Update_Device_Bat(buf.From_ID,buf.Data);//写入电量
                 RadioEnqueue(0,buf.From_ID,buf.Counter,2,0);
-                //Disable_Warining();
             }
             LOG_D("Handshake With %ld\r\n",buf.From_ID);
         }
@@ -273,7 +284,7 @@ void DataSolve(Message buf)
         LOG_D("Pwr On\r\n");
         if(Check_Valid(buf.From_ID))
         {
-            if((Now_Status==Open||Now_Status==Close) && (Now_Status!=Offline))
+            if((Now_Status==Open||Now_Status==Close))
             {
                 LOG_D("Pwr On From %ld\r\n",buf.From_ID);
                 //Disable_Warining();
@@ -297,7 +308,7 @@ void DataSolve(Message buf)
         LOG_D("Pwr Off and Now State is %d\r\n",Now_Status);
         if(Check_Valid(buf.From_ID))
         {
-            if(Now_Status==Open||Now_Status==Close||Now_Status==SlaverLowPower)
+            if(Now_Status==Open||Now_Status==Close)
             {
                 LOG_D("Pwr Off From %ld\r\n",buf.From_ID);
                 Disable_Warining();

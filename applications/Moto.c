@@ -103,6 +103,7 @@ void Moto_Close(uint8_t ActFlag)
     else if(Global_Device.LastFlag == OtherOff && ActFlag == OtherOff)
     {
         Now_Status = Close;
+        ValveStatus=0;
         beep_start(0,7);//蜂鸣器三下
         LOG_D("Moto is alreay otheroff\r\n");
     }
@@ -125,7 +126,7 @@ void Turn2_Edge_Callback(void *parameter)
 void Turn1_Timer_Callback(void *parameter)
 {
     Moto_Open(NormalOpen);
-    rt_pin_irq_enable(Turn1, PIN_IRQ_DISABLE);
+    rt_pin_irq_enable(Senor1, PIN_IRQ_DISABLE);
     if(!Turn1_Flag)
     {
         LOG_D("Moto1 is Fail\r\n");
@@ -139,7 +140,7 @@ void Turn1_Timer_Callback(void *parameter)
 void Turn2_Timer_Callback(void *parameter)
 {
     Moto_Open(NormalOpen);
-    rt_pin_irq_enable(Turn2, PIN_IRQ_DISABLE);
+    rt_pin_irq_enable(Senor2, PIN_IRQ_DISABLE);
     if(!Turn2_Flag)
     {
         LOG_D("Moto2 is Fail\r\n");

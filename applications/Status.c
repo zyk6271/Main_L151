@@ -29,6 +29,7 @@ extern uint16_t Radio_Counter;
 
 WariningEvent NowStatusEvent;
 WariningEvent SlaverLowPowerEvent;
+WariningEvent SlaverUltraLowPowerEvent;
 WariningEvent SlaverWaterAlarmActiveEvent;
 WariningEvent MasterLostPeakEvent;
 WariningEvent MasterWaterAlarmActiveEvent;
@@ -65,12 +66,13 @@ void Warning_Enable_Num(uint8_t id)
 {
     switch(id)
     {
-    case 1:Warning_Enable(SlaverLowPowerEvent);break;
+    case 1:Warning_Enable(SlaverUltraLowPowerEvent);break;
     case 2:Warning_Enable(SlaverWaterAlarmActiveEvent);break;
     case 3:Warning_Enable(MasterLostPeakEvent);break;
     case 4:Warning_Enable(MasterWaterAlarmActiveEvent);break;
     case 5:Warning_Enable(OfflineEvent);break;
     case 6:Warning_Enable(MotoFailEvent);break;
+    case 7:Warning_Enable(SlaverLowPowerEvent);break;
     }
 }
 void Warning_Disable(void)
@@ -82,10 +84,16 @@ void Warning_Disable(void)
 }
 void SlaverLowBatteryWarning(void *parameter)
 {
-    Moto_Close(NormalOff);
-    beep_start(0,0);//红灯,蜂鸣器一下
-    Now_Status = SlaverLowPower;
+    beep_start(0,15);//红灯,蜂鸣器一下
+    //Now_Status = SlaverLowPower;
     LOG_D("SlaverLowBatteryWarning\r\n");
+}
+void SlaverUltraLowBatteryWarning(void *parameter)
+{
+    Moto_Close(NormalOff);
+    beep_start(0,15);//红灯,蜂鸣器一下
+    Now_Status = SlaverUltraLowPower;
+    LOG_D("SlaverUltraLowBatteryWarning\r\n");
 }
 void SlaverWaterAlarmWarning(void *parameter)
 {
@@ -124,7 +132,7 @@ void Delay_Timer_Callback(void *parameter)
 void Delay_Timer_Init(void)
 {
     LOG_D("Delay_Timer_Init Success\r\n");
-    Delay_Timer = rt_timer_create("Delay_Timer", Delay_Timer_Callback, RT_NULL, 4*60*60*1000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_ONE_SHOT);
+    Delay_Timer = rt_timer_create("Delay_Timer", Delay_Timer_Callback, RT_NULL, 10*1000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_ONE_SHOT);
 }
 MSH_CMD_EXPORT(Delay_Timer_Init,Delay_Timer_Init);
 void Delay_Timer_Open(void)
@@ -170,12 +178,13 @@ void RadioInitFail(void)
 }
 void WarningInit(void)
 {
-    WarningEventInit(1,2,&SlaverLowPowerEvent,SlaverLowBatteryWarning);
+    WarningEventInit(7,2,&SlaverLowPowerEvent,SlaverLowBatteryWarning);
     WarningEventInit(2,3,&SlaverWaterAlarmActiveEvent,SlaverWaterAlarmWarning);
     WarningEventInit(3,0,&MasterLostPeakEvent,MasterLostPeakWarning);
     WarningEventInit(4,3,&MasterWaterAlarmActiveEvent,MasterWaterAlarmWarning);
     WarningEventInit(5,4,&OfflineEvent,OfflineWarning);
     WarningEventInit(6,0,&MotoFailEvent,RT_NULL);
+    WarningEventInit(1,2,&SlaverUltraLowPowerEvent,SlaverUltraLowBatteryWarning);
     WarningEventInit(0,0,&NowStatusEvent,RT_NULL);//本地存储器
     LOG_D("Warning Event Init Success\r\n");
 }

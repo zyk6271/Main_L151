@@ -57,7 +57,7 @@ void beep_start(uint8_t led_id,int mode)
     led_mode_temp = mode;
     switch (mode)
     {
-    case 0:
+    case 0://短叫一声
         if(led_id)//绿灯
         {
             agile_led_set_light_mode(beep, "200,200", 1);
@@ -74,7 +74,7 @@ void beep_start(uint8_t led_id,int mode)
         }
         break;
 
-    case 1:
+    case 1://短叫两声
         agile_led_set_light_mode(beep, "200,200,200,5000", -1);
         agile_led_start(beep);
         if(led_id)
@@ -89,7 +89,7 @@ void beep_start(uint8_t led_id,int mode)
         }
         break;
 
-    case 2:
+    case 2://短叫三声
         agile_led_set_light_mode(beep, "200,200,200,200,200,5000", -1);
         agile_led_start(beep);
         if(led_id)
@@ -103,7 +103,7 @@ void beep_start(uint8_t led_id,int mode)
             agile_led_start(led0);
         }
         break;
-    case 3:
+    case 3://短叫四声
         agile_led_set_light_mode(beep, "200,200,200,200,200,200,200,5000", -1);
         agile_led_start(beep);
         if(led_id)
@@ -248,6 +248,19 @@ void beep_start(uint8_t led_id,int mode)
         {
             agile_led_set_light_mode(led0, "200,100", -1);
             agile_led_start(led0);
+        }
+    case 15://1声间隔五秒
+        if(led_id)
+        {
+            agile_led_set_light_mode(led1, "200,100", -1);
+            agile_led_start(led1);
+        }
+        else
+        {
+            agile_led_set_light_mode(led0, "200,5000", -1);
+            agile_led_set_light_mode(beep, "200,5000", -1);
+            agile_led_start(led0);
+            agile_led_start(beep);
         }
     }
 }

@@ -31,19 +31,19 @@
 
 int main(void)
 {
+    button_Init();
+    Key_Reponse();
     flash_Init();
     easyflash_init();
     LoadDevice2Memory();
     led_Init();
     Moto_Init();
-    button_Init();
-    Radio_Task_Init();
     //wdt_sample();
     Delay_Timer_Init();
     RTC_Init();
     WarningInit();
     WaterScan_Init();
-    Key_Reponse();
+    Radio_Task_Init();
     while (1)
     {
         rt_thread_mdelay(1000);

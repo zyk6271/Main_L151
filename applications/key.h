@@ -14,6 +14,7 @@ enum Device_Status
     Close=0,
     Open,
     SlaverLowPower,
+    SlaverUltraLowPower,
     SlaverWaterAlarmActive,
     MasterLostPeak,
     MasterWaterAlarmActive,

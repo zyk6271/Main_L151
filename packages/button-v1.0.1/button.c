@@ -62,7 +62,7 @@ void Button_Create(const char *name,
   btn->Button_Trigger_Event = NONE_TRIGGER;             //Button trigger event
   btn->Read_Button_Level = read_btn_level;              //Button trigger level reading function
   btn->Button_Trigger_Level = btn_trigger_level;        //Button trigger level
-  btn->Button_Last_Level = btn->Read_Button_Level();    //Button current level
+  btn->Button_Last_Level = 1;    //Button current level
   btn->Debounce_Time = 0;
   btn->Long_Flag = 0;
   

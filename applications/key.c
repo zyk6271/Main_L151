@@ -75,7 +75,10 @@ void Key_Reponse_Callback(void *parameter)
                 key_down();
                 LOG_D("Valve Already Open With ON\r\n");
                 break;
-            case SlaverLowPower:
+//            case SlaverLowPower:
+//                beep_start(0,7);//蜂鸣器三下
+//                break;
+            case SlaverUltraLowPower:
                 beep_start(0,7);//蜂鸣器三下
                 break;
             case SlaverWaterAlarmActive:
@@ -122,7 +125,14 @@ void Key_Reponse_Callback(void *parameter)
                 Moto_Close(NormalOff);
                 LOG_D("Valve Close With OFF\r\n");
                 break;
-            case SlaverLowPower:
+//            case SlaverLowPower:
+//                key_down();
+//                Moto_Close(NormalOff);
+//                Warning_Disable();
+//                Now_Status = Close;
+//                LOG_D("SlaverLowPower With OFF\r\n");
+//                break;
+            case SlaverUltraLowPower:
                 just_ring();
                 break;
             case SlaverWaterAlarmActive:
