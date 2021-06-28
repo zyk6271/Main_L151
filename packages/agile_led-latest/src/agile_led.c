@@ -218,6 +218,24 @@ int agile_led_stop(agile_led_t *led)
     return RT_EOK;
 }
 
+int agile_led_pause(agile_led_t *led)
+{
+    RT_ASSERT(led);
+    rt_mutex_take(lock_mtx, RT_WAITING_FOREVER);
+    led->pin_backup = led->pin;
+    led->pin = 0;
+    rt_mutex_release(lock_mtx);
+    return RT_EOK;
+}
+
+int agile_led_resume(agile_led_t *led)
+{
+    RT_ASSERT(led);
+    rt_mutex_take(lock_mtx, RT_WAITING_FOREVER);
+    led->pin = led->pin_backup;
+    rt_mutex_release(lock_mtx);
+    return RT_EOK;
+}
 /**
 * Name:             agile_led_set_light_mode
 * Brief:            设置led对象的模式

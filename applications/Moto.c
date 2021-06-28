@@ -162,12 +162,6 @@ void Moto_Init(void)
     rt_pin_attach_irq(Senor2, PIN_IRQ_MODE_FALLING, Turn2_Edge_Callback, RT_NULL);
     Moto_Timer1 = rt_timer_create("Moto_Timer1", Turn1_Timer_Callback, RT_NULL, 5100, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
     Moto_Timer2 = rt_timer_create("Moto_Timer2", Turn2_Timer_Callback, RT_NULL, 5000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
-    just_ring();
-//    if(Global_Device.LastFlag != OtherOff || Global_Device.LastFlag == 0)
-//    {
-//        Global_Device.LastFlag = NormalOpen;
-//        Moto_InitOpen(NormalOpen);
-//    }
     if(Global_Device.LastFlag == 0 || Global_Device.LastFlag == NormalOpen || Global_Device.LastFlag == OtherOpen)
     {
         Global_Device.LastFlag = NormalOpen;

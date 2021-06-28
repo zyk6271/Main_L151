@@ -78,7 +78,7 @@ void Key_Reponse_Callback(void *parameter)
             case SlaverLowPower:
                 break;
             case SlaverUltraLowPower:
-                beep_start(0,7);//蜂鸣器三下
+                beep_three_times();
                 break;
             case SlaverWaterAlarmActive:
                 break;
@@ -89,10 +89,10 @@ void Key_Reponse_Callback(void *parameter)
                 LOG_D("MasterLostPeak With ON\r\n");
                 break;
             case MasterWaterAlarmActive:
-                beep_start(0,7);//红灯,蜂鸣器三下
+                beep_three_times();
                 break;
             case MasterWaterAlarmDeActive:
-                beep_start(0,7);
+                beep_three_times();
                 LOG_D("MasterWaterAlarmActive With ON\r\n");
                 break;
             case MotoFail:
@@ -204,14 +204,9 @@ void Key_Reponse_Callback(void *parameter)
                 LOG_D("Now in Warining Mode\r\n");
             }
         }
-        rt_thread_mdelay(5);
+        rt_thread_mdelay(10);
     }
 }
-void statusread(void)
-{
-    LOG_D("Now Status is %d\r\n",Now_Status);
-}
-MSH_CMD_EXPORT(statusread,statusread);
 void Learn_Timer_Callback(void *parameter)
 {
     LOG_D("Learn timer is Timeout\r\n");

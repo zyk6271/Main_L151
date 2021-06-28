@@ -938,5 +938,6 @@ void Radio_Task_Init(void)
     AX5043ReceiverON();         //接收开启
     RadioDequeueTaskInit();
     LOG_D("Radio Init success,Self ID is %ld\r\n",Self_Id);
+    just_ring();
 }
 /********************************the end of file***********************/

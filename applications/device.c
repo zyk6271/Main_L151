@@ -149,7 +149,7 @@ void RF_Switch(void)
         rt_pin_write(ANT_EXT,ANT_SW_Status);
         rt_pin_write(ANT_INT,!ANT_SW_Status);
         LOG_I("ANT_EXT is %d , ANT_INT is %d\r\n",ANT_SW_Status,!ANT_SW_Status);
-        Moto_Detect();
+        //Moto_Detect();
     }
 }
 void button_task_entry(void *parameter)

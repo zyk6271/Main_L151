@@ -24,7 +24,6 @@
 #include "dog.h"
 #include "radio_decoder.h"
 
-
 #define DBG_TAG "main"
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>

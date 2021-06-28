@@ -23,6 +23,7 @@ struct agile_led
     rt_tick_t tick_timeout;                          // 超时时间
     void (*compelete)(agile_led_t *led);             // 操作完成回调函数
     rt_slist_t slist;                                // 单向链表节点
+    rt_base_t pin_backup;                              // 单向链表节点
 };
 
 // 创建led对象
@@ -43,6 +44,10 @@ void agile_led_toggle(agile_led_t *led);
 void agile_led_on(agile_led_t *led);
 // led对象灭
 void agile_led_off(agile_led_t *led);
+
+int agile_led_pause(agile_led_t *led);
+
+int agile_led_resume(agile_led_t *led);
 
 #ifdef __cplusplus
 }

@@ -2,12 +2,15 @@
 #include <stdlib.h>
 #include "led.h"
 #include "pin_config.h"
+#include <agile_led.h>
 
 static agile_led_t *led0 = RT_NULL;
 static agile_led_t *led1 = RT_NULL;
 static agile_led_t *beep = RT_NULL;
 static agile_led_t *singlebeep = RT_NULL;
 static agile_led_t *singleled0 = RT_NULL;
+static agile_led_t *beep_three = RT_NULL;
+static agile_led_t *led0_three = RT_NULL;
 static agile_led_t *lossled0 = RT_NULL;
 
 #define DBG_TAG "led"
@@ -24,6 +27,7 @@ void led_Init(void)
         led0 = agile_led_create(LED3_PIN, PIN_LOW, "200,200", -1);
         singleled0 = agile_led_create(LED3_PIN, PIN_LOW, "200,1", 1);
         lossled0 = agile_led_create(LED3_PIN, PIN_LOW, "200,200,200,5000", -1);
+        led0_three = agile_led_create(LED3_PIN, PIN_LOW, "200,200", 3);
         LOG_D("LED_0 Init Success\r\n");
     }
 
@@ -37,9 +41,9 @@ void led_Init(void)
     {
         beep = agile_led_create(BEEP_PIN, PIN_HIGH, "200,200", -1);
         singlebeep = agile_led_create(BEEP_PIN, PIN_HIGH, "200,1", 1);
+        beep_three = agile_led_create(BEEP_PIN, PIN_LOW, "200,200", 3);
         LOG_D("Beep Init Success\r\n");
     }
-
 }
 void loss_led_start(void)
 {
@@ -49,12 +53,22 @@ void loss_led_stop(void)
 {
     agile_led_stop(lossled0);
 }
+void led_resume_callback(agile_led_t *led)
+{
+    rt_pin_write(LED0_PIN, 1);
+    rt_pin_write(BEEP_PIN, 0);
+    agile_led_resume(led0);
+    agile_led_resume(led1);
+    agile_led_resume(beep);
+    agile_led_resume(singlebeep);
+    agile_led_resume(singleled0);
+}
 void beep_three_times(void)
 {
-    const char before_beep;
-    const char before_led;
-    agile_led_get_light_arr(beep,before_beep);
-    agile_led_get_light_arr(led0,before_led);
+    led_Stop(2);
+    agile_led_set_compelete_callback(led0_three,led_resume_callback);
+    agile_led_start(beep_three);
+    agile_led_start(led0_three);
 }
 void beep_start(uint8_t led_id,int mode)
 {
@@ -350,22 +364,15 @@ void led_Stop(uint8_t led_id)
         rt_pin_write(LED0_PIN, 1);
         break;
     case 2:
-        agile_led_stop(beep);
-        rt_pin_write(0, 0);
-        break;
-    case 3:
-        agile_led_stop(singleled0);
-        rt_pin_write(0, 0);
-        break;
-    case 4:
-        agile_led_stop(led0);
-        agile_led_stop(led1);
-        agile_led_stop(beep);
-        agile_led_stop(singlebeep);
-        agile_led_stop(singleled0);
+        agile_led_pause(led0);
+        agile_led_pause(led1);
+        agile_led_pause(beep);
+        agile_led_pause(singlebeep);
+        agile_led_pause(singleled0);
         break;
     }
 }
+
 void led_on(uint8_t id)
 {
     switch(id)
