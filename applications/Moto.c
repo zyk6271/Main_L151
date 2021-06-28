@@ -14,6 +14,7 @@
 #include "key.h"
 #include "moto.h"
 #include "flashwork.h"
+#include "status.h"
 
 #define DBG_TAG "moto"
 #define DBG_LVL DBG_LOG
@@ -125,29 +126,29 @@ void Turn2_Edge_Callback(void *parameter)
 }
 void Turn1_Timer_Callback(void *parameter)
 {
-    Moto_Open(NormalOpen);
     rt_pin_irq_enable(Senor1, PIN_IRQ_DISABLE);
     if(!Turn1_Flag)
     {
         LOG_D("Moto1 is Fail\r\n");
-        beep_start(0,9);
+        Warning_Enable_Num(6);
     }
     else
     {
+        Moto_Open(NormalOpen);
         LOG_D("Moto1 is Good\r\n");
     }
 }
 void Turn2_Timer_Callback(void *parameter)
 {
-    Moto_Open(NormalOpen);
     rt_pin_irq_enable(Senor2, PIN_IRQ_DISABLE);
     if(!Turn2_Flag)
     {
         LOG_D("Moto2 is Fail\r\n");
-        beep_start(0,9);
+        Warning_Enable_Num(6);
     }
     else
     {
+        Moto_Open(NormalOpen);
         LOG_D("Moto2 is Good\r\n");
     }
 }

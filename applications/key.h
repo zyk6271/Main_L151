@@ -19,6 +19,7 @@ enum Device_Status
     MasterLostPeak,
     MasterWaterAlarmActive,
     MasterWaterAlarmDeActive,
+    MotoFail,
     Learn,
     Offline,
     WiFi

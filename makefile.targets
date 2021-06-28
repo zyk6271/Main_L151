@@ -3,4 +3,4 @@ clean2:
 	-$(RM) $(OBJS) *.elf
 	-@echo ' '
     
-*.elf: $(wildcard E:/Main_L151/linkscripts/STM32L151CBxxA/link.lds)
+*.elf: $(wildcard G:/Main_L151/linkscripts/STM32L151CBxxA/link.lds)

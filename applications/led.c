@@ -49,6 +49,13 @@ void loss_led_stop(void)
 {
     agile_led_stop(lossled0);
 }
+void beep_three_times(void)
+{
+    const char before_beep;
+    const char before_led;
+    agile_led_get_light_arr(beep,before_beep);
+    agile_led_get_light_arr(led0,before_led);
+}
 void beep_start(uint8_t led_id,int mode)
 {
     agile_led_stop(singlebeep);

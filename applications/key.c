@@ -75,9 +75,8 @@ void Key_Reponse_Callback(void *parameter)
                 key_down();
                 LOG_D("Valve Already Open With ON\r\n");
                 break;
-//            case SlaverLowPower:
-//                beep_start(0,7);//蜂鸣器三下
-//                break;
+            case SlaverLowPower:
+                break;
             case SlaverUltraLowPower:
                 beep_start(0,7);//蜂鸣器三下
                 break;
@@ -90,11 +89,14 @@ void Key_Reponse_Callback(void *parameter)
                 LOG_D("MasterLostPeak With ON\r\n");
                 break;
             case MasterWaterAlarmActive:
-                beep_start(0,2);//红灯,蜂鸣器三下
+                beep_start(0,7);//红灯,蜂鸣器三下
                 break;
             case MasterWaterAlarmDeActive:
-                beep_start(0,2);
+                beep_start(0,7);
                 LOG_D("MasterWaterAlarmActive With ON\r\n");
+                break;
+            case MotoFail:
+                just_ring();
                 break;
             case Learn:
                 break;
@@ -125,13 +127,8 @@ void Key_Reponse_Callback(void *parameter)
                 Moto_Close(NormalOff);
                 LOG_D("Valve Close With OFF\r\n");
                 break;
-//            case SlaverLowPower:
-//                key_down();
-//                Moto_Close(NormalOff);
-//                Warning_Disable();
-//                Now_Status = Close;
-//                LOG_D("SlaverLowPower With OFF\r\n");
-//                break;
+            case SlaverLowPower:
+                break;
             case SlaverUltraLowPower:
                 just_ring();
                 break;
@@ -156,6 +153,10 @@ void Key_Reponse_Callback(void *parameter)
                 LOG_D("MasterWaterAlarmActive With OFF\r\n");
                 break;
             case Learn:
+                break;
+            case MotoFail:
+                key_down();
+                LOG_D("MotoFail With OFF\r\n");
                 break;
             case Offline:
                 break;

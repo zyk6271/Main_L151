@@ -127,7 +127,7 @@ rt_timer_t Delay_Timer = RT_NULL;
 void Delay_Timer_Callback(void *parameter)
 {
     LOG_D("Delay_Timer_Callback is Now\r\n");
-    Moto_Close(NormalOff);
+    Moto_Close(OtherOff);
 }
 void Delay_Timer_Init(void)
 {
@@ -160,6 +160,12 @@ void OfflineWarning(void *parameter)
         LOG_D("Already OfflineWarning Now\r\n");
     }
 }
+void MotoFailCallback(void *parameter)
+{
+    beep_start(0,9);
+    Now_Status = MotoFail;
+    LOG_D("MotoFail\r\n");
+}
 void OfflineDisableWarning(void)
 {
     if(Now_Status == Offline)
@@ -183,7 +189,7 @@ void WarningInit(void)
     WarningEventInit(3,0,&MasterLostPeakEvent,MasterLostPeakWarning);
     WarningEventInit(4,3,&MasterWaterAlarmActiveEvent,MasterWaterAlarmWarning);
     WarningEventInit(5,4,&OfflineEvent,OfflineWarning);
-    WarningEventInit(6,0,&MotoFailEvent,RT_NULL);
+    WarningEventInit(6,1,&MotoFailEvent,MotoFailCallback);
     WarningEventInit(1,2,&SlaverUltraLowPowerEvent,SlaverUltraLowBatteryWarning);
     WarningEventInit(0,0,&NowStatusEvent,RT_NULL);//本地存储器
     LOG_D("Warning Event Init Success\r\n");
