@@ -135,7 +135,7 @@ void Detect_KO_K1(void)
 uint8_t ANT_SW_Status,ANT_SW_Status_Temp = 0;
 void RF_Init(void)
 {
-    ANT_SW_Status_Temp = rt_pin_read(ANT_SW);
+    ANT_SW_Status = rt_pin_read(ANT_SW);
     rt_pin_write(ANT_EXT,ANT_SW_Status);
     rt_pin_write(ANT_INT,!ANT_SW_Status);
     LOG_I("ANT_EXT is %d , ANT_INT is %d\r\n",ANT_SW_Status,!ANT_SW_Status);
@@ -166,7 +166,7 @@ void button_task_entry(void *parameter)
         Button_Attach(&Key1,BUTTON_LONG,K1_LongSem_Release);
         Button_Attach(&Key0,BUTTON_LONG_FREE,K0_LongFree_Release);
         Button_Attach(&Key1,BUTTON_LONG_FREE,K1_LongFree_Release);
-
+        LOG_D("Button Init Success\r\n");
         while(1)
         {
             RF_Switch();
@@ -176,7 +176,7 @@ void button_task_entry(void *parameter)
 }
 void button_Init(void)
 {
-    button_task=rt_thread_create("button_task",button_task_entry,RT_NULL,2048,5,10);
-    if(button_task!=RT_NULL)rt_thread_startup(button_task);LOG_D("Button Init Success\r\n");
+    button_task=rt_thread_create("button_task",button_task_entry,RT_NULL,1024,5,10);
+    if(button_task!=RT_NULL)rt_thread_startup(button_task);
 }
 MSH_CMD_EXPORT(button_Init,button_Init);

@@ -137,13 +137,78 @@ void Flash_LearnNums_Change(uint32_t value)
 }
 void Flash_Moto_Change(uint8_t value)
 {
-    const char *keybuf="Moto";
+    char *keybuf="Moto";
     char *Temp_ValueBuf = rt_malloc(10);
     sprintf(Temp_ValueBuf, "%d", value);
+    LOG_D("Start write\r\n");
     ef_set_env(keybuf, Temp_ValueBuf);
     rt_free(Temp_ValueBuf);
     LOG_D("Writing %ld to key %s\r\n", value,keybuf);
 }
+//void Flash_Moto1Total_Add(void)
+//{
+//    char *keybuf="Moto1Total";
+//    char *read_value_temp;//真实值
+//    uint32_t read_value = 0;
+//    read_value_temp = strdup(ef_get_env(keybuf));
+//    read_value = atol(read_value_temp);
+//    LOG_I("Reading key %s is %d\r\n", keybuf,read_value);
+//
+//    char *Temp_ValueBuf = rt_malloc(10);
+//    sprintf(Temp_ValueBuf, "%ld", read_value+=1);
+//    ef_set_env(keybuf, Temp_ValueBuf);
+//    rt_free(Temp_ValueBuf);
+//    rt_free(read_value_temp);//释放临时buffer对应内存空间
+//    LOG_D("Writing %ld to key %s\r\n", read_value,keybuf);
+//}
+//void Flash_Moto1Success_Add(void)
+//{
+//    char *keybuf="Moto1Success";
+//    char *read_value_temp;//真实值
+//    uint32_t read_value = 0;
+//    read_value_temp = strdup(ef_get_env(keybuf));
+//    read_value = atol(read_value_temp);
+//    LOG_I("Reading key %s is %d\r\n", keybuf,read_value);
+//
+//    char *Temp_ValueBuf = rt_malloc(10);
+//    sprintf(Temp_ValueBuf, "%ld", read_value+=1);
+//    ef_set_env(keybuf, Temp_ValueBuf);
+//    rt_free(Temp_ValueBuf);
+//    rt_free(read_value_temp);//释放临时buffer对应内存空间
+//    LOG_D("Writing %ld to key %s\r\n", read_value,keybuf);
+//}
+//void Flash_Moto2Total_Add(void)
+//{
+//    char *keybuf="Moto2Total";
+//    char *read_value_temp;//真实值
+//    uint32_t read_value = 0;
+//    read_value_temp = strdup(ef_get_env(keybuf));
+//    read_value = atol(read_value_temp);
+//    LOG_I("Reading key %s is %d\r\n", keybuf,read_value);
+//
+//    char *Temp_ValueBuf = rt_malloc(10);
+//    sprintf(Temp_ValueBuf, "%ld", read_value+=1);
+//    ef_set_env(keybuf, Temp_ValueBuf);
+//    rt_free(Temp_ValueBuf);
+//    rt_free(read_value_temp);//释放临时buffer对应内存空间
+//    LOG_D("Writing %ld to key %s\r\n", read_value,keybuf);
+//}
+//void Flash_Moto2Success_Add(void)
+//{
+//    char *keybuf="Moto2Success";
+//    char *read_value_temp;//真实值
+//    uint32_t read_value = 0;
+//    read_value_temp = strdup(ef_get_env(keybuf));
+//    read_value = atol(read_value_temp);
+//    LOG_I("Reading key %s is %d\r\n", keybuf,read_value);
+//
+//    char *Temp_ValueBuf = rt_malloc(10);
+//    sprintf(Temp_ValueBuf, "%ld", read_value+=1);
+//    ef_set_env(keybuf, Temp_ValueBuf);
+//    rt_free(Temp_ValueBuf);
+//    rt_free(read_value_temp);//释放临时buffer对应内存空间
+//    LOG_D("Writing %ld to key %s\r\n", read_value,keybuf);
+//}
 uint8_t Device_RssiGet(uint32_t Device_ID)
 {
     char *keybuf = rt_malloc(20);
@@ -302,6 +367,7 @@ uint8_t Clear_Device_Time(uint32_t Device_ID)//更新时间戳为0
         if(Global_Device.ID[num]==Device_ID)
         {
             Global_Device.ID_Time[num] = 0;
+            Global_Device.Alive[num] = 1;
             LOG_D("Device %d is Clear to 0",Global_Device.ID[num]);
             return RT_EOK;
         }
@@ -334,6 +400,7 @@ void Clear_All_Time(void)
             if(Global_Device.ID_Time[i]<25)
             {
                 Global_Device.ID_Time[i] = 0;//更新内存中的时间
+                Global_Device.Alive[i] = 0;//更新内存中的时间
                 LOG_D("Device %ld's time is cleard",Global_Device.ID[i]);
             }
         }
@@ -347,7 +414,7 @@ void Detect_All_Time(void)
     if(!num)return;
     while(num)
     {
-        if(Global_Device.ID_Time[num]>24)
+        if(Global_Device.ID_Time[num]==25 && Global_Device.Alive==0)
         {
             WarnFlag = 1;
             //掉线ID上报
@@ -414,7 +481,7 @@ uint8_t Flash_GetRssi(uint32_t Device_ID)//查询内存中的RSSI
 }
 void Detect_All_TimeInDecoder(uint8_t ID)
 {
-    if(Flash_Get_Key_Valid(ID)==0)
+    if(Flash_Get_Key_Valid(ID)==RT_EOK)
     {
         Clear_Device_Time(ID);
     }
@@ -423,7 +490,7 @@ void Detect_All_TimeInDecoder(uint8_t ID)
     if(!num)return;
     while(num)
     {
-        if(Global_Device.ID_Time[num]==25)
+        if(Global_Device.ID_Time[num]==25 && Global_Device.Alive[num]==0)
         {
             WarnFlag = 1;
             //掉线ID上报

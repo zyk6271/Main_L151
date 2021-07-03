@@ -288,7 +288,7 @@ void beep_start(uint8_t led_id,int mode)
 void beep_stop(void)
 {
     agile_led_stop(beep);
-    rt_pin_write(0,0);
+    rt_pin_write(BEEP_PIN,0);
 }
 void key_down(void)
 {
@@ -298,6 +298,18 @@ void key_down(void)
 void just_ring(void)
 {
     agile_led_start(singlebeep);
+}
+void NTC_Ring(void)
+{
+    agile_led_set_light_mode(beep, "50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50\
+                                    ,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,2000", -1);
+    agile_led_set_light_mode(led0, "50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50\
+                                    ,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,2000", -1);
+    agile_led_set_light_mode(led1, "50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50\
+                                    ,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,2000", -1);
+    agile_led_start(led0);
+    agile_led_start(led1);
+    agile_led_start(beep);
 }
 void led_Long_Start(uint8_t led_id)
 {

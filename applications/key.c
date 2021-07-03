@@ -102,7 +102,7 @@ void Key_Reponse_Callback(void *parameter)
                 break;
             case Offline:
                 break;
-            case WiFi:
+            case NTCWarning:
                 break;
             }
         }
@@ -160,7 +160,9 @@ void Key_Reponse_Callback(void *parameter)
                 break;
             case Offline:
                 break;
-            case WiFi:
+            case NTCWarning:
+                beep_stop();
+                key_down();
                 break;
             }
         }
@@ -173,17 +175,6 @@ void Key_Reponse_Callback(void *parameter)
         }
         else if(K0_Long_Status==RT_EOK)//ON
         {
-            //LOG_D("Now in WiFi Mode\r\n");
-            if(Now_Status==Close)
-            {
-//                Now_Status = WiFi;
-//                Show_WiFi();
-            }
-            else if(Now_Status == WiFi)
-            {
-                LOG_D("Now Exit WiFi Mode\r\n");
-                Now_Status = Close;
-            }
         }
         else if(K1_Long_Status==RT_EOK)//OFF
         {
@@ -195,9 +186,6 @@ void Key_Reponse_Callback(void *parameter)
             else if(Now_Status==Learn)
             {
                 Stop_Learn();
-            }
-            else if(Now_Status==WiFi)
-            {
             }
             else
             {

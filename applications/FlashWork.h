@@ -10,6 +10,7 @@ typedef struct
     uint32_t DoorID;
     uint32_t ID[20];
     uint32_t ID_Time[20];
+    uint32_t Alive[20];
     uint8_t  Bat[20];
     uint8_t  Rssi[20];
 }Device_Info;
@@ -47,4 +48,8 @@ void Device_RssiChange(uint32_t Device_ID,uint8_t value);
 uint8_t Device_BatGet(uint32_t Device_ID);
 void Device_BatChange(uint32_t Device_ID,uint8_t value);
 uint8_t Delete_Device(uint32_t Device_ID);
+void Flash_Moto1Total_Add(void);
+void Flash_Moto1Success_Add(void);
+void Flash_Moto2Total_Add(void);
+void Flash_Moto2Success_Add(void);
 

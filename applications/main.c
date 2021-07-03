@@ -28,6 +28,7 @@
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
+extern void ADC_Init(void);
 int main(void)
 {
     button_Init();
@@ -43,6 +44,7 @@ int main(void)
     WarningInit();
     WaterScan_Init();
     Radio_Task_Init();
+    ADC_Init();
     while (1)
     {
         rt_thread_mdelay(1000);

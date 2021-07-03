@@ -11,6 +11,7 @@
 #include <rtthread.h>
 #include <board.h>
 #include <drv_common.h>
+#include "ADCwork.h"
 
 RT_WEAK void rt_hw_board_init()
 {
@@ -88,4 +89,61 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
   /* USER CODE END SPI2_MspInit 1 */
   }
 
+}
+DMA_HandleTypeDef hdma_adc;
+void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  if(hadc->Instance==ADC1)
+  {
+  /* USER CODE BEGIN ADC1_MspInit 0 */
+
+  /* USER CODE END ADC1_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_ADC1_CLK_ENABLE();
+
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    /**ADC GPIO Configuration
+    PB1     ------> ADC_IN9
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_1;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    /* ADC1 DMA Init */
+    /* ADC Init */
+    hdma_adc.Instance = DMA1_Channel1;
+    hdma_adc.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_adc.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_adc.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_adc.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+    hdma_adc.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+    hdma_adc.Init.Mode = DMA_CIRCULAR;
+    hdma_adc.Init.Priority = DMA_PRIORITY_HIGH;
+    if (HAL_DMA_Init(&hdma_adc) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    __HAL_LINKDMA(hadc,DMA_Handle,hdma_adc);
+
+    /* ADC1 interrupt Init */
+    HAL_NVIC_SetPriority(ADC1_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(ADC1_IRQn);
+  /* USER CODE BEGIN ADC1_MspInit 1 */
+
+  /* USER CODE END ADC1_MspInit 1 */
+  }
+
+}
+void DMA1_Channel1_IRQHandler(void)
+{
+    /* USER CODE BEGIN DMA1_Channel1_IRQn 0 */
+
+    /* USER CODE END DMA1_Channel1_IRQn 0 */
+    HAL_DMA_IRQHandler(&hdma_adc);
+    /* USER CODE BEGIN DMA1_Channel1_IRQn 1 */
+
+    /* USER CODE END DMA1_Channel1_IRQn 1 */
 }

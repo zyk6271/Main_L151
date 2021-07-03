@@ -25,6 +25,7 @@ void RTC_Timer_Entry(void *parameter)
         if (result == RT_EOK)
         {
             LOG_D("RTC Handler Callback,Counter is %d\r\n",RTC_Counter);
+            //LOG_D("RTC Handler Callback,Counter is %d\r\n",RTC_Hours);
             if(RTC_Hours%120==0)
             {
                 Moto_Detect();

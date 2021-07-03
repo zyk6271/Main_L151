@@ -248,10 +248,6 @@ void DataSolve(Message buf)
                 else//是否为来自终端的数据
                 {
                     RadioEnqueue(0,buf.From_ID,buf.Counter,4,0);
-//                    if(GetDoorID())
-//                    {
-//                        RadioEnqueue(1,GetDoorID(),buf.Counter,4,0);
-//                    }
                 }
             }
             else if(buf.Data==1)
@@ -266,10 +262,6 @@ void DataSolve(Message buf)
                     RadioEnqueue(0,buf.From_ID,buf.Counter,4,1);
                     if(Now_Status!=SlaverWaterAlarmActive)
                     {
-//                        if(GetDoorID())
-//                        {
-//                            RadioEnqueue(1,GetDoorID(),buf.Counter,4,1);
-//                        }
                         Enable_Warining();
                     }
                 }
@@ -330,23 +322,6 @@ void DataSolve(Message buf)
             LOG_D("Not Include This Device\r\n");
         }
         break;
-    case 7://童锁
-        LOG_D("Kid Lock!\r\n");
-        if(Check_Valid(buf.From_ID))
-        {
-            if(GetDoorID()==buf.From_ID)//是否为门控的包
-            {
-                LOG_D("RECV KidLock %d From Door\r\n",buf.Data);
-                KidLock = buf.Data;
-                //RadioEnqueue(1,buf.From_ID,buf.Counter,7,KidLock);
-                //KidLockUp(KidLock);
-            }
-        }
-        else
-        {
-            LOG_D("Not Include This Device\r\n");
-        }
-        break;
     case 8://延迟
         if(Check_Valid(buf.From_ID))
         {
@@ -380,7 +355,7 @@ void Rx_Done_Callback(uint8_t *rx_buffer,uint8_t rx_len,int8_t rssi)
         rx_buffer[rx_len-1]=0;
         rx_buffer[rx_len-2]=0;
         sscanf((const char *)&rx_buffer[1],"{%ld,%ld,%d,%d,%d}",&Rx_message.Target_ID,&Rx_message.From_ID,&Rx_message.Counter,&Rx_message.Command,&Rx_message.Data);
-        Clear_Device_Time(Rx_message.From_ID);
+        //Clear_Device_Time(Rx_message.From_ID);
         if(Rx_message.From_ID == 10000001)
         {
             Recv_Num++;

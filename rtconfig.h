@@ -34,6 +34,7 @@
 
 #define RT_USING_MEMPOOL
 #define RT_USING_SMALL_MEM
+#define RT_USING_MEMTRACE
 #define RT_USING_HEAP
 /* end of Memory Management */
 
@@ -77,6 +78,7 @@
 #define RT_USING_SERIAL
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_PIN
+#define RT_USING_ADC
 #define RT_USING_SPI
 #define RT_USING_SFUD
 #define RT_SFUD_USING_SFDP
@@ -159,6 +161,8 @@
 
 #define PKG_USING_EASYFLASH
 #define PKG_EASYFLASH_ENV
+#define PKG_EASYFLASH_ENV_AUTO_UPDATE
+#define PKG_EASYFLASH_ENV_VER_NUM 0
 #define PKG_EASYFLASH_ERASE_GRAN 4096
 #define PKG_EASYFLASH_WRITE_GRAN_1BIT
 #define PKG_EASYFLASH_WRITE_GRAN 1
@@ -169,9 +173,6 @@
 
 /* system packages */
 
-/* acceleration: Assembly language or algorithmic acceleration packages */
-
-/* end of acceleration: Assembly language or algorithmic acceleration packages */
 
 /* Micrium: Micrium software products porting for RT-Thread */
 
@@ -205,9 +206,9 @@
 
 /* end of samples: kernel and components samples */
 
-/* entertainment: terminal games and other interesting software packages */
+/* games: games run on RT-Thread console */
 
-/* end of entertainment: terminal games and other interesting software packages */
+/* end of games: games run on RT-Thread console */
 /* end of miscellaneous packages */
 /* end of RT-Thread online packages */
 
