@@ -198,12 +198,11 @@ void Key_Reponse_Callback(void *parameter)
 void Learn_Timer_Callback(void *parameter)
 {
     LOG_D("Learn timer is Timeout\r\n");
-    Disable_Warining();//消警
     Stop_Learn();
 }
 void Key_Reponse(void)
 {
     key_response_t = rt_thread_create("key_response_t", Key_Reponse_Callback, RT_NULL, 2048, 10, 10);
     if(key_response_t!=RT_NULL)rt_thread_startup(key_response_t);
-    Learn_Timer = rt_timer_create("Learn_Timer", Learn_Timer_Callback, RT_NULL, 60*1000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER );
+    Learn_Timer = rt_timer_create("Learn_Timer", Learn_Timer_Callback, RT_NULL, 30*1000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER );
 }

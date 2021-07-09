@@ -168,7 +168,7 @@ void Turn2_Timer_Callback(void *parameter)
     else
     {
         LOG_D("Moto2 is Good\r\n");
-        //Flash_Moto2Success_Add();
+       // Flash_Moto2Success_Add();
     }
 }
 void Moto_Detect_Timer_Callback(void *parameter)
@@ -184,8 +184,8 @@ void Moto_Init(void)
     rt_pin_mode(Turn2,PIN_MODE_OUTPUT);
     rt_pin_attach_irq(Senor1, PIN_IRQ_MODE_FALLING, Turn1_Edge_Callback, RT_NULL);
     rt_pin_attach_irq(Senor2, PIN_IRQ_MODE_FALLING, Turn2_Edge_Callback, RT_NULL);
-    Moto_Timer1 = rt_timer_create("Moto_Timer1", Turn1_Timer_Callback, RT_NULL, 15100, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
-    Moto_Timer2 = rt_timer_create("Moto_Timer2", Turn2_Timer_Callback, RT_NULL, 15000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
+    Moto_Timer1 = rt_timer_create("Moto_Timer1", Turn1_Timer_Callback, RT_NULL, 10100, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
+    Moto_Timer2 = rt_timer_create("Moto_Timer2", Turn2_Timer_Callback, RT_NULL, 10000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
     Moto_Detect_Timer = rt_timer_create("Moto_Detect", Moto_Detect_Timer_Callback, RT_NULL, 1000*60*5, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
     if(Global_Device.LastFlag == 0 || Global_Device.LastFlag == NormalOpen || Global_Device.LastFlag == OtherOpen)
     {

@@ -143,7 +143,7 @@ void Delay_Timer_Callback(void *parameter)
 void Delay_Timer_Init(void)
 {
     LOG_D("Delay_Timer_Init Success\r\n");
-    Delay_Timer = rt_timer_create("Delay_Timer", Delay_Timer_Callback, RT_NULL, 10*1000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_ONE_SHOT);
+    Delay_Timer = rt_timer_create("Delay_Timer", Delay_Timer_Callback, RT_NULL, 4*60*60*1000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_ONE_SHOT);
 }
 MSH_CMD_EXPORT(Delay_Timer_Init,Delay_Timer_Init);
 void Delay_Timer_Open(void)

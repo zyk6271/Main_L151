@@ -11,6 +11,7 @@
 #define ADCWORK_H_
 
 void ADC_Flag_Release(void);
+void ADC_Init(void);
 
 
 #endif /* APPLICATIONS_ADCWORK_H_ */

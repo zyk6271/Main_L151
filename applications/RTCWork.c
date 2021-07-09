@@ -26,6 +26,7 @@ void RTC_Timer_Entry(void *parameter)
         {
             LOG_D("RTC Handler Callback,Counter is %d\r\n",RTC_Counter);
             //LOG_D("RTC Handler Callback,Counter is %d\r\n",RTC_Hours);
+            //Flash_Key_Change(12345678,RTC_Hours);
             if(RTC_Hours%120==0)
             {
                 Moto_Detect();

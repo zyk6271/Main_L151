@@ -30,11 +30,6 @@ uint8_t ValvePastStatus=0;
 rt_thread_t WaterScan_t=RT_NULL;
 extern uint8_t ValveStatus;
 
-void Disable_Warining(void)
-{
-    BackToNormal();
-    LOG_D("Warning is Close\r\n");
-}
 void Enable_Warining(void)
 {
     Warning_Enable_Num(2);

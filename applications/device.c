@@ -39,7 +39,7 @@ void Key_Init(void)
         K0_K1_Long_Sem = rt_sem_create("K0_K1_Long_Sem", 0, RT_IPC_FLAG_FIFO);
         rt_pin_mode(K0, PIN_MODE_INPUT);
         rt_pin_mode(K1, PIN_MODE_INPUT);
-        rt_pin_mode(ANT_EXT,PIN_MODE_OUTPUT);
+        rt_pin_mode(ANT_INT,PIN_MODE_OUTPUT);
         rt_pin_mode(ANT_EXT,PIN_MODE_OUTPUT);
         rt_pin_mode(ANT_SW,PIN_MODE_INPUT);
 }

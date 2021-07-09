@@ -41,7 +41,7 @@ void led_Init(void)
     {
         beep = agile_led_create(BEEP_PIN, PIN_HIGH, "200,200", -1);
         singlebeep = agile_led_create(BEEP_PIN, PIN_HIGH, "200,1", 1);
-        beep_three = agile_led_create(BEEP_PIN, PIN_LOW, "200,200", 3);
+        beep_three = agile_led_create(BEEP_PIN, PIN_HIGH, "200,200", 3);
         LOG_D("Beep Init Success\r\n");
     }
 }
@@ -139,7 +139,7 @@ void beep_start(uint8_t led_id,int mode)
         }
         break;
     case 4://五声
-        agile_led_set_light_mode(beep, "200,200,200,200,200,200,200,200,200,5000", -1);
+        agile_led_set_light_mode(beep, "200,200", 5);
         agile_led_start(beep);
         if(led_id)
         {
@@ -148,7 +148,7 @@ void beep_start(uint8_t led_id,int mode)
         }
         else
         {
-            agile_led_set_light_mode(led0, "200,200,200,200,200,200,200,200,200,5000", -1);
+            agile_led_set_light_mode(led0, "200,200", 75);
             agile_led_start(led0);
         }
         break;
@@ -298,6 +298,11 @@ void key_down(void)
 void just_ring(void)
 {
     agile_led_start(singlebeep);
+}
+void Relearn(void)
+{
+    agile_led_set_light_mode(led0, "200,200", 75);
+    agile_led_start(led0);
 }
 void NTC_Ring(void)
 {

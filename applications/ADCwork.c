@@ -123,12 +123,12 @@ void NTC_Work_Callback(void *parameter)
     LOG_D("NTC With ADC is Init Success\r\n");
     while(1)
     {
-        if(ADC_Voltage_Calc()>1.8 && Now_Status!=NTCWarning)
+        if(ADC_Voltage_Calc()<1.1 && Now_Status!=NTCWarning)
         {
             NTC_State_Save(ValveStatus);
             Warning_Enable_Num(8);
         }
-        if(ADC_Voltage_Calc()<1.8 && Now_Status==NTCWarning)
+        if(ADC_Voltage_Calc()>=1.2 && Now_Status==NTCWarning)
         {
             Warning_Disable();
             if(NTC_State_read())
@@ -146,7 +146,7 @@ void NTC_Work_Callback(void *parameter)
 void NTC_Init(void)
 {
     ADC_Convert_Done = rt_sem_create("ADC_Convert_Done",0, RT_IPC_FLAG_FIFO);
-    ntc_work = rt_thread_create("ntc_work", NTC_Work_Callback, RT_NULL, 1536, 15, 10);
+    ntc_work = rt_thread_create("ntc_work", NTC_Work_Callback, RT_NULL, 2048, 15, 10);
     if(ntc_work != RT_NULL);rt_thread_startup(ntc_work);
 }
 void ADC_Init(void)
