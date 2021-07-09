@@ -13,7 +13,7 @@
 #include "led.h"
 
 #define DBG_TAG "flash"
-#define DBG_LVL DBG_INFO
+#define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
 typedef struct _env_list {
@@ -375,7 +375,7 @@ void Detect_All_Time(void)
     if(!num)return;
     while(num)
     {
-        if(Global_Device.ID_Time[num]==25 && Global_Device.Alive==0)
+        if(Global_Device.ID_Time[num]==25 && Global_Device.Alive[num]==0)
         {
             WarnFlag = 1;
             //掉线ID上报

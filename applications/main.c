@@ -34,7 +34,6 @@ int main(void)
     //cm_backtrace_init("1","2","3");
     led_Init();
     Key_Reponse();
-    button_Init();
     flash_Init();
     easyflash_init();
     LoadDevice2Memory();
@@ -46,6 +45,7 @@ int main(void)
     WaterScan_Init();
     Radio_Task_Init();
     ADC_Init();
+    button_Init();
     while (1)
     {
         FeedDog();

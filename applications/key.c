@@ -18,13 +18,14 @@
 #include "flashwork.h"
 #include "rthw.h"
 #include "status.h"
-#include "rtdevice.h"
+#include "device.h"
 
 #define DBG_TAG "key"
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
 rt_thread_t key_response_t = RT_NULL;
+rt_timer_t Learn_Timer = RT_NULL;
 
 uint8_t K0_Status=0;
 uint8_t K0_Long_Status=0;
@@ -42,11 +43,10 @@ extern rt_sem_t K0_K1_Long_Sem;
 extern uint8_t Learn_Flag;
 extern uint8_t Last_Close_Flag;
 
-rt_timer_t Learn_Timer;
-
 enum Device_Status Now_Status=Close;
 void Key_Reponse_Callback(void *parameter)
 {
+    Key_SemInit();
     LOG_D("Key_Reponse Init Success\r\n");
     while(1)
     {
