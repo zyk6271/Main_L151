@@ -25,7 +25,6 @@
 
 extern enum Device_Status Now_Status;
 extern uint8_t ValveStatus;
-extern uint16_t Radio_Counter;
 
 WariningEvent NowStatusEvent;
 WariningEvent SlaverLowPowerEvent;
@@ -183,10 +182,6 @@ void OfflineDisableWarning(void)
     {
         Warning_Disable();
         LOG_I("Disable OfflineWarning\r\n");
-    }
-    else
-    {
-        LOG_I("Not OfflineWarning Now\r\n");
     }
 }
 void RadioInitFail(void)

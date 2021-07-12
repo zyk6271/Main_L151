@@ -45,6 +45,7 @@ void transmit_packet(void);
 void ReceiveData(void);
 void enable_wor(void);
 void AX5043ReceiverON(void);
+void AX5043Receiver_Continuous(void);
 void SetReceiveMode(void);
 void RdioXtalON(void);
 void Ax5043SetRegisters_RX(void);

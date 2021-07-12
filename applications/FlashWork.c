@@ -299,7 +299,7 @@ uint8_t Update_Device_Bat(uint32_t Device_ID,uint8_t bat)//更新电量
         }
         num--;
     }
-    LOG_D("Device %d is Not Increase Success",Global_Device.ID[num]);
+    LOG_D("Device Bat %d is Increase Fail",Global_Device.ID[num]);
     return RT_ERROR;
 }
 uint8_t Update_Device_Rssi(uint32_t Device_ID,uint8_t rssi)//更新Rssi
@@ -317,7 +317,7 @@ uint8_t Update_Device_Rssi(uint32_t Device_ID,uint8_t rssi)//更新Rssi
         }
         num--;
     }
-    LOG_D("Device %d is Not Increase Success",Global_Device.ID[num]);
+    LOG_D("Device Rssi %d is Increase Fail",Global_Device.ID[num]);
     return RT_ERROR;
 }
 uint8_t Clear_Device_Time(uint32_t Device_ID)//更新时间戳为0
@@ -360,10 +360,10 @@ void Clear_All_Time(void)
     {
         for(uint8_t i=1;i<=Num;i++)
         {
-            if(Global_Device.ID_Time[i]<25)
+            if(Global_Device.ID_Time[i]<25 || Global_Device.Alive[i] == 1)
             {
-                Global_Device.ID_Time[i] = 0;//更新内存中的时间
                 Global_Device.Alive[i] = 0;//更新内存中的时间
+                Global_Device.ID_Time[i] = 0;//更新内存中的时间
                 LOG_D("Device %ld's time is cleard",Global_Device.ID[i]);
             }
         }
@@ -424,12 +424,13 @@ uint8_t Flash_GetRssi(uint32_t Device_ID)//查询内存中的RSSI
     }
     return 0;
 }
-void Detect_All_TimeInDecoder(uint8_t ID)
+void Offline_React(uint32_t ID)
 {
-    if(Flash_Get_Key_Valid(ID)==RT_EOK)
+    if(Flash_Get_Key_Valid(ID)!=RT_EOK)
     {
-        Clear_Device_Time(ID);
+        return;
     }
+    Clear_Device_Time(ID);
     uint16_t num = Global_Device.Num;
     uint8_t WarnFlag = 0;
     if(!num)return;

@@ -42,7 +42,7 @@ uint32_t Flash_Get_Moto_Flag(void);
 uint32_t Flash_Get_Door_Nums(void);
 uint8_t Update_Device_Bat(uint32_t Device_ID,uint8_t bat);
 uint8_t Update_Device_Rssi(uint32_t Device_ID,uint8_t rssi);//更新Rssi;
-void Detect_All_TimeInDecoder(uint8_t ID);
+void Offline_React(uint32_t ID);
 uint8_t Device_RssiGet(uint32_t Device_ID);
 void Device_RssiChange(uint32_t Device_ID,uint8_t value);
 uint8_t Device_BatGet(uint32_t Device_ID);

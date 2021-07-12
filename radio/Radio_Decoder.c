@@ -40,8 +40,6 @@ typedef struct
 
 uint8_t Learn_Flag=0;
 uint8_t Last_Close_Flag=0;
-uint16_t Radio_Counter=0;
-uint8_t KidLock=0;
 
 extern rt_timer_t Learn_Timer;
 extern uint8_t ValveStatus ;
@@ -82,13 +80,10 @@ void Factory_Test(void)
     rt_timer_start(Factory_Test_Timer);
     LOG_D("Start Test\r\n");
 }
-MSH_CMD_EXPORT(Factory_Test,Factory_Test);
 uint8_t Check_Valid(uint32_t From_id)
 {
-    if(Flash_Get_Key_Valid(From_id)==1)return 0;
-    else return 1;
+    return Flash_Get_Key_Valid(From_id);
 }
-
 void Start_Learn_Key(void)
 {
     Now_Status = Learn;
@@ -128,7 +123,7 @@ void Device_Learn(Message buf)
     case 1:
         if(Learn_Flag)
         {
-            if(Check_Valid(buf.From_ID)!=1)//如果数据库不存在该值
+            if(Check_Valid(buf.From_ID))//如果数据库不存在该值
             {
                 LOG_D("Not Include This Device\r\n");
                 if(buf.From_ID<30000000)
@@ -153,7 +148,7 @@ void Device_Learn(Message buf)
     case 2:
         if(Learn_Flag)
         {
-            if(Check_Valid(buf.From_ID)!=1)//如果数据库不存在该值
+            if(Check_Valid(buf.From_ID))//如果数据库不存在该值
             {
                 LOG_D("Ack Not Include This Device\r\n");
             }
@@ -168,7 +163,7 @@ void Device_Learn(Message buf)
         else LOG_D("Not in Learn Mode\r\n");
         break;
     case 3:
-        if(Check_Valid(buf.From_ID))//如果数据库不存在该值
+        if(!Check_Valid(buf.From_ID))//如果数据库不存在该值
         {
             Start_Learn();
             RadioEnqueue(0,buf.From_ID,buf.Counter,3,3);
@@ -184,44 +179,34 @@ void DataSolve(Message buf)
     switch(buf.Command)
     {
     case 1://测试模拟报警（RESET）
-        if(Check_Valid(buf.From_ID))
-        {
-            RadioEnqueue(0,buf.From_ID,buf.Counter,1,1);
-        }
+        RadioEnqueue(0,buf.From_ID,buf.Counter,1,1);
         LOG_D("Test\r\n");
         break;
     case 2://握手包
         LOG_D("HandShake\r\n");
-        if(Check_Valid(buf.From_ID))
+        if(buf.Data==2)
         {
-            if(buf.Data==2)
+            if(buf.From_ID!=GetDoorID())
             {
-                if(buf.From_ID!=GetDoorID())
-                {
-                    RadioEnqueue(0,buf.From_ID,buf.Counter,2,2);
-                    Warning_Enable_Num(1);
-                }
-                else
-                {
-                    RadioEnqueue(0,buf.From_ID,buf.Counter,2,2);
-                }
-            }
-            else if(buf.Data==1)
-            {
-                RadioEnqueue(0,buf.From_ID,buf.Counter,2,1);
-                Warning_Enable_Num(7);
+                RadioEnqueue(0,buf.From_ID,buf.Counter,2,2);
+                Warning_Enable_Num(1);
             }
             else
             {
-                Update_Device_Bat(buf.From_ID,buf.Data);//写入电量
-                RadioEnqueue(0,buf.From_ID,buf.Counter,2,0);
+                RadioEnqueue(0,buf.From_ID,buf.Counter,2,2);
             }
-            LOG_D("Handshake With %ld\r\n",buf.From_ID);
+        }
+        else if(buf.Data==1)
+        {
+            RadioEnqueue(0,buf.From_ID,buf.Counter,2,1);
+            Warning_Enable_Num(7);
         }
         else
         {
-            LOG_D("Not Include This Device\r\n");
+            Update_Device_Bat(buf.From_ID,buf.Data);//写入电量
+            RadioEnqueue(0,buf.From_ID,buf.Counter,2,0);
         }
+        LOG_D("Handshake With %ld\r\n",buf.From_ID);
         break;
     case 3://学习
         if(Learn_Flag||buf.Data==3)
@@ -235,106 +220,77 @@ void DataSolve(Message buf)
         }
         break;
     case 4://报警
-        LOG_D("Warning\r\n");
-        if(Check_Valid(buf.From_ID))
+        LOG_D("Warning From %ld\r\n",buf.From_ID);
+        if(buf.Data==0)
         {
-            LOG_D("Warning From %ld\r\n",buf.From_ID);
-            if(buf.Data==0)
+            LOG_D("Warning With Command 4 Data 0\r\n");
+            if(GetDoorID()==buf.From_ID)//是否为主控的回包
             {
-                LOG_D("Warning With Command 4 Data 0\r\n");
-                if(GetDoorID()==buf.From_ID)//是否为主控的回包
-                {
-                    LOG_D("RECV 40 From Door\r\n");
-                }
-                else//是否为来自终端的数据
-                {
-                    RadioEnqueue(0,buf.From_ID,buf.Counter,4,0);
-                }
+                LOG_D("RECV 40 From Door\r\n");
             }
-            else if(buf.Data==1)
+            else//是否为来自终端的数据
             {
-                LOG_D("Warning With Command 4 Data 1\r\n");
-                if(GetDoorID()==buf.From_ID)//是否为主控的回包
-                {
-                    LOG_D("RECV 41 From Door\r\n");
-                }
-                else//是否为来自终端的报警包
-                {
-                    RadioEnqueue(0,buf.From_ID,buf.Counter,4,1);
-                    if(Now_Status!=SlaverWaterAlarmActive)
-                    {
-                        Enable_Warining();
-                    }
-                }
+                RadioEnqueue(0,buf.From_ID,buf.Counter,4,0);
             }
         }
-        else
+        else if(buf.Data==1)
         {
-            LOG_D("Not Include This Device\r\n");
+            LOG_D("Warning With Command 4 Data 1\r\n");
+            if(GetDoorID()==buf.From_ID)//是否为主控的回包
+            {
+                LOG_D("RECV 41 From Door\r\n");
+            }
+            else//是否为来自终端的报警包
+            {
+                RadioEnqueue(0,buf.From_ID,buf.Counter,4,1);
+                if(Now_Status!=SlaverWaterAlarmActive)
+                {
+                    Enable_Warining();
+                }
+            }
         }
         break;
     case 5://开机
         LOG_D("Pwr On\r\n");
-        if(Check_Valid(buf.From_ID))
+        if((Now_Status==Open||Now_Status==Close))
         {
-            if((Now_Status==Open||Now_Status==Close))
-            {
-                LOG_D("Pwr On From %ld\r\n",buf.From_ID);
-                //Disable_Warining();
-                Moto_Open(OtherOpen);
-                Delay_Timer_Close();
-                Last_Close_Flag=0;
-                RadioEnqueue(0,buf.From_ID,buf.Counter,5,1);
-                just_ring();
-            }
-            else
-            {
-                LOG_D("Pwr On From %ld On Warning\r\n",buf.From_ID);
-                RadioEnqueue(0,buf.From_ID,buf.Counter,5,2);
-            }
+            LOG_D("Pwr On From %ld\r\n",buf.From_ID);
+            //Disable_Warining();
+            Moto_Open(OtherOpen);
+            Delay_Timer_Close();
+            Last_Close_Flag=0;
+            RadioEnqueue(0,buf.From_ID,buf.Counter,5,1);
+            just_ring();
         }
         else
         {
-            LOG_D("Not Include This Device\r\n");
+            LOG_D("Pwr On From %ld On Warning\r\n",buf.From_ID);
+            RadioEnqueue(0,buf.From_ID,buf.Counter,5,2);
         }
         break;
     case 6://关机
         LOG_D("Pwr Off and Now State is %d\r\n",Now_Status);
-        if(Check_Valid(buf.From_ID))
+        if(Now_Status==Open||Now_Status==Close)
         {
-            if(Now_Status==Open||Now_Status==Close)
-            {
-                LOG_D("Pwr Off From %ld\r\n",buf.From_ID);
-                Warning_Disable();
-                Last_Close_Flag=1;
-                Moto_Close(OtherOff);
-                RadioEnqueue(0,buf.From_ID,buf.Counter,6,0);
-                just_ring();
-            }
-            else if(Now_Status == SlaverWaterAlarmActive)
-            {
-                LOG_D("Warning With Command 6\r\n");
-                Warning_Disable();
-                Moto_Close(OtherOff);
-                RadioEnqueue(0,buf.From_ID,buf.Counter,6,0);
-            }
+            LOG_D("Pwr Off From %ld\r\n",buf.From_ID);
+            Warning_Disable();
+            Last_Close_Flag=1;
+            Moto_Close(OtherOff);
+            RadioEnqueue(0,buf.From_ID,buf.Counter,6,0);
+            just_ring();
         }
-        else
+        else if(Now_Status == SlaverWaterAlarmActive)
         {
-            LOG_D("Not Include This Device\r\n");
+            LOG_D("Warning With Command 6\r\n");
+            Warning_Disable();
+            Moto_Close(OtherOff);
+            RadioEnqueue(0,buf.From_ID,buf.Counter,6,0);
         }
         break;
     case 8://延迟
-        if(Check_Valid(buf.From_ID))
-        {
-            LOG_I("Delay Open %d From %ld\r\n",buf.Data,buf.From_ID);
-            RadioEnqueue(0,buf.From_ID,buf.Counter,8,buf.Data);
-            Delay_Timer_Open();
-        }
-        else
-        {
-            LOG_D("Not Include This Device\r\n");
-        }
+        LOG_I("Delay Open %d From %ld\r\n",buf.Data,buf.From_ID);
+        RadioEnqueue(0,buf.From_ID,buf.Counter,8,buf.Data);
+        Delay_Timer_Open();
         break;
     }
     if(buf.Counter==0)
@@ -345,29 +301,30 @@ void DataSolve(Message buf)
     {
         BackNormalPower();
     }
-    Detect_All_TimeInDecoder(buf.From_ID);
+    Offline_React(buf.From_ID);
 }
 void Rx_Done_Callback(uint8_t *rx_buffer,uint8_t rx_len,int8_t rssi)
 {
     Message Rx_message;
-    //LOG_D("Recv ok\r\n");
     if(rx_buffer[rx_len-1]==0x0A&&rx_buffer[rx_len-2]==0x0D)
     {
         LOG_D("Rx verify ok\r\n");
         rx_buffer[rx_len-1]=0;
         rx_buffer[rx_len-2]=0;
         sscanf((const char *)&rx_buffer[1],"{%ld,%ld,%d,%d,%d}",&Rx_message.Target_ID,&Rx_message.From_ID,&Rx_message.Counter,&Rx_message.Command,&Rx_message.Data);
-        //Clear_Device_Time(Rx_message.From_ID);
-        if(Rx_message.From_ID == 10000001)
+        if(Check_Valid(Rx_message.From_ID)!=RT_EOK && Learn_Flag != RT_TRUE)
         {
-            Recv_Num++;
+            LOG_D("Device_ID %ld is not include\r\n",Rx_message.From_ID);
+            return;
         }
         if(Rx_message.Target_ID==Self_Id ||Rx_message.Target_ID==99999999)
         {
             DataSolve(Rx_message);
+            Update_Device_Rssi(Rx_message.From_ID,rssi);
         }
-        Radio_Counter = Rx_message.Counter;
-        Update_Device_Rssi(Rx_message.From_ID,rssi);
     }
-
+    else
+    {
+        LOG_D("Rx verify Fail\r\n");
+    }
 }

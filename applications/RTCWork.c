@@ -24,9 +24,6 @@ void RTC_Timer_Entry(void *parameter)
         result = rt_sem_take(RTC_IRQ_Sem, RT_WAITING_FOREVER);
         if (result == RT_EOK)
         {
-            LOG_D("RTC Handler Callback,Counter is %d\r\n",RTC_Counter);
-            //LOG_D("RTC Handler Callback,Counter is %d\r\n",RTC_Hours);
-            //Flash_Key_Change(88889999,RTC_Hours);
             if(RTC_Hours%120==0)
             {
                 Moto_Detect();
@@ -44,6 +41,7 @@ void RTC_Timer_Entry(void *parameter)
                 Detect_All_Time();//25个小时检测计数器
                 RTC_Counter=0;
             }
+            LOG_D("RTC Handler Callback,Counter is %d\r\n",RTC_Counter);
         }
     }
 }
