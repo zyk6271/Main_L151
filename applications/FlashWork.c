@@ -24,6 +24,8 @@ Device_Info Global_Device={0};
 
 rt_spi_flash_device_t fm25q128;
 
+char read_value_temp[64] = {0};
+
 int flash_Init(void)
 {
     rt_hw_spi_device_attach("spi2", "spi20", GPIOB, GPIO_PIN_12);//往总线spi2上挂载一个spi20设备，cs脚：PB12
@@ -39,7 +41,7 @@ uint32_t Flash_Get_Boot_Times(void)
     uint8_t read_len = 0;
     uint32_t read_value = 0;
     char *keybuf="boot_times";
-    char read_value_temp[64];//真实值
+    memset(read_value_temp,0,64);
     read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
     if(read_len>0)
     {
@@ -58,7 +60,7 @@ uint32_t Flash_Get_Learn_Nums(void)
     uint8_t read_len = 0;
     uint32_t read_value = 0;
     char *keybuf="Learn_Nums";
-    char read_value_temp[64];//真实值
+    memset(read_value_temp,0,64);
     read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
     if(read_len>0)
     {
@@ -76,7 +78,7 @@ uint32_t Flash_Get_Door_Nums(void)
     uint8_t read_len = 0;
     uint32_t read_value = 0;
     char *keybuf="88888888";
-    char read_value_temp[64];//真实值
+    memset(read_value_temp,0,64);
     read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
     if(read_len>0)
     {
@@ -94,7 +96,7 @@ uint32_t Flash_Get_Moto_Flag(void)
     uint8_t read_len = 0;
     uint32_t read_value = 0;
     char *keybuf="Moto";
-    char read_value_temp[64];//真实值
+    memset(read_value_temp,0,64);
     read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
     if(read_len>0)
     {
@@ -113,7 +115,7 @@ uint32_t Flash_Get_Key_Value(uint32_t key)
     uint32_t read_value = 0;
     char *keybuf = rt_malloc(20);
     sprintf(keybuf, "%ld", key);//将传入的数字转换成数组
-    char read_value_temp[64];//真实值
+    memset(read_value_temp,0,64);
     read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
     if(read_len>0)
     {
@@ -162,7 +164,7 @@ uint8_t Device_RssiGet(uint32_t Device_ID)
     uint32_t read_value = 0;
     char *keybuf = rt_malloc(20);
     sprintf(keybuf, "Rssi:%ld", Device_ID);//将传入的数字转换成数组
-    char read_value_temp[64];//真实值
+    memset(read_value_temp,0,64);
     read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
     if(read_len>0)
     {
@@ -193,7 +195,7 @@ uint8_t Device_BatGet(uint32_t Device_ID)
     uint32_t read_value = 0;
     char *keybuf = rt_malloc(20);
     sprintf(keybuf, "Bat:%ld", Device_ID);//将传入的数字转换成数组
-    char read_value_temp[64];//真实值
+    memset(read_value_temp,0,64);
     read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
     if(read_len>0)
     {
@@ -396,24 +398,6 @@ void Detect_All_Time(void)
     }
     Clear_All_Time();
     LOG_D("Detect_All_Time OK\r\n");
-}
-uint8_t Remote_Delete(uint32_t Device_ID)
-{
-    uint16_t num = Global_Device.Num;
-    if(!num)return RT_ERROR;
-    while(num)
-    {
-        if(Global_Device.ID[num]==Device_ID)
-        {
-            Global_Device.ID[num] = 0;
-            Delete_Device(num);
-            LOG_I("Delete ID %ld By WIFI is success\r\n");
-            return RT_EOK;
-        }
-        num--;
-    }
-    LOG_I("Delete ID %ld By WIFI is fail\r\n");
-    return RT_ERROR;
 }
 uint8_t Flash_Get_Key_Valid(uint32_t Device_ID)//查询内存中的ID
 {
