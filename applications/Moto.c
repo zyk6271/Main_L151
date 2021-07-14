@@ -146,7 +146,6 @@ void Turn1_Timer_Callback(void *parameter)
     else
     {
         LOG_D("Moto1 is Good\r\n");
-        //Flash_Moto1Success_Add();
     }
 }
 void Turn2_Timer_Callback(void *parameter)
@@ -168,7 +167,6 @@ void Turn2_Timer_Callback(void *parameter)
     else
     {
         LOG_D("Moto2 is Good\r\n");
-       // Flash_Moto2Success_Add();
     }
 }
 void Moto_Detect_Timer_Callback(void *parameter)
@@ -206,13 +204,16 @@ void Moto_Init(void)
 }
 void Moto_Detect(void)
 {
+    if(Now_Status==MotoFail)
+    {
+        return;
+    }
     uint8_t ValveFuncFlag = ValveStatus;
     if(rt_pin_read(Senor1)==1&&ValveFuncFlag==1)
     {
         Turn1_Flag = 0;
         rt_pin_irq_enable(Senor1, PIN_IRQ_ENABLE);
         Moto_Close(NormalOff);
-        //Flash_Moto1Total_Add();
         rt_timer_start(Moto_Timer1);
     }
     if(rt_pin_read(Senor2)==1&&ValveFuncFlag==1)
@@ -220,7 +221,6 @@ void Moto_Detect(void)
         Turn2_Flag = 0;
         rt_pin_irq_enable(Senor2, PIN_IRQ_ENABLE);
         Moto_Close(NormalOff);
-        //Flash_Moto2Total_Add();
         rt_timer_start(Moto_Timer2);
     }
 }
