@@ -63,6 +63,7 @@ uint8_t axradio_freq_select = 1;
 uint8_t axradio_freq_now = 1;
 uint8_t axradio_power_now = 0;
 uint32_t axradio_txbuffer_cnt = 0;
+uint32_t axradio_txbuffer_len = 0;
 
 //uint32_t axradio_phy_chanfreq[2] = {0x10b62763,0x10b81f83};//434.5,434.7
 uint32_t axradio_phy_chanfreq[2] = {0X10AE46E4,0x10b81f83};//433.7,434.7
@@ -552,6 +553,7 @@ uint8_t InitAX5043(void)
             return AXRADIO_ERR_RANGING;
         }
     }
+    InitFlag = RT_TRUE;
     return AXRADIO_ERR_NOERROR;
 }
 void SetTransmitMode(void)
@@ -583,6 +585,28 @@ void AX5043ReceiverON(void)
     ubRFState = trxstate_rx;
     SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK0,0x01);//AX5043_IRQMASK0��0x07�� = 0x01;  enable FIFO not empty
     SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK1,0x00);
+}
+void AX5043Receiver_Continuous(void)
+{
+    uint32_t ubTemp=0;
+
+    SpiWriteSingleAddressRegister(REG_AX5043_RADIOEVENTMASK0, 0x04);
+
+    SpiWriteLongAddressRegister(REG_AX5043_RSSIREFERENCE, 0);
+    SpiWriteLongAddressRegister(REG_AX5043_TMGRXPREAMBLE1, 0); //   AX5043_TMGRXPREAMBLE1(0x229) = 0x00;
+    SpiWriteLongAddressRegister(REG_AX5043_PKTMISCFLAGS , 0 ); // AX5043_PKTSTOREFLAGS &= (uint8_t)~0x40;
+
+    ubTemp = SpiReadLongAddressRegister(REG_AX5043_PKTSTOREFLAGS);
+    ubTemp &= ~0x40;
+    SpiWriteLongAddressRegister(REG_AX5043_PKTSTOREFLAGS, ubTemp);            // enable xtal ready interrupt
+
+    SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK0,0x01);//AX5043_IRQMASK0��0x07�� = 0x01;  enable FIFO not empty
+    SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK1,0x00);
+
+    SpiWriteSingleAddressRegister(REG_AX5043_FIFOSTAT,0x03);  // AX5043_FIFOSTAT(0x28) = 3;  bit[5:0]=0b00011 Clear FIFO Data and Flags  ���FIFO page 69
+    SpiWriteSingleAddressRegister(REG_AX5043_PWRMODE,AX5043_PWRSTATE_FULL_RX); //AX5043_PWRSTATE_FULL_RX =0x09; bit[3:0]=1001 Receiver Running page55 ��������
+    ubRFState = trxstate_rx;
+
 }
 void SetReceiveMode(void)
 {
@@ -812,16 +836,14 @@ static void TransmitData(void)
                 LOG_D("B Send\r\n");
                 break;
             case trxstate_tx_packet:  //C
-                TxLen +=1 ;
                 SpiWriteSingleAddressRegister(REG_AX5043_FIFODATA, AX5043_FIFOCMD_DATA | (7 << 5));//AX5043_FIFODATA = AX5043_FIFOCMD_DATA | (7 << 5);
-                SpiWriteSingleAddressRegister(REG_AX5043_FIFODATA,TxLen);//write FIFO chunk length byte (data length+MAC_len + Flag byte=64+3+1)
+                SpiWriteSingleAddressRegister(REG_AX5043_FIFODATA,TxLen+1);//write FIFO chunk length byte (data length+MAC_len + Flag byte=64+3+1)
                 SpiWriteSingleAddressRegister(REG_AX5043_FIFODATA,0x03);//AX5043_FIFODATA = flags=0x03;
-                TxLen--;
                 SpiWriteData( TXBuff,TxLen);          //ax5043_writefifo(&axradio_txbuffer[axradio_txbuffer_cnt], cnt);
+                SpiWriteSingleAddressRegister(REG_AX5043_FIFOSTAT,0x04);        //AX5043_FIFOSTAT = 4; // commit
                 ubRFState = trxstate_tx_waitdone;
                 SpiWriteSingleAddressRegister(REG_AX5043_RADIOEVENTMASK0,0x01);//AX5043_RADIOEVENTMASK0 = 0x01; // enable REVRDONE event
                 SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK0,0x40);        //AX5043_IRQMASK0 = 0x40; // enable radio controller irq
-                SpiWriteSingleAddressRegister(REG_AX5043_FIFOSTAT,0x04);        //AX5043_FIFOSTAT = 4; // commit
                 LOG_D("C Send,Len is %d\r\n",TxLen);
                 break;
             default:
@@ -858,10 +880,8 @@ void Radio_Task_Callback(void *parameter)
         switch (ubRFState)
         {
         case trxstate_rx: //0x01
-            //LOG_D("Got Data");
             ReceiveData();
-            SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK0,0x01);
-            AX5043ReceiverON();
+            AX5043Receiver_Continuous();
             if (RxLen != 0)
             {
                 Rx_Done_Callback(RXBuff,RxLen,ubRssi);
@@ -894,7 +914,6 @@ void Radio_Task_Callback(void *parameter)
             TransmitData();
             SpiWriteSingleAddressRegister(REG_AX5043_PWRMODE, AX5043_PWRSTATE_FULL_TX); //AX5043_PWRMODE = AX5043_PWRSTATE_FULL_TX;
             break;
-
         case trxstate_tx_waitdone:                 //D
             SpiReadSingleAddressRegister(REG_AX5043_RADIOEVENTREQ0);        //clear Interrupt flag
             if (SpiReadSingleAddressRegister(REG_AX5043_RADIOSTATE) != 0)
@@ -904,7 +923,7 @@ void Radio_Task_Callback(void *parameter)
             Tx_Done_Callback(TXBuff,TxLen);
             SpiWriteSingleAddressRegister(REG_AX5043_RADIOEVENTMASK0, 0x00);
             SetReceiveMode();           //接收模式
-            AX5043ReceiverON();         //接收开启
+            AX5043Receiver_Continuous();
             break;
         default:
             SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK1, 0x00);
@@ -933,10 +952,10 @@ void Radio_Task_Init(void)
     rt_timer_start(Init_Timer);
 
     InitAX5043();
-    InitFlag = 1;
     SetReceiveMode();           //接收模式
     AX5043ReceiverON();         //接收开启
     RadioDequeueTaskInit();
     LOG_D("Radio Init success,Self ID is %ld\r\n",Self_Id);
+    just_ring();
 }
 /********************************the end of file***********************/

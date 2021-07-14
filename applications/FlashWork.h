@@ -7,9 +7,10 @@ typedef struct
 {
     uint8_t  LastFlag;
     uint32_t Num;
-    uint32_t DoorID;
+    uint32_t DoorNum;
     uint32_t ID[20];
     uint32_t ID_Time[20];
+    uint32_t Alive[20];
     uint8_t  Bat[20];
     uint8_t  Rssi[20];
 }Device_Info;
@@ -41,10 +42,14 @@ uint32_t Flash_Get_Moto_Flag(void);
 uint32_t Flash_Get_Door_Nums(void);
 uint8_t Update_Device_Bat(uint32_t Device_ID,uint8_t bat);
 uint8_t Update_Device_Rssi(uint32_t Device_ID,uint8_t rssi);//更新Rssi;
-void Detect_All_TimeInDecoder(uint8_t ID);
+void Offline_React(uint32_t ID);
 uint8_t Device_RssiGet(uint32_t Device_ID);
 void Device_RssiChange(uint32_t Device_ID,uint8_t value);
 uint8_t Device_BatGet(uint32_t Device_ID);
 void Device_BatChange(uint32_t Device_ID,uint8_t value);
 uint8_t Delete_Device(uint32_t Device_ID);
+void Flash_Moto1Total_Add(void);
+void Flash_Moto1Success_Add(void);
+void Flash_Moto2Total_Add(void);
+void Flash_Moto2Success_Add(void);
 

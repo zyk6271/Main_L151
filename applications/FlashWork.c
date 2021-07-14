@@ -24,6 +24,8 @@ Device_Info Global_Device={0};
 
 rt_spi_flash_device_t fm25q128;
 
+char read_value_temp[64] = {0};
+
 int flash_Init(void)
 {
     rt_hw_spi_device_attach("spi2", "spi20", GPIOB, GPIO_PIN_12);//往总线spi2上挂载一个spi20设备，cs脚：PB12
@@ -34,85 +36,97 @@ int flash_Init(void)
     };
     return RT_EOK;
 }
-void Boot_Times_Record(void)
-{
-    uint32_t i_boot_times = 0;
-    char *c_old_boot_times, c_new_boot_times[11] = {0};
-
-    /* 从环境变量中获取启动次数 */
-    c_old_boot_times = ef_get_env("boot_times");
-    /* 获取启动次数是否失败 */
-    if (c_old_boot_times == RT_NULL)
-        c_old_boot_times[0] = '0';
-
-    i_boot_times = atol(c_old_boot_times);
-    /* 启动次数加 1 */
-    i_boot_times++;
-    LOG_D("===============================================");
-    LOG_D("The system now boot %d times", i_boot_times);
-    LOG_D("===============================================");
-    /* 数字转字符串 */
-    sprintf(c_new_boot_times, "%ld", i_boot_times);
-    /* 保存开机次数的值 */
-    ef_set_env("boot_times", c_new_boot_times);
-}
 uint32_t Flash_Get_Boot_Times(void)
 {
-    const char *keybuf="boot_times";
-    char *read_value_temp;//真实值
+    uint8_t read_len = 0;
     uint32_t read_value = 0;
-    read_value_temp = strdup(ef_get_env(keybuf));
-    read_value = atol(read_value_temp);
-    rt_free(read_value_temp);//释放临时buffer对应内存空间
+    char *keybuf="boot_times";
+    memset(read_value_temp,0,64);
+    read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
+    if(read_len>0)
+    {
+        read_value = atol(read_value_temp);
+    }
+    else
+    {
+        read_value = 0;
+    }
     LOG_D("Reading Key %s value %ld \r\n", keybuf, read_value);//输出
     return read_value;
 }
 MSH_CMD_EXPORT(Flash_Get_Boot_Times,Flash_Get_Boot_Times);
 uint32_t Flash_Get_Learn_Nums(void)
 {
-    const char *keybuf="Learn_Nums";
-    char *read_value_temp;//真实值
+    uint8_t read_len = 0;
     uint32_t read_value = 0;
-    read_value_temp = strdup(ef_get_env(keybuf));
-    read_value = atol(read_value_temp);
-    rt_free(read_value_temp);//释放临时buffer对应内存空间
+    char *keybuf="Learn_Nums";
+    memset(read_value_temp,0,64);
+    read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
+    if(read_len>0)
+    {
+        read_value = atol(read_value_temp);
+    }
+    else
+    {
+        read_value = 0;
+    }
     LOG_D("Reading Key %s value %ld \r\n", keybuf, read_value);//输出
     return read_value;
 }
 uint32_t Flash_Get_Door_Nums(void)
 {
-    char *keybuf = rt_malloc(20);
-    sprintf(keybuf, "%d", 88888888);//将传入的数字转换成数组
-    char *read_value_temp;//真实值
+    uint8_t read_len = 0;
     uint32_t read_value = 0;
-    read_value_temp = strdup(ef_get_env(keybuf));
-    read_value = atol(read_value_temp);
-    rt_free(read_value_temp);//释放临时buffer对应内存空间
+    char *keybuf="88888888";
+    memset(read_value_temp,0,64);
+    read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
+    if(read_len>0)
+    {
+        read_value = atol(read_value_temp);
+    }
+    else
+    {
+        read_value = 0;
+    }
     LOG_D("Reading Key %s value %ld \r\n", keybuf, read_value);//输出
     return read_value;
 }
 uint32_t Flash_Get_Moto_Flag(void)
 {
-    const char *keybuf="Moto";
-    char *read_value_temp;//真实值
+    uint8_t read_len = 0;
     uint32_t read_value = 0;
-    read_value_temp = strdup(ef_get_env(keybuf));
-    read_value = atol(read_value_temp);
-    rt_free(read_value_temp);//释放临时buffer对应内存空间
+    char *keybuf="Moto";
+    memset(read_value_temp,0,64);
+    read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
+    if(read_len>0)
+    {
+        read_value = atol(read_value_temp);
+    }
+    else
+    {
+        read_value = 0;
+    }
     LOG_D("Reading Key %s value %ld \r\n", keybuf, read_value);//输出
     return read_value;
 }
 uint32_t Flash_Get_Key_Value(uint32_t key)
 {
+    uint8_t read_len = 0;
+    uint32_t read_value = 0;
     char *keybuf = rt_malloc(20);
     sprintf(keybuf, "%ld", key);//将传入的数字转换成数组
-    char *read_value_temp;//真实值
-    uint32_t read_value = 0;
-    read_value_temp = strdup(ef_get_env(keybuf));
-    read_value = atol(read_value_temp);
+    memset(read_value_temp,0,64);
+    read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
+    if(read_len>0)
+    {
+        read_value = atol(read_value_temp);
+    }
+    else
+    {
+        read_value = 0;
+    }
     rt_free(keybuf);//释放临时buffer对应内存空间
-    rt_free(read_value_temp);//释放临时buffer对应内存空间
-    LOG_D("Reading Key %d value %ld \r\n", key, read_value);//输出
+    LOG_D("Reading Key %s value %ld \r\n", keybuf, read_value);//输出
     return read_value;
 }
 void Flash_Key_Change(uint32_t key,uint32_t value)
@@ -146,15 +160,22 @@ void Flash_Moto_Change(uint8_t value)
 }
 uint8_t Device_RssiGet(uint32_t Device_ID)
 {
+    uint8_t read_len = 0;
+    uint32_t read_value = 0;
     char *keybuf = rt_malloc(20);
     sprintf(keybuf, "Rssi:%ld", Device_ID);//将传入的数字转换成数组
-    char *read_value_temp;//真实值
-    uint32_t read_value = 0;
-    read_value_temp = strdup(ef_get_env(keybuf));
-    read_value = atol(read_value_temp);
+    memset(read_value_temp,0,64);
+    read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
+    if(read_len>0)
+    {
+        read_value = atol(read_value_temp);
+    }
+    else
+    {
+        read_value = 0;
+    }
     rt_free(keybuf);//释放临时buffer对应内存空间
-    rt_free(read_value_temp);//释放临时buffer对应内存空间
-    LOG_D("Reading Rssi %d value %ld \r\n", Device_ID, read_value);//输出
+    LOG_D("Reading Key %s value %ld \r\n", keybuf, read_value);//输出
     return read_value;
 }
 void Device_RssiChange(uint32_t Device_ID,uint8_t value)
@@ -170,15 +191,22 @@ void Device_RssiChange(uint32_t Device_ID,uint8_t value)
 }
 uint8_t Device_BatGet(uint32_t Device_ID)
 {
+    uint8_t read_len = 0;
+    uint32_t read_value = 0;
     char *keybuf = rt_malloc(20);
     sprintf(keybuf, "Bat:%ld", Device_ID);//将传入的数字转换成数组
-    char *read_value_temp;//真实值
-    uint32_t read_value = 0;
-    read_value_temp = strdup(ef_get_env(keybuf));
-    read_value = atol(read_value_temp);
+    memset(read_value_temp,0,64);
+    read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
+    if(read_len>0)
+    {
+        read_value = atol(read_value_temp);
+    }
+    else
+    {
+        read_value = 0;
+    }
     rt_free(keybuf);//释放临时buffer对应内存空间
-    rt_free(read_value_temp);//释放临时buffer对应内存空间
-    LOG_D("Reading Bat %d value %ld \r\n", Device_ID, read_value);//输出
+    LOG_D("Reading Key %s value %ld \r\n", keybuf, read_value);//输出
     return read_value;
 }
 void Device_BatChange(uint32_t Device_ID,uint8_t value)
@@ -212,7 +240,7 @@ uint8_t Add_DoorDevice(uint32_t Device_ID)
         Num = Flash_Get_Door_Nums();
         Global_Device.ID[Num] = Device_ID;
         Flash_Key_Change(Num,Device_ID);
-        Global_Device.DoorID = Num;
+        Global_Device.DoorNum = Num;
         Flash_Key_Change(88888888,Num);
         LOG_D("Replace Learn\r\n");
         return RT_EOK;
@@ -226,7 +254,7 @@ uint8_t Add_DoorDevice(uint32_t Device_ID)
         Global_Device.Num = Num;
         Global_Device.ID[Num] = Device_ID;
         Flash_Key_Change(Num,Device_ID);
-        Global_Device.DoorID = Num;
+        Global_Device.DoorNum = Num;
         Flash_Key_Change(88888888,Num);
         LOG_D("New Learn\r\n");
         return RT_EOK;
@@ -234,11 +262,11 @@ uint8_t Add_DoorDevice(uint32_t Device_ID)
 }
 uint32_t GetDoorID(void)
 {
-    if(Global_Device.DoorID)
+    if(Global_Device.DoorNum)
     {
-        if(Global_Device.ID[Global_Device.DoorID])
+        if(Global_Device.ID[Global_Device.DoorNum])
         {
-            return Global_Device.ID[Global_Device.DoorID];
+            return Global_Device.ID[Global_Device.DoorNum];
         }
         else {
             LOG_D("Not Include Door Device\r\n");
@@ -271,7 +299,7 @@ uint8_t Update_Device_Bat(uint32_t Device_ID,uint8_t bat)//更新电量
         }
         num--;
     }
-    LOG_D("Device %d is Not Increase Success",Global_Device.ID[num]);
+    LOG_D("Device Bat %d is Increase Fail",Global_Device.ID[num]);
     return RT_ERROR;
 }
 uint8_t Update_Device_Rssi(uint32_t Device_ID,uint8_t rssi)//更新Rssi
@@ -289,7 +317,7 @@ uint8_t Update_Device_Rssi(uint32_t Device_ID,uint8_t rssi)//更新Rssi
         }
         num--;
     }
-    LOG_D("Device %d is Not Increase Success",Global_Device.ID[num]);
+    LOG_D("Device Rssi %d is Increase Fail",Global_Device.ID[num]);
     return RT_ERROR;
 }
 uint8_t Clear_Device_Time(uint32_t Device_ID)//更新时间戳为0
@@ -302,6 +330,7 @@ uint8_t Clear_Device_Time(uint32_t Device_ID)//更新时间戳为0
         if(Global_Device.ID[num]==Device_ID)
         {
             Global_Device.ID_Time[num] = 0;
+            Global_Device.Alive[num] = 1;
             LOG_D("Device %d is Clear to 0",Global_Device.ID[num]);
             return RT_EOK;
         }
@@ -331,8 +360,9 @@ void Clear_All_Time(void)
     {
         for(uint8_t i=1;i<=Num;i++)
         {
-            if(Global_Device.ID_Time[i]<25)
+            if(Global_Device.ID_Time[i]<25 || Global_Device.Alive[i] == 1)
             {
+                Global_Device.Alive[i] = 0;//更新内存中的时间
                 Global_Device.ID_Time[i] = 0;//更新内存中的时间
                 LOG_D("Device %ld's time is cleard",Global_Device.ID[i]);
             }
@@ -347,16 +377,16 @@ void Detect_All_Time(void)
     if(!num)return;
     while(num)
     {
-        if(Global_Device.ID_Time[num]>24)
+        if(Global_Device.ID_Time[num]==25 && Global_Device.Alive[num]==0)
         {
-            WarnFlag = 1;
             //掉线ID上报
-            if(Global_Device.ID[num] == Global_Device.DoorID)
+            if(num == Global_Device.DoorNum)
             {
                 LOG_D("Door is Offline\r\n");
             }
             else
             {
+                WarnFlag = 1;
                 LOG_D("Device ID %ld is Offline\r\n",Global_Device.ID[num]);
             }
         }
@@ -368,24 +398,6 @@ void Detect_All_Time(void)
     }
     Clear_All_Time();
     LOG_D("Detect_All_Time OK\r\n");
-}
-uint8_t Remote_Delete(uint32_t Device_ID)
-{
-    uint16_t num = Global_Device.Num;
-    if(!num)return RT_ERROR;
-    while(num)
-    {
-        if(Global_Device.ID[num]==Device_ID)
-        {
-            Global_Device.ID[num] = 0;
-            Delete_Device(num);
-            LOG_I("Delete ID %ld By WIFI is success\r\n");
-            return RT_EOK;
-        }
-        num--;
-    }
-    LOG_I("Delete ID %ld By WIFI is fail\r\n");
-    return RT_ERROR;
 }
 uint8_t Flash_Get_Key_Valid(uint32_t Device_ID)//查询内存中的ID
 {
@@ -412,27 +424,28 @@ uint8_t Flash_GetRssi(uint32_t Device_ID)//查询内存中的RSSI
     }
     return 0;
 }
-void Detect_All_TimeInDecoder(uint8_t ID)
+void Offline_React(uint32_t ID)
 {
-    if(Flash_Get_Key_Valid(ID)==0)
+    if(Flash_Get_Key_Valid(ID)!=RT_EOK)
     {
-        Clear_Device_Time(ID);
+        return;
     }
+    Clear_Device_Time(ID);
     uint16_t num = Global_Device.Num;
     uint8_t WarnFlag = 0;
     if(!num)return;
     while(num)
     {
-        if(Global_Device.ID_Time[num]==25)
+        if(Global_Device.ID_Time[num]==25 && Global_Device.Alive[num]==0)
         {
-            WarnFlag = 1;
             //掉线ID上报
-            if(Global_Device.ID[num] == Global_Device.DoorID)
+            if(num == Global_Device.DoorNum)
             {
                 LOG_D("Door is Offline\r\n");
             }
             else
             {
+                WarnFlag = 1;
                 LOG_D("Device ID %ld is Offline\r\n",Global_Device.ID[num]);
             }
         }
@@ -459,7 +472,7 @@ void LoadDevice2Memory(void)//数据载入到内存中
         Global_Device.Rssi[i] = Device_RssiGet(Global_Device.ID[i]);
         LOG_D("GOT Rssi is %ld\r\n",Global_Device.Rssi[i]);
     }
-    Global_Device.DoorID = Flash_Get_Key_Value(88888888);
+    Global_Device.DoorNum = Flash_Get_Key_Value(88888888);
     Global_Device.LastFlag = Flash_Get_Moto_Flag();
 }
 MSH_CMD_EXPORT(LoadDevice2Memory,LoadDevice2Memory);
@@ -472,4 +485,3 @@ void DeleteAllDevice(void)//数据载入到内存中
     Flash_Moto_Change(0);//LastFlag
     LOG_D("After Delete num is %d",Global_Device.Num);
 }
-MSH_CMD_EXPORT(DeleteAllDevice,DeleteAllDevice);

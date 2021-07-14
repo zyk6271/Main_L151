@@ -19,9 +19,10 @@ enum Device_Status
     MasterLostPeak,
     MasterWaterAlarmActive,
     MasterWaterAlarmDeActive,
+    NTCWarning,
+    MotoFail,
     Learn,
-    Offline,
-    WiFi
+    Offline
 };
 void Key_Reponse(void);
 

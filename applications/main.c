@@ -22,8 +22,8 @@
 #include "RTCWork.h"
 #include "status.h"
 #include "dog.h"
+#include "adcwork.h"
 #include "radio_decoder.h"
-
 
 #define DBG_TAG "main"
 #define DBG_LVL DBG_LOG
@@ -31,21 +31,24 @@
 
 int main(void)
 {
-    button_Init();
+    //cm_backtrace_init("1","2","3");
+    led_Init();
     Key_Reponse();
     flash_Init();
     easyflash_init();
     LoadDevice2Memory();
-    led_Init();
     Moto_Init();
-    //wdt_sample();
+    wdt_sample();
     Delay_Timer_Init();
     RTC_Init();
     WarningInit();
     WaterScan_Init();
     Radio_Task_Init();
+    ADC_Init();
+    button_Init();
     while (1)
     {
+        FeedDog();
         rt_thread_mdelay(1000);
     }
     return RT_EOK;

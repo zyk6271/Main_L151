@@ -10,6 +10,7 @@
 #ifndef APPLICATIONS_DEVICE_H_
 #define APPLICATIONS_DEVICE_H_
 void button_Init(void);
+void Key_SemInit(void);
 
 
 #endif /* APPLICATIONS_DEVICE_H_ */

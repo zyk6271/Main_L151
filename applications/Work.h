@@ -10,7 +10,6 @@
 #ifndef APPLICATIONS_WORK_H_
 #define APPLICATIONS_WORK_H_
 
-void Disable_Warining(void);
 void Enable_Warining(void);
 void WaterScan_Init(void);
 void WaterScan_Clear(void);

@@ -18,13 +18,14 @@
 #include "flashwork.h"
 #include "rthw.h"
 #include "status.h"
-#include "rtdevice.h"
+#include "device.h"
 
 #define DBG_TAG "key"
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
 rt_thread_t key_response_t = RT_NULL;
+rt_timer_t Learn_Timer = RT_NULL;
 
 uint8_t K0_Status=0;
 uint8_t K0_Long_Status=0;
@@ -42,11 +43,10 @@ extern rt_sem_t K0_K1_Long_Sem;
 extern uint8_t Learn_Flag;
 extern uint8_t Last_Close_Flag;
 
-rt_timer_t Learn_Timer;
-
 enum Device_Status Now_Status=Close;
 void Key_Reponse_Callback(void *parameter)
 {
+    Key_SemInit();
     LOG_D("Key_Reponse Init Success\r\n");
     while(1)
     {
@@ -75,11 +75,10 @@ void Key_Reponse_Callback(void *parameter)
                 key_down();
                 LOG_D("Valve Already Open With ON\r\n");
                 break;
-//            case SlaverLowPower:
-//                beep_start(0,7);//蜂鸣器三下
-//                break;
+            case SlaverLowPower:
+                break;
             case SlaverUltraLowPower:
-                beep_start(0,7);//蜂鸣器三下
+                beep_three_times();
                 break;
             case SlaverWaterAlarmActive:
                 break;
@@ -90,17 +89,20 @@ void Key_Reponse_Callback(void *parameter)
                 LOG_D("MasterLostPeak With ON\r\n");
                 break;
             case MasterWaterAlarmActive:
-                beep_start(0,2);//红灯,蜂鸣器三下
+                beep_three_times();
                 break;
             case MasterWaterAlarmDeActive:
-                beep_start(0,2);
+                beep_three_times();
                 LOG_D("MasterWaterAlarmActive With ON\r\n");
+                break;
+            case MotoFail:
+                just_ring();
                 break;
             case Learn:
                 break;
             case Offline:
                 break;
-            case WiFi:
+            case NTCWarning:
                 break;
             }
         }
@@ -125,13 +127,8 @@ void Key_Reponse_Callback(void *parameter)
                 Moto_Close(NormalOff);
                 LOG_D("Valve Close With OFF\r\n");
                 break;
-//            case SlaverLowPower:
-//                key_down();
-//                Moto_Close(NormalOff);
-//                Warning_Disable();
-//                Now_Status = Close;
-//                LOG_D("SlaverLowPower With OFF\r\n");
-//                break;
+            case SlaverLowPower:
+                break;
             case SlaverUltraLowPower:
                 just_ring();
                 break;
@@ -157,9 +154,15 @@ void Key_Reponse_Callback(void *parameter)
                 break;
             case Learn:
                 break;
+            case MotoFail:
+                key_down();
+                LOG_D("MotoFail With OFF\r\n");
+                break;
             case Offline:
                 break;
-            case WiFi:
+            case NTCWarning:
+                beep_stop();
+                key_down();
                 break;
             }
         }
@@ -172,17 +175,6 @@ void Key_Reponse_Callback(void *parameter)
         }
         else if(K0_Long_Status==RT_EOK)//ON
         {
-            //LOG_D("Now in WiFi Mode\r\n");
-            if(Now_Status==Close)
-            {
-//                Now_Status = WiFi;
-//                Show_WiFi();
-            }
-            else if(Now_Status == WiFi)
-            {
-                LOG_D("Now Exit WiFi Mode\r\n");
-                Now_Status = Close;
-            }
         }
         else if(K1_Long_Status==RT_EOK)//OFF
         {
@@ -195,31 +187,22 @@ void Key_Reponse_Callback(void *parameter)
             {
                 Stop_Learn();
             }
-            else if(Now_Status==WiFi)
-            {
-            }
             else
             {
                 LOG_D("Now in Warining Mode\r\n");
             }
         }
-        rt_thread_mdelay(5);
+        rt_thread_mdelay(10);
     }
 }
-void statusread(void)
-{
-    LOG_D("Now Status is %d\r\n",Now_Status);
-}
-MSH_CMD_EXPORT(statusread,statusread);
 void Learn_Timer_Callback(void *parameter)
 {
     LOG_D("Learn timer is Timeout\r\n");
-    Disable_Warining();//消警
     Stop_Learn();
 }
 void Key_Reponse(void)
 {
     key_response_t = rt_thread_create("key_response_t", Key_Reponse_Callback, RT_NULL, 2048, 10, 10);
     if(key_response_t!=RT_NULL)rt_thread_startup(key_response_t);
-    Learn_Timer = rt_timer_create("Learn_Timer", Learn_Timer_Callback, RT_NULL, 60*1000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER );
+    Learn_Timer = rt_timer_create("Learn_Timer", Learn_Timer_Callback, RT_NULL, 30*1000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER );
 }

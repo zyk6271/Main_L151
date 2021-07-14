@@ -30,18 +30,21 @@ uint16_t K1_Long_Sem_Counter=0;
 uint8_t  K0_OnceFlag=0;
 uint8_t  K1_OnceFlag=0;
 uint8_t  K0_K1_OnceFlag=0;
+void Key_SemInit(void)
+{
+    K0_Sem=rt_sem_create("K0", 0, RT_IPC_FLAG_FIFO);
+    K0_Long_Sem=rt_sem_create("K0_Long", 0, RT_IPC_FLAG_FIFO);
+    K1_Sem=rt_sem_create("K1", 0, RT_IPC_FLAG_FIFO);
+    K1_Long_Sem = rt_sem_create("K1_Long", 0, RT_IPC_FLAG_FIFO);
+    K0_K1_Long_Sem = rt_sem_create("K0_K1_Long_Sem", 0, RT_IPC_FLAG_FIFO);
+}
 void Key_Init(void)
 {
-        K0_Sem=rt_sem_create("K0", 0, RT_IPC_FLAG_FIFO);
-        K0_Long_Sem=rt_sem_create("K0_Long", 0, RT_IPC_FLAG_FIFO);
-        K1_Sem=rt_sem_create("K1", 0, RT_IPC_FLAG_FIFO);
-        K1_Long_Sem = rt_sem_create("K1_Long", 0, RT_IPC_FLAG_FIFO);
-        K0_K1_Long_Sem = rt_sem_create("K0_K1_Long_Sem", 0, RT_IPC_FLAG_FIFO);
-        rt_pin_mode(K0, PIN_MODE_INPUT);
-        rt_pin_mode(K1, PIN_MODE_INPUT);
-        rt_pin_mode(ANT_EXT,PIN_MODE_OUTPUT);
-        rt_pin_mode(ANT_EXT,PIN_MODE_OUTPUT);
-        rt_pin_mode(ANT_SW,PIN_MODE_INPUT);
+    rt_pin_mode(K0, PIN_MODE_INPUT);
+    rt_pin_mode(K1, PIN_MODE_INPUT);
+    rt_pin_mode(ANT_INT,PIN_MODE_OUTPUT);
+    rt_pin_mode(ANT_EXT,PIN_MODE_OUTPUT);
+    rt_pin_mode(ANT_SW,PIN_MODE_INPUT);
 }
 void K0_Sem_Release(void *parameter)
 {
@@ -135,7 +138,7 @@ void Detect_KO_K1(void)
 uint8_t ANT_SW_Status,ANT_SW_Status_Temp = 0;
 void RF_Init(void)
 {
-    ANT_SW_Status_Temp = rt_pin_read(ANT_SW);
+    ANT_SW_Status = rt_pin_read(ANT_SW);
     rt_pin_write(ANT_EXT,ANT_SW_Status);
     rt_pin_write(ANT_INT,!ANT_SW_Status);
     LOG_I("ANT_EXT is %d , ANT_INT is %d\r\n",ANT_SW_Status,!ANT_SW_Status);
@@ -149,7 +152,6 @@ void RF_Switch(void)
         rt_pin_write(ANT_EXT,ANT_SW_Status);
         rt_pin_write(ANT_INT,!ANT_SW_Status);
         LOG_I("ANT_EXT is %d , ANT_INT is %d\r\n",ANT_SW_Status,!ANT_SW_Status);
-        Moto_Detect();
     }
 }
 void button_task_entry(void *parameter)
@@ -166,7 +168,7 @@ void button_task_entry(void *parameter)
         Button_Attach(&Key1,BUTTON_LONG,K1_LongSem_Release);
         Button_Attach(&Key0,BUTTON_LONG_FREE,K0_LongFree_Release);
         Button_Attach(&Key1,BUTTON_LONG_FREE,K1_LongFree_Release);
-
+        LOG_D("Button Init Success\r\n");
         while(1)
         {
             RF_Switch();
@@ -176,7 +178,7 @@ void button_task_entry(void *parameter)
 }
 void button_Init(void)
 {
-    button_task=rt_thread_create("button_task",button_task_entry,RT_NULL,2048,5,10);
-    if(button_task!=RT_NULL)rt_thread_startup(button_task);LOG_D("Button Init Success\r\n");
+    button_task=rt_thread_create("button_task",button_task_entry,RT_NULL,1024,5,10);
+    if(button_task!=RT_NULL)rt_thread_startup(button_task);
 }
 MSH_CMD_EXPORT(button_Init,button_Init);

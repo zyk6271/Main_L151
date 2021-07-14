@@ -11,8 +11,8 @@
 #define APPLICATIONS_PIN_CONFIG_H_
 //RADIO
 #define Radio_IRQ               16
-#define ANT_EXT                 18
-#define ANT_INT                 26
+#define ANT_EXT                 26
+#define ANT_INT                 18
 #define ANT_SW                  113
 //BASIC
 #define K0                      0

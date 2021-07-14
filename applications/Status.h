@@ -24,6 +24,7 @@ void KidLock_Enable(void);
 void KidLock_Disable(void);
 uint8_t Detect_Learn(void);
 void Delay_Timer_Open();
+void Delay_Timer_Close(void);
 
 typedef struct
 {

@@ -24,7 +24,6 @@ void RTC_Timer_Entry(void *parameter)
         result = rt_sem_take(RTC_IRQ_Sem, RT_WAITING_FOREVER);
         if (result == RT_EOK)
         {
-            LOG_D("RTC Handler Callback,Counter is %d\r\n",RTC_Counter);
             if(RTC_Hours%120==0)
             {
                 Moto_Detect();
@@ -42,6 +41,7 @@ void RTC_Timer_Entry(void *parameter)
                 Detect_All_Time();//25个小时检测计数器
                 RTC_Counter=0;
             }
+            LOG_D("RTC Handler Callback,Counter is %d\r\n",RTC_Counter);
         }
     }
 }
@@ -96,9 +96,9 @@ void RTC_AlarmConfig(void)
     salarmstructure.AlarmMask = RTC_ALARMMASK_DATEWEEKDAY;
     salarmstructure.AlarmSubSecondMask = RTC_ALARMSUBSECONDMASK_ALL;
     salarmstructure.AlarmTime.TimeFormat = RTC_HOURFORMAT12_AM;
-    salarmstructure.AlarmTime.Hours = 0;
+    salarmstructure.AlarmTime.Hours = 1;
     salarmstructure.AlarmTime.Minutes = 0;
-    salarmstructure.AlarmTime.Seconds = 30;
+    salarmstructure.AlarmTime.Seconds = 0;
     salarmstructure.AlarmTime.SubSeconds = 0;
 
     if(HAL_RTC_SetAlarm_IT(&RtcHandle,&salarmstructure,RTC_FORMAT_BIN) == HAL_OK)

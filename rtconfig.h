@@ -14,10 +14,10 @@
 #define RT_USING_HOOK
 #define RT_USING_IDLE_HOOK
 #define RT_IDLE_HOOK_LIST_SIZE 4
-#define IDLE_THREAD_STACK_SIZE 256
+#define IDLE_THREAD_STACK_SIZE 1024
 #define RT_USING_TIMER_SOFT
 #define RT_TIMER_THREAD_PRIO 4
-#define RT_TIMER_THREAD_STACK_SIZE 1024
+#define RT_TIMER_THREAD_STACK_SIZE 2048
 #define RT_DEBUG
 #define RT_DEBUG_COLOR
 
@@ -34,6 +34,7 @@
 
 #define RT_USING_MEMPOOL
 #define RT_USING_SMALL_MEM
+#define RT_USING_MEMTRACE
 #define RT_USING_HEAP
 /* end of Memory Management */
 
@@ -41,7 +42,7 @@
 
 #define RT_USING_DEVICE
 #define RT_USING_CONSOLE
-#define RT_CONSOLEBUF_SIZE 256
+#define RT_CONSOLEBUF_SIZE 128
 #define RT_CONSOLE_DEVICE_NAME "uart2"
 /* end of Kernel Device Object */
 #define RT_VER_NUM 0x40003
@@ -77,9 +78,9 @@
 #define RT_USING_SERIAL
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_PIN
+#define RT_USING_ADC
 #define RT_USING_SPI
 #define RT_USING_SFUD
-#define RT_SFUD_USING_SFDP
 #define RT_SFUD_USING_FLASH_INFO_TABLE
 #define RT_SFUD_SPI_MAX_HZ 50000000
 #define RT_USING_WDT
@@ -157,8 +158,16 @@
 
 /* tools packages */
 
+#define PKG_USING_CMBACKTRACE
+#define PKG_CMBACKTRACE_PLATFORM_M3
+#define PKG_CMBACKTRACE_DUMP_STACK
+#define PKG_CMBACKTRACE_PRINT_ENGLISH
+#define PKG_USING_CMBACKTRACE_V10400
+#define PKG_CMBACKTRACE_VER_NUM 0x10400
 #define PKG_USING_EASYFLASH
 #define PKG_EASYFLASH_ENV
+#define PKG_EASYFLASH_ENV_AUTO_UPDATE
+#define PKG_EASYFLASH_ENV_VER_NUM 0
 #define PKG_EASYFLASH_ERASE_GRAN 4096
 #define PKG_EASYFLASH_WRITE_GRAN_1BIT
 #define PKG_EASYFLASH_WRITE_GRAN 1
@@ -169,9 +178,6 @@
 
 /* system packages */
 
-/* acceleration: Assembly language or algorithmic acceleration packages */
-
-/* end of acceleration: Assembly language or algorithmic acceleration packages */
 
 /* Micrium: Micrium software products porting for RT-Thread */
 
@@ -205,9 +211,9 @@
 
 /* end of samples: kernel and components samples */
 
-/* entertainment: terminal games and other interesting software packages */
+/* games: games run on RT-Thread console */
 
-/* end of entertainment: terminal games and other interesting software packages */
+/* end of games: games run on RT-Thread console */
 /* end of miscellaneous packages */
 /* end of RT-Thread online packages */
 
