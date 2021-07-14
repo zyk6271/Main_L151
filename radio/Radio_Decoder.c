@@ -270,13 +270,13 @@ void DataSolve(Message buf)
         break;
     case 6://关机
         LOG_D("Pwr Off and Now State is %d\r\n",Now_Status);
+        RadioEnqueue(0,buf.From_ID,buf.Counter,6,0);
         if(Now_Status==Open||Now_Status==Close)
         {
             LOG_D("Pwr Off From %ld\r\n",buf.From_ID);
             Warning_Disable();
             Last_Close_Flag=1;
             Moto_Close(OtherOff);
-            RadioEnqueue(0,buf.From_ID,buf.Counter,6,0);
             just_ring();
         }
         else if(Now_Status == SlaverWaterAlarmActive)
@@ -284,7 +284,6 @@ void DataSolve(Message buf)
             LOG_D("Warning With Command 6\r\n");
             Warning_Disable();
             Moto_Close(OtherOff);
-            RadioEnqueue(0,buf.From_ID,buf.Counter,6,0);
         }
         break;
     case 8://延迟

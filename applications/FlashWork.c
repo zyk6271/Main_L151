@@ -240,7 +240,7 @@ uint8_t Add_DoorDevice(uint32_t Device_ID)
         Num = Flash_Get_Door_Nums();
         Global_Device.ID[Num] = Device_ID;
         Flash_Key_Change(Num,Device_ID);
-        Global_Device.DoorID = Num;
+        Global_Device.DoorNum = Num;
         Flash_Key_Change(88888888,Num);
         LOG_D("Replace Learn\r\n");
         return RT_EOK;
@@ -254,7 +254,7 @@ uint8_t Add_DoorDevice(uint32_t Device_ID)
         Global_Device.Num = Num;
         Global_Device.ID[Num] = Device_ID;
         Flash_Key_Change(Num,Device_ID);
-        Global_Device.DoorID = Num;
+        Global_Device.DoorNum = Num;
         Flash_Key_Change(88888888,Num);
         LOG_D("New Learn\r\n");
         return RT_EOK;
@@ -262,11 +262,11 @@ uint8_t Add_DoorDevice(uint32_t Device_ID)
 }
 uint32_t GetDoorID(void)
 {
-    if(Global_Device.DoorID)
+    if(Global_Device.DoorNum)
     {
-        if(Global_Device.ID[Global_Device.DoorID])
+        if(Global_Device.ID[Global_Device.DoorNum])
         {
-            return Global_Device.ID[Global_Device.DoorID];
+            return Global_Device.ID[Global_Device.DoorNum];
         }
         else {
             LOG_D("Not Include Door Device\r\n");
@@ -379,14 +379,14 @@ void Detect_All_Time(void)
     {
         if(Global_Device.ID_Time[num]==25 && Global_Device.Alive[num]==0)
         {
-            WarnFlag = 1;
             //掉线ID上报
-            if(Global_Device.ID[num] == Global_Device.DoorID)
+            if(num == Global_Device.DoorNum)
             {
                 LOG_D("Door is Offline\r\n");
             }
             else
             {
+                WarnFlag = 1;
                 LOG_D("Device ID %ld is Offline\r\n",Global_Device.ID[num]);
             }
         }
@@ -438,14 +438,14 @@ void Offline_React(uint32_t ID)
     {
         if(Global_Device.ID_Time[num]==25 && Global_Device.Alive[num]==0)
         {
-            WarnFlag = 1;
             //掉线ID上报
-            if(Global_Device.ID[num] == Global_Device.DoorID)
+            if(num == Global_Device.DoorNum)
             {
                 LOG_D("Door is Offline\r\n");
             }
             else
             {
+                WarnFlag = 1;
                 LOG_D("Device ID %ld is Offline\r\n",Global_Device.ID[num]);
             }
         }
@@ -472,7 +472,7 @@ void LoadDevice2Memory(void)//数据载入到内存中
         Global_Device.Rssi[i] = Device_RssiGet(Global_Device.ID[i]);
         LOG_D("GOT Rssi is %ld\r\n",Global_Device.Rssi[i]);
     }
-    Global_Device.DoorID = Flash_Get_Key_Value(88888888);
+    Global_Device.DoorNum = Flash_Get_Key_Value(88888888);
     Global_Device.LastFlag = Flash_Get_Moto_Flag();
 }
 MSH_CMD_EXPORT(LoadDevice2Memory,LoadDevice2Memory);

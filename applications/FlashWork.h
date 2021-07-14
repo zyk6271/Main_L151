@@ -7,7 +7,7 @@ typedef struct
 {
     uint8_t  LastFlag;
     uint32_t Num;
-    uint32_t DoorID;
+    uint32_t DoorNum;
     uint32_t ID[20];
     uint32_t ID_Time[20];
     uint32_t Alive[20];
