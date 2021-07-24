@@ -14,6 +14,7 @@
 #include "key.h"
 #include "moto.h"
 #include "flashwork.h"
+#include "gateway.h"
 #include <stm32l1xx_hal.h>
 
 #define DBG_TAG "adc"
@@ -127,9 +128,11 @@ void NTC_Work_Callback(void *parameter)
         {
             NTC_State_Save(ValveStatus);
             Warning_Enable_Num(8);
+            WarUpload_GW(0,8,1);//NTC报警
         }
         if(ADC_Voltage_Calc()>=1.2 && Now_Status==NTCWarning)
         {
+            WarUpload_GW(0,8,0);//NTC报警
             Warning_Disable();
             if(NTC_State_read())
             {

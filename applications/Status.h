@@ -9,6 +9,29 @@
  */
 #ifndef APPLICATIONS_STATUS_H_
 #define APPLICATIONS_STATUS_H_
+enum Device_Status
+{
+    Close=0,
+    Open,
+    SlaverLowPower,
+    SlaverUltraLowPower,
+    SlaverWaterAlarmActive,
+    MasterLostPeak,
+    MasterWaterAlarmActive,
+    MasterWaterAlarmDeActive,
+    NTCWarning,
+    MotoFail,
+    Learn,
+    Offline
+};
+typedef struct
+{
+    uint8_t warning_id;
+    uint8_t last_id;
+    uint8_t priority;
+    void (*callback)(void*);
+}WariningEvent;
+
 void WarningInit(void);
 void BackToNormal(void);
 void Warning_Disable(void);
@@ -25,13 +48,5 @@ void KidLock_Disable(void);
 uint8_t Detect_Learn(void);
 void Delay_Timer_Open();
 void Delay_Timer_Close(void);
-
-typedef struct
-{
-    uint8_t warning_id;
-    uint8_t last_id;
-    uint8_t priority;
-    void (*callback)(void*);
-}WariningEvent;
-
+uint8_t GetNowStatus(void);
 #endif /* APPLICATIONS_STATUS_H_ */

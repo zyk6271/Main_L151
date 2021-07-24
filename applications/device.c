@@ -15,7 +15,7 @@
 #include "led.h"
 
 #define DBG_TAG "device"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 rt_thread_t button_task=RT_NULL;
@@ -49,12 +49,12 @@ void Key_Init(void)
 void K0_Sem_Release(void *parameter)
 {
     rt_sem_release(K0_Sem);
-    LOG_D("K0 is Down\r\n");
+    LOG_I("K0 is Down\r\n");
 }
 void K1_Sem_Release(void *parameter)
 {
     rt_sem_release(K1_Sem);
-    LOG_D("K1 is Down\r\n");
+    LOG_I("K1 is Down\r\n");
 }
 void K0_LongSem_Release(void *parameter)
 {
@@ -68,7 +68,7 @@ void K0_LongSem_Release(void *parameter)
         }
         else
         {
-            LOG_D("K0 Long Counter is %d",K0_Long_Sem_Counter++);
+            LOG_I("K0 Long Counter is %d",K0_Long_Sem_Counter++);
         }
     }
 }
@@ -92,7 +92,7 @@ void K1_LongSem_Release(void *parameter)
         }
         else
         {
-            LOG_D("K1 Long Counter is %d",K1_Long_Sem_Counter++);
+            LOG_I("K1 Long Counter is %d",K1_Long_Sem_Counter++);
         }
     }
 }

@@ -11,9 +11,10 @@
 #include "FlashWork.h"
 #include "status.h"
 #include "led.h"
+#include "gateway.h"
 
 #define DBG_TAG "flash"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 typedef struct _env_list {
@@ -78,6 +79,24 @@ uint32_t Flash_Get_Door_Nums(void)
     uint8_t read_len = 0;
     uint32_t read_value = 0;
     char *keybuf="88888888";
+    memset(read_value_temp,0,64);
+    read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
+    if(read_len>0)
+    {
+        read_value = atol(read_value_temp);
+    }
+    else
+    {
+        read_value = 0;
+    }
+    LOG_D("Reading Key %s value %ld \r\n", keybuf, read_value);//输出
+    return read_value;
+}
+uint32_t Flash_Get_Gateway_Nums(void)
+{
+    uint8_t read_len = 0;
+    uint32_t read_value = 0;
+    char *keybuf="88887777";
     memset(read_value_temp,0,64);
     read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
     if(read_len>0)
@@ -224,7 +243,7 @@ uint8_t Add_Device(uint32_t Device_ID)
 {
     uint32_t Num=0;
     Num = Flash_Get_Learn_Nums();
-    if(Num>200)return RT_ERROR;
+    if(Num>20)return RT_ERROR;
     Num++;
     Flash_LearnNums_Change(Num);
     Global_Device.Num = Num;
@@ -248,7 +267,7 @@ uint8_t Add_DoorDevice(uint32_t Device_ID)
     else
     {
         Num = Flash_Get_Learn_Nums();
-        if(Num>200)return RT_ERROR;
+        if(Num>20)return RT_ERROR;
         Num++;
         Flash_LearnNums_Change(Num);
         Global_Device.Num = Num;
@@ -256,6 +275,34 @@ uint8_t Add_DoorDevice(uint32_t Device_ID)
         Flash_Key_Change(Num,Device_ID);
         Global_Device.DoorNum = Num;
         Flash_Key_Change(88888888,Num);
+        LOG_D("New Learn\r\n");
+        return RT_EOK;
+    }
+}
+uint8_t Add_GatewayDevice(uint32_t Device_ID)
+{
+    uint32_t Num=0;
+    if(GetGatewayID())
+    {
+        Num = Flash_Get_Door_Nums();
+        Global_Device.ID[Num] = Device_ID;
+        Flash_Key_Change(Num,Device_ID);
+        Global_Device.GatewayNum = Num;
+        Flash_Key_Change(88887777,Num);
+        LOG_D("Replace Learn\r\n");
+        return RT_EOK;
+    }
+    else
+    {
+        Num = Flash_Get_Learn_Nums();
+        if(Num>20)return RT_ERROR;
+        Num++;
+        Flash_LearnNums_Change(Num);
+        Global_Device.Num = Num;
+        Global_Device.ID[Num] = Device_ID;
+        Flash_Key_Change(Num,Device_ID);
+        Global_Device.GatewayNum = Num;
+        Flash_Key_Change(88887777,Num);
         LOG_D("New Learn\r\n");
         return RT_EOK;
     }
@@ -275,7 +322,26 @@ uint32_t GetDoorID(void)
     }
     else
     {
-        LOG_D("Not Include Door Device ID\r\n");
+        LOG_W("Not Include Door Device ID\r\n");
+        return 0;
+    }
+}
+uint32_t GetGatewayID(void)
+{
+    if(Global_Device.GatewayNum)
+    {
+        if(Global_Device.ID[Global_Device.GatewayNum])
+        {
+            return Global_Device.ID[Global_Device.GatewayNum];
+        }
+        else {
+            LOG_D("Not Include Gateway Device\r\n");
+            return 0;
+        }
+    }
+    else
+    {
+        LOG_W("Not Include Gateway Device ID\r\n");
         return 0;
     }
 }
@@ -299,7 +365,7 @@ uint8_t Update_Device_Bat(uint32_t Device_ID,uint8_t bat)//更新电量
         }
         num--;
     }
-    LOG_D("Device Bat %d is Increase Fail",Global_Device.ID[num]);
+    LOG_E("Device Bat %d is Increase Fail",Global_Device.ID[num]);
     return RT_ERROR;
 }
 uint8_t Update_Device_Rssi(uint32_t Device_ID,uint8_t rssi)//更新Rssi
@@ -317,7 +383,7 @@ uint8_t Update_Device_Rssi(uint32_t Device_ID,uint8_t rssi)//更新Rssi
         }
         num--;
     }
-    LOG_D("Device Rssi %d is Increase Fail",Global_Device.ID[num]);
+    LOG_E("Device Rssi %d is Increase Fail",Global_Device.ID[num]);
     return RT_ERROR;
 }
 uint8_t Clear_Device_Time(uint32_t Device_ID)//更新时间戳为0
@@ -336,7 +402,7 @@ uint8_t Clear_Device_Time(uint32_t Device_ID)//更新时间戳为0
         }
         num--;
     }
-    LOG_D("Device %d is Not Found\r\n",Device_ID);
+    LOG_E("Device %d is Not Found\r\n",Device_ID);
     return RT_ERROR;
 }
 void Update_All_Time(void)
@@ -384,10 +450,15 @@ void Detect_All_Time(void)
             {
                 LOG_D("Door is Offline\r\n");
             }
+            else if(num == Global_Device.GatewayNum)
+            {
+                LOG_D("Gateway is Offline\r\n");
+            }
             else
             {
                 WarnFlag = 1;
                 LOG_D("Device ID %ld is Offline\r\n",Global_Device.ID[num]);
+                WarUpload_GW(Global_Device.ID[num],4,1);//Offline报警
             }
         }
         num--;
@@ -426,6 +497,10 @@ uint8_t Flash_GetRssi(uint32_t Device_ID)//查询内存中的RSSI
 }
 void Offline_React(uint32_t ID)
 {
+    if(GetNowStatus()!=Offline)
+    {
+        return;
+    }
     if(Flash_Get_Key_Valid(ID)!=RT_EOK)
     {
         return;
@@ -443,6 +518,10 @@ void Offline_React(uint32_t ID)
             {
                 LOG_D("Door is Offline\r\n");
             }
+            else if(num == Global_Device.GatewayNum)
+            {
+                LOG_D("Gateway is Offline\r\n");
+            }
             else
             {
                 WarnFlag = 1;
@@ -453,6 +532,7 @@ void Offline_React(uint32_t ID)
     }
     if(WarnFlag==0)
     {
+        WarUpload_GW(Global_Device.ID[num],4,0);//Offline报警
         OfflineDisableWarning();
     }
     LOG_D("Detect_All_Time OK\r\n");
@@ -473,6 +553,7 @@ void LoadDevice2Memory(void)//数据载入到内存中
         LOG_D("GOT Rssi is %ld\r\n",Global_Device.Rssi[i]);
     }
     Global_Device.DoorNum = Flash_Get_Key_Value(88888888);
+    Global_Device.GatewayNum = Flash_Get_Key_Value(88887777);
     Global_Device.LastFlag = Flash_Get_Moto_Flag();
 }
 MSH_CMD_EXPORT(LoadDevice2Memory,LoadDevice2Memory);
@@ -480,8 +561,10 @@ void DeleteAllDevice(void)//数据载入到内存中
 {
     LOG_D("Before Delete num is %d",Global_Device.Num);
     memset(&Global_Device,0,sizeof(Global_Device));
-    Flash_LearnNums_Change(0);
-    Flash_Key_Change(88888888,0);//DoorID
-    Flash_Moto_Change(0);//LastFlag
+    ef_env_set_default();
+//    Flash_LearnNums_Change(0);
+//    Flash_Key_Change(88888888,0);//DoorID
+//    Flash_Key_Change(88887777,0);//GatewayID
+//    Flash_Moto_Change(0);//LastFlag
     LOG_D("After Delete num is %d",Global_Device.Num);
 }

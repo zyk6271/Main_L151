@@ -18,12 +18,13 @@
 #include "work.h"
 #include "string.h"
 #include "rthw.h"
+#include "gateway.h"
 
 #define DBG_TAG "status"
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
-extern enum Device_Status Now_Status;
+enum Device_Status Now_Status=Close;
 extern uint8_t ValveStatus;
 
 WariningEvent NowStatusEvent;
@@ -123,10 +124,6 @@ void MasterWaterAlarmWarning(void *parameter)
     Now_Status = MasterWaterAlarmActive;
     LOG_I("MasterWaterAlarmWarning\r\n");
 }
-void MasterAlarmWaterDisable(void)
-{
-
-}
 void NTCWarningEvent_Callback(void *parameter)
 {
     Moto_Close(NormalOff);
@@ -212,6 +209,10 @@ uint8_t Detect_Learn(void)
 }
 void BackToNormal(void)
 {
+    if(Now_Status!=Open && Now_Status!=Close && Now_Status!=Learn)
+    {
+        WarUpload_GW(0,7,0);//消警
+    }
     WaterScan_Clear();
     beep_stop();
     led_Stop(0);
@@ -224,4 +225,7 @@ void BackToNormal(void)
         Now_Status = Close;
     }
 }
-
+uint8_t GetNowStatus(void)
+{
+    return Now_Status;
+}

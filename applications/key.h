@@ -9,21 +9,6 @@
  */
 #ifndef APPLICATIONS_KEY_H_
 #define APPLICATIONS_KEY_H_
-enum Device_Status
-{
-    Close=0,
-    Open,
-    SlaverLowPower,
-    SlaverUltraLowPower,
-    SlaverWaterAlarmActive,
-    MasterLostPeak,
-    MasterWaterAlarmActive,
-    MasterWaterAlarmDeActive,
-    NTCWarning,
-    MotoFail,
-    Learn,
-    Offline
-};
 void Key_Reponse(void);
 
 

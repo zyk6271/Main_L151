@@ -13,15 +13,17 @@
 #include "led.h"
 #include "moto.h"
 #include "Radio_Decoder.h"
+#include "Radio_encoder.h"
 #include "work.h"
 #include "status.h"
 #include "flashwork.h"
 #include "rthw.h"
 #include "status.h"
 #include "device.h"
+#include "gateway.h"
 
 #define DBG_TAG "key"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 rt_thread_t key_response_t = RT_NULL;
@@ -43,7 +45,7 @@ extern rt_sem_t K0_K1_Long_Sem;
 extern uint8_t Learn_Flag;
 extern uint8_t Last_Close_Flag;
 
-enum Device_Status Now_Status=Close;
+extern enum Device_Status Now_Status;
 void Key_Reponse_Callback(void *parameter)
 {
     Key_SemInit();
@@ -149,7 +151,6 @@ void Key_Reponse_Callback(void *parameter)
                 key_down();
                 Now_Status = Close;
                 Warning_Disable();
-                MasterAlarmWaterDisable();
                 LOG_D("MasterWaterAlarmActive With OFF\r\n");
                 break;
             case Learn:
@@ -169,6 +170,7 @@ void Key_Reponse_Callback(void *parameter)
         else if(K0_K1_Status==RT_EOK)
         {
             DeleteAllDevice();
+            GatewaySyncEnqueue(5,0,0,0);
             beep_start(0,8);//蜂鸣器5次
             rt_thread_mdelay(2500);
             rt_hw_cpu_reset();
