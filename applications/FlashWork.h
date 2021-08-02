@@ -51,7 +51,7 @@ uint8_t Device_RssiGet(uint32_t Device_ID);
 void Device_RssiChange(uint32_t Device_ID,uint8_t value);
 uint8_t Device_BatGet(uint32_t Device_ID);
 void Device_BatChange(uint32_t Device_ID,uint8_t value);
-uint8_t Delete_Device(uint32_t Device_ID);
+uint8_t Delete_Device(uint32_t device_id);
 void Flash_Moto1Total_Add(void);
 void Flash_Moto1Success_Add(void);
 void Flash_Moto2Total_Add(void);

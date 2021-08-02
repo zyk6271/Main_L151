@@ -48,7 +48,7 @@ void Moto_InitOpen(uint8_t ActFlag)
         beep_start(0,7);//蜂鸣器三下
         LOG_D("No permissions to Open\r\n");
     }
-    ControlUpload_GW(0,1,ValveStatus);
+    //ControlUpload_GW(0,1,ValveStatus);
 }
 void Moto_Open(uint8_t ActFlag)
 {

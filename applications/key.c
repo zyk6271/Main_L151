@@ -46,6 +46,20 @@ extern uint8_t Learn_Flag;
 extern uint8_t Last_Close_Flag;
 
 extern enum Device_Status Now_Status;
+void release_k0(void)
+{
+    if(K0_Sem != RT_NULL)
+    {
+        rt_sem_release(K0_Sem);
+    }
+}
+void release_k1(void)
+{
+    if(K1_Sem != RT_NULL)
+    {
+        rt_sem_release(K1_Sem);
+    }
+}
 void Key_Reponse_Callback(void *parameter)
 {
     Key_SemInit();
@@ -170,9 +184,8 @@ void Key_Reponse_Callback(void *parameter)
         else if(K0_K1_Status==RT_EOK)
         {
             DeleteAllDevice();
-            GatewaySyncEnqueue(5,0,0,0);
             beep_start(0,8);//蜂鸣器5次
-            rt_thread_mdelay(2500);
+            rt_thread_mdelay(3000);
             rt_hw_cpu_reset();
         }
         else if(K0_Long_Status==RT_EOK)//ON

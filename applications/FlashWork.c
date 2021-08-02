@@ -345,10 +345,21 @@ uint32_t GetGatewayID(void)
         return 0;
     }
 }
-uint8_t Delete_Device(uint32_t Num)
+uint8_t Delete_Device(uint32_t device_id)
 {
-    Flash_Key_Change(Num,0);
-    return RT_EOK;
+    uint16_t num = Global_Device.Num;
+    if(!num)return RT_ERROR;
+    while(num)
+    {
+        if(Global_Device.ID[num] == device_id)
+        {
+            Global_Device.ID[num]=0;
+            Flash_Key_Change(num,0);
+            return RT_EOK;
+        }
+        num--;
+    }
+    return RT_ERROR;
 }
 uint8_t Update_Device_Bat(uint32_t Device_ID,uint8_t bat)//更新电量
 {
@@ -501,11 +512,6 @@ void Offline_React(uint32_t ID)
     {
         return;
     }
-    if(Flash_Get_Key_Valid(ID)!=RT_EOK)
-    {
-        return;
-    }
-    Clear_Device_Time(ID);
     uint16_t num = Global_Device.Num;
     uint8_t WarnFlag = 0;
     if(!num)return;
@@ -532,7 +538,7 @@ void Offline_React(uint32_t ID)
     }
     if(WarnFlag==0)
     {
-        WarUpload_GW(Global_Device.ID[num],4,0);//Offline报警
+        WarUpload_GW(ID,4,0);//Offline报警
         OfflineDisableWarning();
     }
     LOG_D("Detect_All_Time OK\r\n");
@@ -542,7 +548,7 @@ void LoadDevice2Memory(void)//数据载入到内存中
 {
     memset(&Global_Device,0,sizeof(Global_Device));
     Global_Device.Num = Flash_Get_Learn_Nums();
-    LOG_D("num is %d",Global_Device.Num);
+
     for(uint8_t i=1;i<=Global_Device.Num;i++)
     {
         Global_Device.ID[i] = Flash_Get_Key_Value(i);
@@ -555,10 +561,12 @@ void LoadDevice2Memory(void)//数据载入到内存中
     Global_Device.DoorNum = Flash_Get_Key_Value(88888888);
     Global_Device.GatewayNum = Flash_Get_Key_Value(88887777);
     Global_Device.LastFlag = Flash_Get_Moto_Flag();
+    LOG_I("Num is %d",Global_Device.Num);
 }
 MSH_CMD_EXPORT(LoadDevice2Memory,LoadDevice2Memory);
 void DeleteAllDevice(void)//数据载入到内存中
 {
+    Gateway_RemoteDelete();
     LOG_D("Before Delete num is %d",Global_Device.Num);
     memset(&Global_Device,0,sizeof(Global_Device));
     ef_env_set_default();

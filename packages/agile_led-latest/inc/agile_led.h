@@ -15,6 +15,8 @@ struct agile_led
     uint8_t active;                                  // 激活标志
     rt_base_t pin;                                   // 控制引脚
     rt_base_t active_logic;                          // 有效电平(PIN_HIGH/PIN_LOW)
+    rt_base_t now_logic;                             // 当前电平(PIN_HIGH/PIN_LOW)
+    rt_base_t save_logic;                            // 存储电平(PIN_HIGH/PIN_LOW)
     uint32_t *light_arr;                             // 闪烁数组
     uint32_t arr_num;                                // 数组元素数目
     uint32_t arr_index;                              // 数组索引
@@ -23,7 +25,8 @@ struct agile_led
     rt_tick_t tick_timeout;                          // 超时时间
     void (*compelete)(agile_led_t *led);             // 操作完成回调函数
     rt_slist_t slist;                                // 单向链表节点
-    rt_base_t pin_backup;                              // 单向链表节点
+    rt_base_t pin_backup;                            // 备份控制引脚
+
 };
 
 // 创建led对象

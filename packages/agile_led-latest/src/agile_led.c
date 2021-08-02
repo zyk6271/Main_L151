@@ -215,6 +215,7 @@ int agile_led_stop(agile_led_t *led)
     led->slist.next = RT_NULL;
     led->active = 0;
     rt_mutex_release(lock_mtx);
+    rt_pin_write(led->pin, !led->active_logic);
     return RT_EOK;
 }
 
@@ -224,6 +225,7 @@ int agile_led_pause(agile_led_t *led)
     rt_mutex_take(lock_mtx, RT_WAITING_FOREVER);
     led->pin_backup = led->pin;
     led->pin = 0;
+    led->save_logic = led->now_logic;
     rt_mutex_release(lock_mtx);
     return RT_EOK;
 }
@@ -233,6 +235,14 @@ int agile_led_resume(agile_led_t *led)
     RT_ASSERT(led);
     rt_mutex_take(lock_mtx, RT_WAITING_FOREVER);
     led->pin = led->pin_backup;
+    if(led->save_logic==led->active_logic)
+    {
+        agile_led_on(led);
+    }
+    else
+    {
+        agile_led_off(led);
+    }
     rt_mutex_release(lock_mtx);
     return RT_EOK;
 }
@@ -314,6 +324,7 @@ void agile_led_toggle(agile_led_t *led)
 void agile_led_on(agile_led_t *led)
 {
     RT_ASSERT(led);
+    led->now_logic = led->active_logic;
     rt_pin_write(led->pin, led->active_logic);
 }
 
@@ -327,6 +338,7 @@ void agile_led_on(agile_led_t *led)
 void agile_led_off(agile_led_t *led)
 {
     RT_ASSERT(led);
+    led->now_logic = !led->active_logic;
     rt_pin_write(led->pin, !led->active_logic);
 }
 

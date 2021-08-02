@@ -37,7 +37,6 @@ int main(void)
     flash_Init();
     easyflash_init();
     LoadDevice2Memory();
-    Gateway_Init();
     Moto_Init();
     //wdt_sample();
     Delay_Timer_Init();
@@ -45,6 +44,7 @@ int main(void)
     WarningInit();
     WaterScan_Init();
     Radio_Task_Init();
+    Gateway_Init();
     ADC_Init();
     button_Init();
     while (1)

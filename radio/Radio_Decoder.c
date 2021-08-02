@@ -34,6 +34,7 @@ typedef struct
 {
     long Target_ID;
     long From_ID;
+    long Device_ID;
     int Counter;
     int Command ;
     int Data;
@@ -42,6 +43,7 @@ typedef struct
 
 uint8_t Learn_Flag=0;
 uint8_t Last_Close_Flag=0;
+uint8_t Gw_Flag = 0;
 
 extern rt_timer_t Learn_Timer;
 extern uint8_t ValveStatus ;
@@ -109,22 +111,27 @@ void Start_Learn(void)
         LOG_D("Now in Warining Mode\r\n");
     }
 }
+
 void Stop_Learn(void)
 {
     Learn_Flag = 0;
-    rt_timer_stop(Learn_Timer);
     Warning_Disable();//消警
     beep_start(0, 6);
     //if(ValveStatus)Moto_Open(NormalOpen);else Moto_Close(NormalOff);
     LOG_D("Learn timer is stop\r\n");
+    if(Gw_Flag)
+    {
+        Gw_Flag = 0;
+        Gateway_Sync();
+    }
 }
 void Device_Learn(Message buf)
 {
-    switch(buf.Data)
+    if(buf.Command == 3)
     {
-    case 1:
-        if(Learn_Flag)
+        switch(buf.Data)
         {
+        case 1:
             RadioEnqueue(0,buf.From_ID,buf.Counter,3,1);
             if(Check_Valid(buf.From_ID))//如果数据库不存在该值
             {
@@ -142,7 +149,6 @@ void Device_Learn(Message buf)
                 else if(buf.From_ID>=40000000 && buf.From_ID<50000000)
                 {
                     Add_GatewayDevice(buf.From_ID);//向数据库写入
-                    Gateway_Init();
                     LOG_I("Gateway Write to Flash With ID %d\r\n",buf.From_ID);
                 }
             }
@@ -150,39 +156,29 @@ void Device_Learn(Message buf)
             {
                 LOG_I("Include This Device，Send Ack\r\n");
             }
-        }
-        else LOG_W("Not in Learn Mode\r\n");
-        break;
-    case 2:
-        if(Learn_Flag)
-        {
+            break;
+        case 2:
             if(Check_Valid(buf.From_ID))//如果数据库不存在该值
             {
                 LOG_W("Ack Not Include This Device\r\n");
             }
             else//存在该值
             {
+                if(buf.From_ID>=40000000 && buf.From_ID<50000000)
+                {
+                    Gateway_Reload();
+                }
                 LOG_D("Include This Device，Send Confirmed\r\n");
                 just_ring();    //响一声
                 Relearn();
                 RadioEnqueue(0,buf.From_ID,buf.Counter,3,2);
                 GatewaySyncEnqueue(3,buf.From_ID,0,0);
             }
+            break;
         }
-        else LOG_W("Not in Learn Mode\r\n");
-        break;
-    case 3:
-        if(!Check_Valid(buf.From_ID))//如果数据库不存在该值
-        {
-            Start_Learn();
-            RadioEnqueue(0,buf.From_ID,buf.Counter,3,3);
-        }
-        else LOG_W("Unknown Device Want to Learn\r\n");
-        break;
+        rt_timer_start(Learn_Timer);
     }
-    rt_timer_start(Learn_Timer);
 }
-
 void DataSolve(Message buf)
 {
     switch(buf.Command)
@@ -216,18 +212,18 @@ void DataSolve(Message buf)
         {
             Update_Device_Bat(buf.From_ID,buf.Data);//写入电量
             RadioEnqueue(0,buf.From_ID,buf.Counter,2,0);
+            WarUpload_GW(buf.From_ID,6,0);//终端低电量报警
         }
         LOG_D("Handshake With %ld\r\n",buf.From_ID);
         break;
     case 3://学习
-        if(Learn_Flag||buf.Data==3)
+        if(buf.Data==3)
         {
-            LOG_D("Learn\r\n");
-            Device_Learn(buf);
-        }
-        else
-        {
-            LOG_D("LearnFlag is Zero\r\n");
+            if(!Check_Valid(buf.From_ID))//如果数据库不存在该值
+            {
+                Start_Learn();
+                RadioEnqueue(0,buf.From_ID,buf.Counter,3,3);
+            }
         }
         break;
     case 4://报警
@@ -301,10 +297,7 @@ void DataSolve(Message buf)
         break;
     case 8://延迟
         LOG_I("Delay Open %d From %ld\r\n",buf.Data,buf.From_ID);
-        if(buf.From_ID==GetDoorID())
-        {
-            RadioEnqueue(0,buf.From_ID,buf.Counter,8,buf.Data);
-        }
+        RadioEnqueue(0,buf.From_ID,buf.Counter,8,buf.Data);
         if(buf.Data)
         {
             Delay_Timer_Close();
@@ -316,30 +309,6 @@ void DataSolve(Message buf)
             ControlUpload_GW(buf.From_ID,3,1);
         }
         break;
-    case 9://网关开
-        if(buf.Data)
-        {
-            LOG_I("Gateway Open\r\n");
-            just_ring();
-            Moto_Open(OtherOpen);
-            ControlUpload_GW(buf.From_ID,2,ValveStatus);
-        }
-        else
-        {
-            LOG_I("Gateway Close\r\n");
-            just_ring();
-            Moto_Close(OtherOff);
-            ControlUpload_GW(buf.From_ID,2,ValveStatus);
-        }
-        break;
-    case 10://请求心跳
-        LOG_I("Request Heart\r\n");
-        ControlUpload_GW(0,4,0);
-        break;
-    case 11://请求同步
-        LOG_I("Request Sync\r\n");
-        Gateway_Sync();
-        break;
     }
     if(buf.Counter==0)
     {
@@ -349,30 +318,121 @@ void DataSolve(Message buf)
     {
         BackNormalPower();
     }
+    Clear_Device_Time(buf.From_ID);
     Offline_React(buf.From_ID);
+}
+void GatewayDataSolve(uint8_t *rx_buffer,uint8_t rx_len)
+{
+    Message Rx_message;
+    if(rx_buffer[rx_len-1]=='G')
+    {
+        LOG_D("GatewayDataSolve verify ok\r\n");
+        sscanf((const char *)&rx_buffer[2],"{%ld,%ld,%ld,%d,%d,%d}",&Rx_message.Target_ID,&Rx_message.From_ID,&Rx_message.Device_ID,&Rx_message.Counter,&Rx_message.Command,&Rx_message.Data);
+        if(Rx_message.Target_ID != Self_Id)return;
+        if(Check_Valid(Rx_message.From_ID) == RT_EOK)
+        {
+            Heart_Refresh();
+            switch(Rx_message.Command)
+            {
+            case 1://延迟
+                just_ring();
+                LOG_I("Delay Open %d From %ld\r\n",Rx_message.Data,Rx_message.From_ID);
+                if(Rx_message.Data)
+                {
+                    ControlUpload_GW(0,3,1);
+                    Delay_Timer_Open();
+                }
+                else
+                {
+                    Delay_Timer_Close();
+                }
+                break;
+            case 2://网关开
+                just_ring();
+                if(Rx_message.Data)
+                {
+                    ControlUpload_GW(Rx_message.From_ID,2,1);
+                    Remote_Open();
+                    ControlUpload_GW(Rx_message.From_ID,2,ValveStatus);
+                }
+                else
+                {
+                    ControlUpload_GW(Rx_message.From_ID,2,0);
+                    Remote_Close();
+                    ControlUpload_GW(Rx_message.From_ID,2,ValveStatus);
+                }
+                break;
+            case 3://请求心跳
+                LOG_I("Request Heart\r\n");
+                ControlUpload_GW(0,4,0);
+                break;
+            case 4://请求同步
+                LOG_I("Request Sync\r\n");
+                Gateway_Sync();
+                break;
+            case 5://请求同步
+                LOG_I("Ack Reponse\r\n");
+                break;
+            case 6://删除指定设备
+                LOG_I("Delete Device %ld\r\n",Rx_message.Device_ID);
+                Delete_Device(Rx_message.Device_ID);
+                break;
+            }
+        }
+        else
+         {
+             LOG_W("GatewayControlSolve ID Error\r\n");
+         }
+    }
+    else
+    {
+        LOG_W("GatewayControlSolve verify Fail\r\n");
+    }
 }
 void Rx_Done_Callback(uint8_t *rx_buffer,uint8_t rx_len,int8_t rssi)
 {
     Message Rx_message;
-    if(rx_buffer[rx_len-1]==0x0A&&rx_buffer[rx_len-2]==0x0D)
+    switch(rx_buffer[1])
     {
-        LOG_D("Rx verify ok\r\n");
-        rx_buffer[rx_len-1]=0;
-        rx_buffer[rx_len-2]=0;
-        sscanf((const char *)&rx_buffer[1],"{%ld,%ld,%d,%d,%d}",&Rx_message.Target_ID,&Rx_message.From_ID,&Rx_message.Counter,&Rx_message.Command,&Rx_message.Data);
-        if(Check_Valid(Rx_message.From_ID)!=RT_EOK && Learn_Flag != RT_TRUE)
+    case '{':
+        if(rx_buffer[rx_len-1]==0x0A&&rx_buffer[rx_len-2]==0x0D)
         {
-            LOG_D("Device_ID %ld is not include\r\n",Rx_message.From_ID);
-            return;
+            LOG_D("Rx verify ok\r\n");
+            rx_buffer[rx_len-1]=0;
+            rx_buffer[rx_len-2]=0;
+            sscanf((const char *)&rx_buffer[1],"{%ld,%ld,%d,%d,%d}",&Rx_message.Target_ID,&Rx_message.From_ID,&Rx_message.Counter,&Rx_message.Command,&Rx_message.Data);
+            if(Rx_message.Target_ID==Self_Id ||Rx_message.Target_ID==99999999)
+            {
+                Update_Device_Rssi(Rx_message.From_ID,rssi);
+                if(Learn_Flag)
+                {
+                    Device_Learn(Rx_message);
+                }
+                else
+                {
+                    if(Rx_message.From_ID==GetGatewayID())
+                    {
+                        wifi_led(3);
+                    }
+                    if(Flash_Get_Key_Valid(Rx_message.From_ID)==RT_EOK)
+                    {
+                        DataSolve(Rx_message);
+                    }
+                    else
+                    {
+                        LOG_I("Device_ID %ld is not include\r\n",Rx_message.From_ID);
+                    }
+                }
+
+            }
         }
-        if(Rx_message.Target_ID==Self_Id ||Rx_message.Target_ID==99999999)
+        else
         {
-            Update_Device_Rssi(Rx_message.From_ID,rssi);
-            DataSolve(Rx_message);
+            LOG_D("Rx verify Fail\r\n");
         }
-    }
-    else
-    {
-        LOG_D("Rx verify Fail\r\n");
+        break;
+    case 'G':
+        GatewayDataSolve(rx_buffer,rx_len);
+        break;
     }
 }

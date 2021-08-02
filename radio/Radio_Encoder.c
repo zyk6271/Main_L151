@@ -9,14 +9,15 @@
  */
 #include <rtthread.h>
 #include <rtdevice.h>
-#include "drv_spi.h"
-#include <string.h>
-#include "AX5043.h"
-#include "Radio_Config.h"
-#include "Radio.h"
-#include "Radio_Encoder.h"
-#include "led.h"
 #include <stdio.h>
+#include <string.h>
+#include "led.h"
+#include "drv_spi.h"
+#include "AX5043.h"
+#include "Radio.h"
+#include "Radio_Config.h"
+#include "Radio_Encoder.h"
+#include "flashwork.h"
 
 #define DBG_TAG "radio_encoder"
 #define DBG_LVL DBG_INFO
@@ -39,7 +40,7 @@ Radio_Queue Main_Queue={0};
 
 extern uint32_t Gateway_ID;
 uint32_t Self_Id = 0;
-uint32_t Self_Default_Id = 10000088;
+uint32_t Self_Default_Id = 10000080;
 uint32_t Self_Counter = 0;
 
 void RadioSend(uint32_t Taget_Id,uint8_t counter,uint8_t Command,uint8_t Data)
@@ -155,22 +156,25 @@ void RadioDequeue(void *paramaeter)
             case 0:
                 RadioSend(Main_Queue.Taget_Id[Main_Queue.NowNum],Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
                 LOG_I("Normal Send With Now Num %d,Target Num is %d,Target_Id %ld,counter %d,command %d,data %d\r\n",Main_Queue.NowNum,Main_Queue.TargetNum,Main_Queue.Taget_Id[Main_Queue.NowNum],Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
-                rt_thread_mdelay(150);
+                rt_thread_mdelay(300);
                 break;
             case 1:
                 GatewaySyncSend(Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Taget_Id[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
-                LOG_I("GatewaySync With Now Num %d,Type is %d,Target Num is %d,Target_Id %ld,rssi %d,bat %d\r\n",Main_Queue.NowNum,Main_Queue.TargetNum,Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Taget_Id[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
-                rt_thread_mdelay(150);
+                LOG_I("GatewaySync With Now Num %d,Type is %d,Target Num is %d,Target_Id %ld,rssi %d,bat %d\r\n",Main_Queue.NowNum,Main_Queue.TargetNum,Main_Queue.counter[Main_Queue.NowNum],Gateway_ID,Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
+                rt_thread_mdelay(300);
+                wifi_led(3);
                 break;
             case 2:
                 GatewayWarningSend(Main_Queue.Taget_Id[Main_Queue.NowNum],Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
-                LOG_I("GatewayWarningSend With Now Num %d,Target Num is %d,Target_Id %ld,Rssi is %d,warn_id %d,value %d\r\n",Main_Queue.NowNum,Main_Queue.TargetNum,Main_Queue.Taget_Id[Main_Queue.NowNum],Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
-                rt_thread_mdelay(150);
+                LOG_I("GatewayWarningSend With Now Num %d,Target Num is %d,Target_Id %ld,Rssi is %d,warn_id %d,value %d\r\n",Main_Queue.NowNum,Main_Queue.TargetNum,Gateway_ID,Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
+                rt_thread_mdelay(300);
+                wifi_led(3);
                 break;
             case 3:
                 GatewayControlSend(Main_Queue.Taget_Id[Main_Queue.NowNum],Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
-                LOG_I("GatewayControl With Now Num %d,Target Num is %d,Target_Id %ld,Rssi is %d,control %d,value %d\r\n",Main_Queue.NowNum,Main_Queue.TargetNum,Main_Queue.Taget_Id[Main_Queue.NowNum],Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
-                rt_thread_mdelay(150);
+                LOG_I("GatewayControl With Now Num %d,Target Num is %d,Target_Id %ld,Rssi is %d,control %d,value %d\r\n",Main_Queue.NowNum,Main_Queue.TargetNum,Gateway_ID,Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
+                rt_thread_mdelay(300);
+                wifi_led(3);
                 break;
             default:break;
             }

@@ -45,23 +45,6 @@ void RTC_Timer_Entry(void *parameter)
         }
     }
 }
-void RTC_TimeShow(void)
-{
-  RTC_DateTypeDef sdatestructureget;
-  RTC_TimeTypeDef stimestructureget;
-  while(1)
-  {
-      /* Get the RTC current Time */
-      HAL_RTC_GetTime(&RtcHandle, &stimestructureget, RTC_FORMAT_BIN);
-      /* Get the RTC current Date */
-      HAL_RTC_GetDate(&RtcHandle, &sdatestructureget, RTC_FORMAT_BIN);
-      /* Display time Format : hh:mm:ss */
-      LOG_D("WeekDay:%02d, Month:%02d, Date:%02d, Year:%02d\r\n\r\n",sdatestructureget.WeekDay, sdatestructureget.Month, sdatestructureget.Date,sdatestructureget.Year);
-      LOG_D("Hours:%02d, Minutes:%02d, Seconds:%02d \r\n\r\n",stimestructureget.Hours, stimestructureget.Minutes, stimestructureget.Seconds);
-      rt_thread_mdelay(1000);
-  }
-}
-MSH_CMD_EXPORT(RTC_TimeShow,RTC_TimeShow);
 void RTC_AlarmConfig(void)
 {
     RTC_DateTypeDef  sdatestructure;
@@ -149,7 +132,6 @@ void RTC_Init(void)
     RTC_AlarmConfig();
     LOG_D("RTC Init Success\r\n");
 }
-MSH_CMD_EXPORT(RTC_Init,RTC_Init);
 void RTC_Alarm_IRQHandler(void)
 {
     HAL_RTC_AlarmIRQHandler(&RtcHandle);

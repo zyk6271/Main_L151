@@ -9,7 +9,9 @@
  */
 #ifndef APPLICATIONS_KEY_H_
 #define APPLICATIONS_KEY_H_
-void Key_Reponse(void);
 
+void Key_Reponse(void);
+void release_k0(void);
+void release_k1(void);
 
 #endif /* APPLICATIONS_KEY_H_ */

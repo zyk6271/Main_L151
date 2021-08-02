@@ -142,15 +142,39 @@ void Delay_Timer_Init(void)
     Delay_Timer = rt_timer_create("Delay_Timer", Delay_Timer_Callback, RT_NULL, 4*60*60*1000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_ONE_SHOT);
 }
 MSH_CMD_EXPORT(Delay_Timer_Init,Delay_Timer_Init);
+void Remote_Open(void)
+{
+    if(Now_Status==Close || Now_Status==Open)
+    {
+        LOG_D("Remote_Open\r\n");
+        Moto_Open(OtherOpen);
+    }
+    else {
+        LOG_I("Remote_Open Fail,Now is %d",Now_Status);
+    }
+}
+void Remote_Close(void)
+{
+    LOG_D("Remote_Close\r\n");
+    Moto_Close(OtherOff);
+}
 void Delay_Timer_Open(void)
 {
-    LOG_D("Delay_Timer is Open\r\n");
-    rt_timer_start(Delay_Timer);
+    if(Now_Status==Close || Now_Status==Open)
+    {
+        LOG_D("Delay_Timer is Open\r\n");
+        ControlUpload_GW(0,3,1);
+        rt_timer_start(Delay_Timer);
+    }
+    else {
+        ControlUpload_GW(0,3,0);
+        LOG_I("Delay_Timer_Open Fail,Now is %d",Now_Status);
+    }
 }
-MSH_CMD_EXPORT(Delay_Timer_Open,Delay_Timer_Open);
 void Delay_Timer_Close(void)
 {
     LOG_D("Delay_Timer is Close\r\n");
+    ControlUpload_GW(0,3,0);
     rt_timer_stop(Delay_Timer);
 }
 void OfflineWarning(void *parameter)

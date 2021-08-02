@@ -62,9 +62,12 @@ void K0_LongSem_Release(void *parameter)
     {
         if(K0_Long_Sem_Counter>6)
         {
-            K0_OnceFlag=1;
-            rt_sem_release(K0_Long_Sem);
-            LOG_D("K0 is Long\r\n");
+            if(K1_Long_Sem_Counter == 0)
+            {
+                K0_OnceFlag=1;
+                rt_sem_release(K0_Long_Sem);
+                LOG_D("K0 is Long\r\n");
+            }
         }
         else
         {
