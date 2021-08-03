@@ -63,7 +63,7 @@ void Moto_Open(uint8_t ActFlag)
         Flash_Moto_Change(ActFlag);
         if(ActFlag==NormalOpen)
         {
-            ControlUpload_GW(0,1,1);
+            ControlUpload_GW(1,0,1,1);
         }
         rt_pin_write(Turn1,1);
         rt_pin_write(Turn2,1);
@@ -87,7 +87,7 @@ void Moto_Close(uint8_t ActFlag)
         Flash_Moto_Change(ActFlag);
         if(ActFlag==NormalOff)
         {
-            ControlUpload_GW(0,1,0);
+            ControlUpload_GW(1,0,1,0);
         }
         rt_pin_write(Turn1,0);
         rt_pin_write(Turn2,0);
@@ -130,11 +130,11 @@ void Turn1_Timer_Callback(void *parameter)
     {
         LOG_E("Moto1 is Fail\r\n");
         Warning_Enable_Num(6);
-        WarUpload_GW(0,2,1);//MOTO报警
+        WarUpload_GW(1,0,2,1);//MOTO报警
     }
     else
     {
-        WarUpload_GW(0,2,0);//MOTO报警
+        WarUpload_GW(1,0,2,0);//MOTO报警
         LOG_D("Moto1 is Good\r\n");
     }
 }
@@ -153,11 +153,11 @@ void Turn2_Timer_Callback(void *parameter)
     {
         LOG_E("Moto2 is Fail\r\n");
         Warning_Enable_Num(6);
-        WarUpload_GW(0,2,1);//MOTO报警
+        WarUpload_GW(1,0,2,1);//MOTO报警
     }
     else
     {
-        WarUpload_GW(0,2,0);//MOTO报警
+        WarUpload_GW(1,0,2,0);//MOTO报警
         LOG_D("Moto2 is Good\r\n");
     }
 }

@@ -27,6 +27,9 @@ typedef struct
 {
     uint8_t NowNum;
     uint8_t TargetNum;
+    uint8_t SendNum;
+    uint8_t ack[30];
+    uint8_t trials[30];
     uint8_t type[30];
     uint32_t Taget_Id[30];
     uint8_t counter[30];
@@ -35,12 +38,12 @@ typedef struct
 }Radio_Queue;
 
 rt_thread_t Radio_QueueTask = RT_NULL;
-rt_timer_t FreqRefresh = RT_NULL;
+rt_timer_t AckCheck_t = RT_NULL;
 Radio_Queue Main_Queue={0};
 
 extern uint32_t Gateway_ID;
 uint32_t Self_Id = 0;
-uint32_t Self_Default_Id = 10000080;
+uint32_t Self_Default_Id = 10000090;
 uint32_t Self_Counter = 0;
 
 void RadioSend(uint32_t Taget_Id,uint8_t counter,uint8_t Command,uint8_t Data)
@@ -68,55 +71,58 @@ void RadioSend(uint32_t Taget_Id,uint8_t counter,uint8_t Command,uint8_t Data)
     Normal_send(buf,32);
 }
 
-void GatewaySyncEnqueue(uint8_t type,uint32_t device_id,uint8_t rssi,uint8_t bat)
+void GatewaySyncEnqueue(uint8_t ack,uint8_t type,uint32_t device_id,uint8_t rssi,uint8_t bat)
 {
-    RadioEnqueue(1,device_id,type,rssi,bat);
+    RadioEnqueue(ack,2,device_id,type,rssi,bat);
 }
-void GatewaySyncSend(uint8_t type,uint32_t device_id,uint8_t rssi,uint8_t bat)
+void GatewaySyncSend(uint8_t ack,uint8_t type,uint32_t device_id,uint8_t rssi,uint8_t bat)
 {
     uint8_t buf[50]={0};
-    sprintf((char *)(&buf),"A{%02d,%08ld,%08ld,%08ld,%03d,%02d}A",\
+    sprintf((char *)(&buf),"A{%02d,%02d,%08ld,%08ld,%08ld,%03d,%02d}A",\
+                                            ack,\
                                             type,\
                                             Gateway_ID,\
                                             Self_Id,\
                                             device_id,\
                                             rssi,\
                                             bat);
-    Normal_send(buf,40);
+    Normal_send(buf,43);
 }
-void GatewayWarningEnqueue(uint32_t device_id,uint8_t rssi,uint8_t warn_id,uint8_t value)
+void GatewayWarningEnqueue(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t warn_id,uint8_t value)
 {
-    RadioEnqueue(2,device_id,rssi,warn_id,value);
+    RadioEnqueue(ack,3,device_id,rssi,warn_id,value);
 }
-void GatewayWarningSend(uint32_t device_id,uint8_t rssi,uint8_t warn_id,uint8_t value)
+void GatewayWarningSend(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t warn_id,uint8_t value)
 {
     uint8_t buf[50]={0};
-    sprintf((char *)(&buf),"B{%08ld,%08ld,%08ld,%03d,%03d,%02d}B",\
+    sprintf((char *)(&buf),"B{%02d,%08ld,%08ld,%08ld,%03d,%03d,%02d}B",\
+                                            ack,\
                                             Gateway_ID,\
                                             Self_Id,\
                                             device_id,\
                                             rssi,\
                                             warn_id,\
                                             value);
-    Normal_send(buf,41);
+    Normal_send(buf,44);
 }
-void GatewayControlEnqueue(uint32_t device_id,uint8_t rssi,uint8_t control,uint8_t value)
+void GatewayControlEnqueue(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t control,uint8_t value)
 {
-    RadioEnqueue(3,device_id,rssi,control,value);
+    RadioEnqueue(ack,4,device_id,rssi,control,value);
 }
-void GatewayControlSend(uint32_t device_id,uint8_t rssi,uint8_t control,uint8_t value)
+void GatewayControlSend(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t control,uint8_t value)
 {
     uint8_t buf[50]={0};
-    sprintf((char *)(&buf),"C{%08ld,%08ld,%08ld,%03d,%03d,%02d}C",\
+    sprintf((char *)(&buf),"C{%02d,%08ld,%08ld,%08ld,%03d,%03d,%02d}C",\
+                                            ack,\
                                             Gateway_ID,\
                                             Self_Id,\
                                             device_id,\
                                             rssi,\
                                             control,\
                                             value);
-    Normal_send(buf,41);
+    Normal_send(buf,44);
 }
-void RadioEnqueue(uint32_t type,uint32_t Taget_Id,uint8_t counter,uint8_t Command,uint8_t Data)
+void RadioEnqueue(uint8_t ack,uint32_t type,uint32_t Taget_Id,uint8_t counter,uint8_t Command,uint8_t Data)
 {
     uint8_t NumTemp = Main_Queue.TargetNum;
     if(NumTemp<20)
@@ -129,6 +135,7 @@ void RadioEnqueue(uint32_t type,uint32_t Taget_Id,uint8_t counter,uint8_t Comman
         LOG_E("Queue is Full,Value is %d\r\n",NumTemp);
         return;
     }
+    Main_Queue.ack[NumTemp] = ack;
     Main_Queue.type[NumTemp] = type;
     Main_Queue.Taget_Id[NumTemp] = Taget_Id;
     Main_Queue.counter[NumTemp] = counter;
@@ -147,33 +154,77 @@ void RadioDequeue(void *paramaeter)
         {
             Main_Queue.NowNum = 0;
             Main_Queue.TargetNum = 0;
+            Main_Queue.SendNum = 0;
         }
-        else if(Main_Queue.TargetNum>0 && Main_Queue.TargetNum>Main_Queue.NowNum)
+        if(Main_Queue.TargetNum>Main_Queue.NowNum)
         {
-            Main_Queue.NowNum++;
-            switch(Main_Queue.type[Main_Queue.NowNum])
+            if(Main_Queue.ack[Main_Queue.NowNum+1]==1)
             {
-            case 0:
-                RadioSend(Main_Queue.Taget_Id[Main_Queue.NowNum],Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
-                LOG_I("Normal Send With Now Num %d,Target Num is %d,Target_Id %ld,counter %d,command %d,data %d\r\n",Main_Queue.NowNum,Main_Queue.TargetNum,Main_Queue.Taget_Id[Main_Queue.NowNum],Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
-                rt_thread_mdelay(300);
-                break;
+                if(Main_Queue.trials[Main_Queue.NowNum+1]==0)
+                {
+                    Main_Queue.SendNum = Main_Queue.NowNum+1;
+                    Main_Queue.trials[Main_Queue.NowNum+1]=1;
+                    LOG_I("Ack First try\r\n");
+                }
+                else if(Main_Queue.trials[Main_Queue.NowNum+1]>0 && Main_Queue.trials[Main_Queue.NowNum+1]<=3)
+                {
+                    if(AckCheck(Gateway_ID)==0)
+                    {
+                        if(Main_Queue.trials[Main_Queue.NowNum+1]==3)
+                        {
+                            Main_Queue.trials[Main_Queue.NowNum+1]=0;
+                            Main_Queue.NowNum++;
+                            Main_Queue.SendNum = Main_Queue.NowNum;
+                            LOG_I("Ack Retry Stop\r\n");
+                            continue;
+                        }
+                        else if(Main_Queue.trials[Main_Queue.NowNum+1]<3)
+                        {
+                            Main_Queue.SendNum = Main_Queue.NowNum+1;
+                            Main_Queue.trials[Main_Queue.NowNum+1]++;
+                            LOG_I("Ack Retry again\r\n");
+                        }
+                    }
+                    else
+                    {
+                        Main_Queue.trials[Main_Queue.NowNum+1]=0;
+                        Main_Queue.NowNum++;
+                        Main_Queue.SendNum = Main_Queue.NowNum;
+                        LOG_I("Ack Ok\r\n");
+                        continue;
+                    }
+                }
+            }
+            else
+            {
+                Main_Queue.NowNum++;
+                Main_Queue.SendNum = Main_Queue.NowNum;
+                LOG_I("No Ack Send\r\n");
+            }
+            AckClear(Gateway_ID);
+            switch(Main_Queue.type[Main_Queue.SendNum])
+            {
             case 1:
-                GatewaySyncSend(Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Taget_Id[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
-                LOG_I("GatewaySync With Now Num %d,Type is %d,Target Num is %d,Target_Id %ld,rssi %d,bat %d\r\n",Main_Queue.NowNum,Main_Queue.TargetNum,Main_Queue.counter[Main_Queue.NowNum],Gateway_ID,Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
-                rt_thread_mdelay(300);
-                wifi_led(3);
+                RadioSend(Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
+                LOG_I("Normal Send With Now Num %d,Target Num is %d,Target_Id %ld,counter %d,command %d,data %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
+                rt_thread_mdelay(800);
                 break;
             case 2:
-                GatewayWarningSend(Main_Queue.Taget_Id[Main_Queue.NowNum],Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
-                LOG_I("GatewayWarningSend With Now Num %d,Target Num is %d,Target_Id %ld,Rssi is %d,warn_id %d,value %d\r\n",Main_Queue.NowNum,Main_Queue.TargetNum,Gateway_ID,Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
-                rt_thread_mdelay(300);
+                GatewaySyncSend(Main_Queue.ack[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
+                LOG_I("GatewaySync With Now Num %d,Type is %d,Target Num is %d,Target_Id %ld,rssi %d,bat %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Main_Queue.counter[Main_Queue.SendNum],Gateway_ID,Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
+                rt_thread_mdelay(800);
                 wifi_led(3);
                 break;
             case 3:
-                GatewayControlSend(Main_Queue.Taget_Id[Main_Queue.NowNum],Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
-                LOG_I("GatewayControl With Now Num %d,Target Num is %d,Target_Id %ld,Rssi is %d,control %d,value %d\r\n",Main_Queue.NowNum,Main_Queue.TargetNum,Gateway_ID,Main_Queue.counter[Main_Queue.NowNum],Main_Queue.Command[Main_Queue.NowNum],Main_Queue.Data[Main_Queue.NowNum]);
-                rt_thread_mdelay(300);
+                GatewayWarningSend(Main_Queue.ack[Main_Queue.SendNum],Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
+                LOG_I("GatewayWarningSend With Now Num %d,Target Num is %d,Target_Id %ld,Rssi is %d,warn_id %d,value %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Gateway_ID,Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
+                rt_thread_mdelay(800);
+                wifi_led(3);
+                break;
+            case 4:
+                GatewayControlSend(Main_Queue.ack[Main_Queue.SendNum],Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
+                LOG_I("GatewayControl With Now Num %d,Target Num is %d,Target_Id %ld,Rssi is %d,control %d,value %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Gateway_ID,Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
+                rt_thread_mdelay(800);
                 wifi_led(3);
                 break;
             default:break;
@@ -182,6 +233,7 @@ void RadioDequeue(void *paramaeter)
         rt_thread_mdelay(10);
     }
 }
+
 void RadioDequeueTaskInit(void)
 {
     int *p;

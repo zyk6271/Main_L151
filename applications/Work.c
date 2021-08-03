@@ -39,22 +39,22 @@ void WarningWithPeak(uint8_t status)
         {
         case 0://恢复正常
             BackToNormal();
-            WarUpload_GW(0,3,0);//掉落消除报警
+            WarUpload_GW(1,0,3,0);//掉落消除报警
             beep_stop();
             loss_led_stop();
             break;
         case 1://测水线掉落
             beep_start(0,1);//红灯,蜂鸣器三下
             loss_led_start();
-            WarUpload_GW(0,3,1);//掉落报警
+            WarUpload_GW(1,0,3,1);//掉落报警
             LOG_D("MasterLostPeakWarning\r\n");
             break;
         case 2://测水线短路
             Warning_Enable_Num(4);
-            WarUpload_GW(0,1,1);//主控水警
+            WarUpload_GW(1,0,1,1);//主控水警
             break;
         case 3://测水线短路解除
-            WarUpload_GW(0,1,0);//主控消除水警
+            WarUpload_GW(1,0,1,0);//主控消除水警
             MasterStatusChangeToDeAvtive();
             break;
         }

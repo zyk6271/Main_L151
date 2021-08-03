@@ -132,7 +132,7 @@ void Device_Learn(Message buf)
         switch(buf.Data)
         {
         case 1:
-            RadioEnqueue(0,buf.From_ID,buf.Counter,3,1);
+            RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,1);
             if(Check_Valid(buf.From_ID))//如果数据库不存在该值
             {
                 LOG_D("Not Include This Device\r\n");
@@ -171,8 +171,8 @@ void Device_Learn(Message buf)
                 LOG_D("Include This Device，Send Confirmed\r\n");
                 just_ring();    //响一声
                 Relearn();
-                RadioEnqueue(0,buf.From_ID,buf.Counter,3,2);
-                GatewaySyncEnqueue(3,buf.From_ID,0,0);
+                RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,2);
+                GatewaySyncEnqueue(0,3,buf.From_ID,0,0);
             }
             break;
         }
@@ -184,7 +184,7 @@ void DataSolve(Message buf)
     switch(buf.Command)
     {
     case 1://测试模拟报警（RESET）
-        RadioEnqueue(0,buf.From_ID,buf.Counter,1,1);
+        RadioEnqueue(0,1,buf.From_ID,buf.Counter,1,1);
         LOG_D("Test\r\n");
         break;
     case 2://握手包
@@ -193,26 +193,26 @@ void DataSolve(Message buf)
         {
             if(buf.From_ID!=GetDoorID())
             {
-                RadioEnqueue(0,buf.From_ID,buf.Counter,2,2);
+                RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,2);
                 Warning_Enable_Num(1);
-                WarUpload_GW(buf.From_ID,6,2);//终端低电量报警
+                WarUpload_GW(1,buf.From_ID,6,2);//终端低电量报警
             }
             else
             {
-                RadioEnqueue(0,buf.From_ID,buf.Counter,2,2);
+                RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,2);
             }
         }
         else if(buf.Data==1)
         {
-            RadioEnqueue(0,buf.From_ID,buf.Counter,2,1);
+            RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,1);
             Warning_Enable_Num(7);
-            WarUpload_GW(buf.From_ID,6,1);//终端低电量报警
+            WarUpload_GW(1,buf.From_ID,6,1);//终端低电量报警
         }
         else
         {
             Update_Device_Bat(buf.From_ID,buf.Data);//写入电量
-            RadioEnqueue(0,buf.From_ID,buf.Counter,2,0);
-            WarUpload_GW(buf.From_ID,6,0);//终端低电量报警
+            RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,0);
+            WarUpload_GW(1,buf.From_ID,6,0);//终端低电量报警
         }
         LOG_D("Handshake With %ld\r\n",buf.From_ID);
         break;
@@ -222,7 +222,7 @@ void DataSolve(Message buf)
             if(!Check_Valid(buf.From_ID))//如果数据库不存在该值
             {
                 Start_Learn();
-                RadioEnqueue(0,buf.From_ID,buf.Counter,3,3);
+                RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,3);
             }
         }
         break;
@@ -237,8 +237,8 @@ void DataSolve(Message buf)
             }
             else//是否为来自终端的数据
             {
-                RadioEnqueue(0,buf.From_ID,buf.Counter,4,0);
-                WarUpload_GW(buf.From_ID,5,1);//终端消除水警
+                RadioEnqueue(0,1,buf.From_ID,buf.Counter,4,0);
+                WarUpload_GW(1,buf.From_ID,5,1);//终端消除水警
             }
         }
         else if(buf.Data==1)
@@ -250,11 +250,11 @@ void DataSolve(Message buf)
             }
             else//是否为来自终端的报警包
             {
-                RadioEnqueue(0,buf.From_ID,buf.Counter,4,1);
+                RadioEnqueue(0,1,buf.From_ID,buf.Counter,4,1);
                 if(Now_Status!=SlaverWaterAlarmActive)
                 {
                     Warning_Enable_Num(2);
-                    WarUpload_GW(buf.From_ID,5,0);//终端水警
+                    WarUpload_GW(1,buf.From_ID,5,0);//终端水警
                     LOG_D("SlaverWaterAlarm is Active\r\n");
                 }
             }
@@ -264,7 +264,7 @@ void DataSolve(Message buf)
         if((Now_Status==Open||Now_Status==Close))
         {
             LOG_D("Pwr On From %ld\r\n",buf.From_ID);
-            RadioEnqueue(0,buf.From_ID,buf.Counter,5,1);
+            RadioEnqueue(0,1,buf.From_ID,buf.Counter,5,1);
             Moto_Open(OtherOpen);
             Delay_Timer_Close();
             Last_Close_Flag=0;
@@ -273,12 +273,12 @@ void DataSolve(Message buf)
         else
         {
             LOG_D("Pwr On From %ld On Warning\r\n",buf.From_ID);
-            RadioEnqueue(0,buf.From_ID,buf.Counter,5,2);
+            RadioEnqueue(0,1,buf.From_ID,buf.Counter,5,2);
         }
-        ControlUpload_GW(buf.From_ID,2,ValveStatus);
+        ControlUpload_GW(1,buf.From_ID,2,ValveStatus);
         break;
     case 6://关机
-        RadioEnqueue(0,buf.From_ID,buf.Counter,6,0);
+        RadioEnqueue(0,1,buf.From_ID,buf.Counter,6,0);
         if(Now_Status==Open||Now_Status==Close)
         {
             LOG_D("Pwr Off From %ld\r\n",buf.From_ID);
@@ -293,20 +293,20 @@ void DataSolve(Message buf)
             Warning_Disable();
             Moto_Close(OtherOff);
         }
-        ControlUpload_GW(buf.From_ID,2,ValveStatus);
+        ControlUpload_GW(1,buf.From_ID,2,ValveStatus);
         break;
     case 8://延迟
         LOG_I("Delay Open %d From %ld\r\n",buf.Data,buf.From_ID);
-        RadioEnqueue(0,buf.From_ID,buf.Counter,8,buf.Data);
+        RadioEnqueue(0,1,buf.From_ID,buf.Counter,8,buf.Data);
         if(buf.Data)
         {
             Delay_Timer_Close();
-            ControlUpload_GW(buf.From_ID,3,0);
+            ControlUpload_GW(1,buf.From_ID,3,0);
         }
         else
         {
             Delay_Timer_Open();
-            ControlUpload_GW(buf.From_ID,3,1);
+            ControlUpload_GW(1,buf.From_ID,3,1);
         }
         break;
     }
@@ -339,7 +339,6 @@ void GatewayDataSolve(uint8_t *rx_buffer,uint8_t rx_len)
                 LOG_I("Delay Open %d From %ld\r\n",Rx_message.Data,Rx_message.From_ID);
                 if(Rx_message.Data)
                 {
-                    ControlUpload_GW(0,3,1);
                     Delay_Timer_Open();
                 }
                 else
@@ -351,20 +350,18 @@ void GatewayDataSolve(uint8_t *rx_buffer,uint8_t rx_len)
                 just_ring();
                 if(Rx_message.Data)
                 {
-                    ControlUpload_GW(Rx_message.From_ID,2,1);
                     Remote_Open();
-                    ControlUpload_GW(Rx_message.From_ID,2,ValveStatus);
+                    ControlUpload_GW(0,Rx_message.From_ID,2,ValveStatus);
                 }
                 else
                 {
-                    ControlUpload_GW(Rx_message.From_ID,2,0);
                     Remote_Close();
-                    ControlUpload_GW(Rx_message.From_ID,2,ValveStatus);
+                    ControlUpload_GW(0,Rx_message.From_ID,2,ValveStatus);
                 }
                 break;
             case 3://请求心跳
                 LOG_I("Request Heart\r\n");
-                ControlUpload_GW(0,4,0);
+                ControlUpload_GW(0,0,4,0);
                 break;
             case 4://请求同步
                 LOG_I("Request Sync\r\n");
@@ -376,6 +373,9 @@ void GatewayDataSolve(uint8_t *rx_buffer,uint8_t rx_len)
             case 6://删除指定设备
                 LOG_I("Delete Device %ld\r\n",Rx_message.Device_ID);
                 Delete_Device(Rx_message.Device_ID);
+                break;
+            case 7://应答
+                AckSet(Rx_message.From_ID);
                 break;
             }
         }

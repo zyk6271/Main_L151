@@ -391,7 +391,6 @@ void ReceiveData(void)
                 ubDataLen--;
                 SpiReadData(RXBuff,ubDataLen);
                 RxLen = ubDataLen;
-//                rt_kprintf("Receive is");
 //                for( int i = 1; i < ubDataLen; i++ )
 //                {
 //                    LOG_RAW( " %02X", RXBuff[i] );

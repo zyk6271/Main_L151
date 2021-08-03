@@ -469,7 +469,7 @@ void Detect_All_Time(void)
             {
                 WarnFlag = 1;
                 LOG_D("Device ID %ld is Offline\r\n",Global_Device.ID[num]);
-                WarUpload_GW(Global_Device.ID[num],4,1);//Offline报警
+                WarUpload_GW(1,Global_Device.ID[num],4,1);//Offline报警
             }
         }
         num--;
@@ -538,12 +538,55 @@ void Offline_React(uint32_t ID)
     }
     if(WarnFlag==0)
     {
-        WarUpload_GW(ID,4,0);//Offline报警
+        WarUpload_GW(1,ID,4,0);//Offline报警
         OfflineDisableWarning();
     }
     LOG_D("Detect_All_Time OK\r\n");
 }
-
+uint8_t AckCheck(uint32_t device)
+{
+    uint16_t num = Global_Device.Num;
+    if(!num)return 0;
+    while(num)
+    {
+        if(Global_Device.ID[num]==device)
+        {
+            return Global_Device.Reponse[num];
+        }
+        num--;
+    }
+    return 0;
+}
+void AckClear(uint32_t device)
+{
+    uint16_t num = Global_Device.Num;
+    if(!num)return;
+    while(num)
+    {
+        if(Global_Device.ID[num]==device)
+        {
+            Global_Device.Reponse[num] = 0;
+            return;
+        }
+        num--;
+    }
+    return;
+}
+void AckSet(uint32_t device)
+{
+    uint16_t num = Global_Device.Num;
+    if(!num)return;
+    while(num)
+    {
+        if(Global_Device.ID[num]==device)
+        {
+            Global_Device.Reponse[num] = 1;
+            return;
+        }
+        num--;
+    }
+    return;
+}
 void LoadDevice2Memory(void)//数据载入到内存中
 {
     memset(&Global_Device,0,sizeof(Global_Device));
@@ -570,9 +613,5 @@ void DeleteAllDevice(void)//数据载入到内存中
     LOG_D("Before Delete num is %d",Global_Device.Num);
     memset(&Global_Device,0,sizeof(Global_Device));
     ef_env_set_default();
-//    Flash_LearnNums_Change(0);
-//    Flash_Key_Change(88888888,0);//DoorID
-//    Flash_Key_Change(88887777,0);//GatewayID
-//    Flash_Moto_Change(0);//LastFlag
     LOG_D("After Delete num is %d",Global_Device.Num);
 }

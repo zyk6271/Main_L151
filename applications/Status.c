@@ -163,18 +163,18 @@ void Delay_Timer_Open(void)
     if(Now_Status==Close || Now_Status==Open)
     {
         LOG_D("Delay_Timer is Open\r\n");
-        ControlUpload_GW(0,3,1);
+        ControlUpload_GW(0,0,3,1);
         rt_timer_start(Delay_Timer);
     }
     else {
-        ControlUpload_GW(0,3,0);
+        ControlUpload_GW(0,0,3,0);
         LOG_I("Delay_Timer_Open Fail,Now is %d",Now_Status);
     }
 }
 void Delay_Timer_Close(void)
 {
     LOG_D("Delay_Timer is Close\r\n");
-    ControlUpload_GW(0,3,0);
+    ControlUpload_GW(0,0,3,0);
     rt_timer_stop(Delay_Timer);
 }
 void OfflineWarning(void *parameter)
@@ -235,7 +235,7 @@ void BackToNormal(void)
 {
     if(Now_Status!=Open && Now_Status!=Close && Now_Status!=Learn)
     {
-        WarUpload_GW(0,7,0);//消警
+        WarUpload_GW(1,0,7,0);//消警
     }
     WaterScan_Clear();
     beep_stop();

@@ -32,13 +32,13 @@ void Gateway_Sync(void)
     {
         if(Global_Device.ID[i]<40000000)
         {
-            GatewaySyncEnqueue(3,Global_Device.ID[i],Global_Device.Rssi[i],Global_Device.Bat[i]);
+            GatewaySyncEnqueue(1,3,Global_Device.ID[i],Global_Device.Rssi[i],Global_Device.Bat[i]);
         }
     }
 }
 void Gateway_RemoteDelete(void)
 {
-    GatewaySyncEnqueue(4,0,0,0);
+    GatewaySyncEnqueue(0,4,0,0,0);
 }
 
 void Heart_Refresh(void)
@@ -74,7 +74,7 @@ void Heart_Test(void *parameter)
         {
             Heart_Check_Count++;
             wifi_led(0);
-            ControlUpload_GW(0,5,ValveStatus);
+            ControlUpload_GW(0,0,5,ValveStatus);
             LOG_W("Gateway Test Check Again %d\r\n",Heart_Check_Count);
         }
         else
@@ -120,22 +120,22 @@ void Gateway_Init(void)
         {
             Heart_Check_t = rt_timer_create("Heart_Check", Heart_Check,RT_NULL,10*60000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_PERIODIC);
         }
-        ControlUpload_GW(0,5,ValveStatus);
+        ControlUpload_GW(0,0,5,ValveStatus);
         Heart_Test_Start();
         rt_timer_start(Heart_Check_t);
     }
 }
-void WarUpload_GW(uint32_t device_id,uint8_t warn_id,uint8_t value)
+void WarUpload_GW(uint8_t ack,uint32_t device_id,uint8_t warn_id,uint8_t value)
 {
     if(GetGatewayID())
     {
-        GatewayWarningEnqueue(device_id,Flash_GetRssi(device_id),warn_id,value);
+        GatewayWarningEnqueue(ack,device_id,Flash_GetRssi(device_id),warn_id,value);
     }
 }
-void ControlUpload_GW(uint32_t device_id,uint8_t control_id,uint8_t value)
+void ControlUpload_GW(uint8_t ack,uint32_t device_id,uint8_t control_id,uint8_t value)
 {
     if(GetGatewayID())
     {
-        GatewayControlEnqueue(device_id,Flash_GetRssi(device_id),control_id,value);
+        GatewayControlEnqueue(ack,device_id,Flash_GetRssi(device_id),control_id,value);
     }
 }

@@ -10,6 +10,7 @@ typedef struct
     uint32_t DoorNum;
     uint32_t GatewayNum;
     uint32_t ID[20];
+    uint8_t Reponse[20];
     uint32_t ID_Time[20];
     uint32_t Alive[20];
     uint8_t  Bat[20];
@@ -35,6 +36,9 @@ uint8_t Clear_Device_Time(uint32_t Device_ID);//更新时间戳为0
 void Detect_All_Time(void);
 void Boot_Times_Record(void);
 void LoadDevice2Memory(void);
+uint8_t AckCheck(uint32_t device);
+void AckClear(uint32_t device);
+void AckSet(uint32_t device);
 uint8_t Add_DoorDevice(uint32_t Device_ID);
 uint8_t Add_GatewayDevice(uint32_t Device_ID);
 uint32_t GetDoorID(void);

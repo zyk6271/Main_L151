@@ -17,8 +17,8 @@ void Gateway_Reload(void);
 void Heart_Test_Start(void);
 void Gateway_Sync(void);
 void Gateway_RemoteDelete(void);
-void WarUpload_GW(uint32_t device_id,uint8_t warn_id,uint8_t value);
-void ControlUpload_GW(uint32_t device_id,uint8_t control_id,uint8_t value);
+void WarUpload_GW(uint8_t ack,uint32_t device_id,uint8_t warn_id,uint8_t value);
+void ControlUpload_GW(uint8_t ack,uint32_t device_id,uint8_t control_id,uint8_t value);
 void Heart_Refresh(void);
 
 #endif /* APPLICATIONS_GATEWAY_H_ */
