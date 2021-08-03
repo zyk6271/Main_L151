@@ -38,7 +38,7 @@ void Gateway_Sync(void)
 }
 void Gateway_RemoteDelete(void)
 {
-    GatewaySyncEnqueue(0,4,0,0,0);
+    GatewaySyncEnqueue(1,4,0,0,0);
 }
 
 void Heart_Refresh(void)
