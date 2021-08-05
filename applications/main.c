@@ -24,6 +24,7 @@
 #include "dog.h"
 #include "adcwork.h"
 #include "radio_decoder.h"
+#include "gateway.h"
 
 #define DBG_TAG "main"
 #define DBG_LVL DBG_LOG
@@ -31,7 +32,6 @@
 
 int main(void)
 {
-    //cm_backtrace_init("1","2","3");
     led_Init();
     Key_Reponse();
     flash_Init();
@@ -44,6 +44,7 @@ int main(void)
     WarningInit();
     WaterScan_Init();
     Radio_Task_Init();
+    Gateway_Init();
     ADC_Init();
     button_Init();
     while (1)

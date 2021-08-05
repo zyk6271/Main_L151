@@ -12,6 +12,9 @@ static agile_led_t *singleled0 = RT_NULL;
 static agile_led_t *beep_three = RT_NULL;
 static agile_led_t *led0_three = RT_NULL;
 static agile_led_t *lossled0 = RT_NULL;
+static agile_led_t *wifi_G = RT_NULL;
+static agile_led_t *wifi_G_Com = RT_NULL;
+static agile_led_t *wifi_R = RT_NULL;
 
 #define DBG_TAG "led"
 #define DBG_LVL DBG_LOG
@@ -19,6 +22,7 @@ static agile_led_t *lossled0 = RT_NULL;
 
 uint8_t led_id_temp = 0;
 uint8_t led_mode_temp = 0;
+extern uint32_t Gateway_ID;
 
 void led_Init(void)
 {
@@ -40,9 +44,20 @@ void led_Init(void)
     if(beep == RT_NULL)
     {
         beep = agile_led_create(BEEP_PIN, PIN_HIGH, "200,200", -1);
-        singlebeep = agile_led_create(BEEP_PIN, PIN_HIGH, "200,1", 1);
+        singlebeep = agile_led_create(BEEP_PIN, PIN_HIGH, "200,200", 1);
         beep_three = agile_led_create(BEEP_PIN, PIN_HIGH, "200,200", 3);
         LOG_D("Beep Init Success\r\n");
+    }
+    if(wifi_G == RT_NULL)
+    {
+        wifi_G = agile_led_create(LED4_PIN, PIN_LOW, "200,200", -1);
+        wifi_G_Com = agile_led_create(LED4_PIN, PIN_LOW, "200,200", -1);
+        LOG_D("wifi_G Init Success\r\n");
+    }
+    if(wifi_R == RT_NULL)
+    {
+        wifi_R = agile_led_create(LED5_PIN, PIN_LOW, "200,200", -1);
+        LOG_D("wifi_R Init Success\r\n");
     }
 }
 void loss_led_start(void)
@@ -69,6 +84,49 @@ void beep_three_times(void)
     agile_led_set_compelete_callback(led0_three,led_resume_callback);
     agile_led_start(beep_three);
     agile_led_start(led0_three);
+}
+void wifi_G_resume_callback(agile_led_t *led)
+{
+    extern uint8_t Heart_Flag;
+    if(Heart_Flag)
+    {
+        wifi_led(1);
+    }
+    else
+    {
+        wifi_led(2);
+    }
+}
+void wifi_led(uint8_t num)
+{
+    switch(num)
+    {
+    case 0://无设备
+        agile_led_stop(wifi_R);
+        agile_led_stop(wifi_G);
+        agile_led_off(wifi_R);
+        agile_led_off(wifi_G);
+        break;
+    case 1://心跳成功
+        agile_led_stop(wifi_R);
+        agile_led_set_light_mode(wifi_G, "200,0", -1);
+        agile_led_start(wifi_G);
+        break;
+    case 2://心跳失败
+        agile_led_stop(wifi_G);
+        agile_led_set_light_mode(wifi_R, "200,0", -1);
+        agile_led_start(wifi_R);
+        break;
+    case 3://正在通讯
+        agile_led_stop(wifi_G);
+        agile_led_set_light_mode(wifi_G, "50,50", 1);
+        if(Gateway_ID)
+        {
+            agile_led_set_compelete_callback(wifi_G,wifi_G_resume_callback);
+        }
+        agile_led_start(wifi_G);
+        break;
+    }
 }
 void beep_start(uint8_t led_id,int mode)
 {

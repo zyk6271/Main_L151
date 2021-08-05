@@ -18,12 +18,13 @@
 #include "work.h"
 #include "string.h"
 #include "rthw.h"
+#include "gateway.h"
 
 #define DBG_TAG "status"
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
-extern enum Device_Status Now_Status;
+enum Device_Status Now_Status=Close;
 extern uint8_t ValveStatus;
 
 WariningEvent NowStatusEvent;
@@ -123,10 +124,6 @@ void MasterWaterAlarmWarning(void *parameter)
     Now_Status = MasterWaterAlarmActive;
     LOG_I("MasterWaterAlarmWarning\r\n");
 }
-void MasterAlarmWaterDisable(void)
-{
-
-}
 void NTCWarningEvent_Callback(void *parameter)
 {
     Moto_Close(NormalOff);
@@ -145,15 +142,39 @@ void Delay_Timer_Init(void)
     Delay_Timer = rt_timer_create("Delay_Timer", Delay_Timer_Callback, RT_NULL, 4*60*60*1000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_ONE_SHOT);
 }
 MSH_CMD_EXPORT(Delay_Timer_Init,Delay_Timer_Init);
+void Remote_Open(void)
+{
+    if(Now_Status==Close || Now_Status==Open)
+    {
+        LOG_D("Remote_Open\r\n");
+        Moto_Open(OtherOpen);
+    }
+    else {
+        LOG_I("Remote_Open Fail,Now is %d",Now_Status);
+    }
+}
+void Remote_Close(void)
+{
+    LOG_D("Remote_Close\r\n");
+    Moto_Close(OtherOff);
+}
 void Delay_Timer_Open(void)
 {
-    LOG_D("Delay_Timer is Open\r\n");
-    rt_timer_start(Delay_Timer);
+    if(Now_Status==Close || Now_Status==Open)
+    {
+        LOG_D("Delay_Timer is Open\r\n");
+        ControlUpload_GW(0,0,3,1);
+        rt_timer_start(Delay_Timer);
+    }
+    else {
+        ControlUpload_GW(0,0,3,0);
+        LOG_I("Delay_Timer_Open Fail,Now is %d",Now_Status);
+    }
 }
-MSH_CMD_EXPORT(Delay_Timer_Open,Delay_Timer_Open);
 void Delay_Timer_Close(void)
 {
     LOG_D("Delay_Timer is Close\r\n");
+    ControlUpload_GW(0,0,3,0);
     rt_timer_stop(Delay_Timer);
 }
 void OfflineWarning(void *parameter)
@@ -212,6 +233,10 @@ uint8_t Detect_Learn(void)
 }
 void BackToNormal(void)
 {
+    if(Now_Status!=Open && Now_Status!=Close && Now_Status!=Learn)
+    {
+        WarUpload_GW(1,0,7,0);//消警
+    }
     WaterScan_Clear();
     beep_stop();
     led_Stop(0);
@@ -224,4 +249,7 @@ void BackToNormal(void)
         Now_Status = Close;
     }
 }
-
+uint8_t GetNowStatus(void)
+{
+    return Now_Status;
+}

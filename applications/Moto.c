@@ -15,9 +15,11 @@
 #include "moto.h"
 #include "flashwork.h"
 #include "status.h"
+#include "gateway.h"
+#include "radio_encoder.h"
 
 #define DBG_TAG "moto"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 rt_timer_t Moto_Timer1,Moto_Timer2 = RT_NULL;
@@ -30,8 +32,8 @@ extern Device_Info Global_Device;
 
 void Moto_InitOpen(uint8_t ActFlag)
 {
-    LOG_D("Moto Open Init Now is is %d , act is %d\r\n",Global_Device.LastFlag,ActFlag);
-    if(Global_Device.LastFlag == OtherOff && ActFlag == OtherOpen)
+    LOG_I("Moto Open Init Now is is %d , act is %d\r\n",Global_Device.LastFlag,ActFlag);
+    if((Global_Device.LastFlag == OtherOff && ActFlag == OtherOpen)||(Global_Device.LastFlag != OtherOff))
     {
         LOG_D("Moto is Open\r\n");
         Now_Status = Open;
@@ -42,26 +44,22 @@ void Moto_InitOpen(uint8_t ActFlag)
         rt_pin_write(Turn1,1);
         rt_pin_write(Turn2,1);
     }
-    else if(Global_Device.LastFlag != OtherOff )
+    else if(Global_Device.LastFlag == OtherOff && ActFlag == NormalOpen)
     {
-        LOG_D("Moto is Open\r\n");
-        Now_Status = Open;
-        led_Long_Start(1);//绿灯
-        ValveStatus=1;
-        Global_Device.LastFlag = ActFlag;
-        Flash_Moto_Change(ActFlag);
-        rt_pin_write(Turn1,1);
-        rt_pin_write(Turn2,1);
-    }
-    else {
         beep_start(0,7);//蜂鸣器三下
         LOG_D("No permissions to Open\r\n");
     }
+    else
+    {
+      beep_start(0,6);//蜂鸣器一下
+      LOG_D("No permissions to Open\r\n");
+    }
+    //ControlUpload_GW(0,0,1,ValveStatus);//初次上发
 }
 void Moto_Open(uint8_t ActFlag)
 {
-    LOG_D("Moto Open Now is is %d , act is %d\r\n",Global_Device.LastFlag,ActFlag);
-    if(Global_Device.LastFlag == OtherOff && ActFlag == OtherOpen)
+    LOG_I("Moto Open Now is is %d , act is %d\r\n",Global_Device.LastFlag,ActFlag);
+    if((Global_Device.LastFlag == OtherOff && ActFlag == OtherOpen)||(Global_Device.LastFlag != OtherOff))
     {
         LOG_D("Moto is Open\r\n");
         Now_Status = Open;
@@ -69,30 +67,24 @@ void Moto_Open(uint8_t ActFlag)
         ValveStatus=1;
         Global_Device.LastFlag = ActFlag;
         Flash_Moto_Change(ActFlag);
+        if(ActFlag==NormalOpen)
+        {
+            ControlUpload_GW(1,0,1,1);
+        }
         rt_pin_write(Turn1,1);
         rt_pin_write(Turn2,1);
         rt_timer_start(Moto_Detect_Timer);
+        just_ring();
     }
-    else if(Global_Device.LastFlag != OtherOff )
+    else if(Global_Device.LastFlag == OtherOff && ActFlag == NormalOpen)
     {
-        LOG_D("Moto is Open\r\n");
-        Now_Status = Open;
-        led_Long_Start(1);//绿灯
-        ValveStatus=1;
-        Global_Device.LastFlag = ActFlag;
-        Flash_Moto_Change(ActFlag);
-        rt_pin_write(Turn1,1);
-        rt_pin_write(Turn2,1);
-        rt_timer_start(Moto_Detect_Timer);
-    }
-    else {
         beep_start(0,7);//蜂鸣器三下
         LOG_D("No permissions to Open\r\n");
     }
 }
 void Moto_Close(uint8_t ActFlag)
 {
-    LOG_D("Moto Close Now is is %d , act is %d\r\n",Global_Device.LastFlag,ActFlag);
+    LOG_I("Moto Close Now is is %d , act is %d\r\n",Global_Device.LastFlag,ActFlag);
     if(Global_Device.LastFlag != OtherOff )
     {
         LOG_D("Moto is Close\r\n");
@@ -101,14 +93,19 @@ void Moto_Close(uint8_t ActFlag)
         ValveStatus=0;
         Global_Device.LastFlag = ActFlag;
         Flash_Moto_Change(ActFlag);
+        if(ActFlag==NormalOff)
+        {
+            ControlUpload_GW(1,0,1,0);
+        }
         rt_pin_write(Turn1,0);
         rt_pin_write(Turn2,0);
+        just_ring();
     }
     else if(Global_Device.LastFlag == OtherOff && ActFlag == OtherOff)
     {
         Now_Status = Close;
         ValveStatus=0;
-        beep_start(0,7);//蜂鸣器三下
+        just_ring();
         LOG_D("Moto is alreay otheroff\r\n");
     }
     else
@@ -140,11 +137,13 @@ void Turn1_Timer_Callback(void *parameter)
     rt_pin_write(Turn2,1);
     if(!Turn1_Flag)
     {
-        LOG_D("Moto1 is Fail\r\n");
+        LOG_E("Moto1 is Fail\r\n");
         Warning_Enable_Num(6);
+        WarUpload_GW(1,0,2,1);//MOTO报警
     }
     else
     {
+        WarUpload_GW(1,0,2,0);//MOTO报警
         LOG_D("Moto1 is Good\r\n");
     }
 }
@@ -161,11 +160,13 @@ void Turn2_Timer_Callback(void *parameter)
     rt_pin_write(Turn2,1);
     if(!Turn2_Flag)
     {
-        LOG_D("Moto2 is Fail\r\n");
+        LOG_E("Moto2 is Fail\r\n");
         Warning_Enable_Num(6);
+        WarUpload_GW(1,0,2,1);//MOTO报警
     }
     else
     {
+        WarUpload_GW(1,0,2,0);//MOTO报警
         LOG_D("Moto2 is Good\r\n");
     }
 }
