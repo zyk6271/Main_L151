@@ -31,7 +31,7 @@ uint8_t ValvePastStatus=0;
 rt_thread_t WaterScan_t=RT_NULL;
 extern uint8_t ValveStatus;
 
-void WarningWithPeak(uint8_t status)
+void WarningWithPeak(uint8_t past,uint8_t status)
 {
     if(Detect_Learn())
     {
@@ -39,7 +39,15 @@ void WarningWithPeak(uint8_t status)
         {
         case 0://恢复正常
             BackToNormal();
-            WarUpload_GW(1,0,3,0);//掉落消除报警
+            if(past==1)
+            {
+                WarUpload_GW(1,0,3,0);//掉落消除报警
+
+            }
+            else
+            {
+                WarUpload_GW(1,0,1,0);//主控消除水警
+            }
             beep_stop();
             loss_led_stop();
             break;
@@ -54,7 +62,6 @@ void WarningWithPeak(uint8_t status)
             WarUpload_GW(1,0,1,1);//主控水警
             break;
         case 3://测水线短路解除
-            WarUpload_GW(1,0,1,0);//主控消除水警
             MasterStatusChangeToDeAvtive();
             break;
         }
@@ -99,7 +106,7 @@ void WaterScan_Callback(void *parameter)
                 if(WarningStatus != 1<<0)
                 {
                     WarningStatus = 1<<0;
-                    WarningWithPeak(3);
+                    WarningWithPeak(WarningPastStatus,3);
                     LOG_D("Change Status to Deactive\r\n");
                 }
             }
@@ -114,27 +121,27 @@ void WaterScan_Callback(void *parameter)
             {
                 if(WarningStatus != 1<<2)
                 {
+                    WarningWithPeak(WarningPastStatus,1);
                     WarningPastStatus = WarningNowStatus;
                     WarningStatus = 1<<2;
-                    WarningWithPeak(1);
                 }
             }
             else if(WarningPastStatus==0 && WarningNowStatus==2)
             {
                 if(WarningStatus != 1<<3)
                 {
+                    WarningWithPeak(WarningPastStatus,2);
                     WarningPastStatus = WarningNowStatus;
                     WarningStatus = 1<<3;
-                    WarningWithPeak(2);
                 }
             }
             else if(WarningPastStatus==1 && WarningNowStatus==0)
             {
                 if(WarningStatus != 1<<4)
                 {
+                    WarningWithPeak(WarningPastStatus,0);
                     WarningPastStatus = WarningNowStatus;
                     WarningStatus = 1<<4;
-                    WarningWithPeak(0);
                 }
             }
         }

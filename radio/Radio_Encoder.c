@@ -43,7 +43,7 @@ Radio_Queue Main_Queue={0};
 
 extern uint32_t Gateway_ID;
 uint32_t Self_Id = 0;
-uint32_t Self_Default_Id = 10000080;
+uint32_t Self_Default_Id = 10000070;
 uint32_t Self_Counter = 0;
 
 void RadioSend(uint32_t Taget_Id,uint8_t counter,uint8_t Command,uint8_t Data)
@@ -206,25 +206,25 @@ void RadioDequeue(void *paramaeter)
             {
             case 1:
                 RadioSend(Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                LOG_I("Normal Send With Now Num %d,Target Num is %d,Target_Id %ld,counter %d,command %d,data %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                rt_thread_mdelay(800);
+                LOG_D("Normal Send With Now Num %d,Target Num is %d,Target_Id %ld,counter %d,command %d,data %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
+                rt_thread_mdelay(300);
                 break;
             case 2:
                 GatewaySyncSend(Main_Queue.ack[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                LOG_I("GatewaySync With Now Num %d,Type is %d,Target Num is %d,Target_Id %ld,rssi %d,bat %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Main_Queue.counter[Main_Queue.SendNum],Gateway_ID,Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                rt_thread_mdelay(800);
+                LOG_D("GatewaySync With Now Num %d,Target Num is %d,Type is %d,Target_Id %ld,rssi %d,bat %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Main_Queue.counter[Main_Queue.SendNum],Gateway_ID,Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
+                rt_thread_mdelay(600);
                 wifi_led(3);
                 break;
             case 3:
                 GatewayWarningSend(Main_Queue.ack[Main_Queue.SendNum],Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                LOG_I("GatewayWarningSend With Now Num %d,Target Num is %d,Target_Id %ld,Rssi is %d,warn_id %d,value %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Gateway_ID,Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                rt_thread_mdelay(800);
+                LOG_D("GatewayWarningSend With Now Num %d,Target Num is %d,Target_Id %ld,Rssi is %d,warn_id %d,value %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Gateway_ID,Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
+                rt_thread_mdelay(600);
                 wifi_led(3);
                 break;
             case 4:
                 GatewayControlSend(Main_Queue.ack[Main_Queue.SendNum],Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                LOG_I("GatewayControl With Now Num %d,Target Num is %d,Target_Id %ld,Rssi is %d,control %d,value %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Gateway_ID,Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                rt_thread_mdelay(800);
+                LOG_D("GatewayControl With Now Num %d,Target Num is %d,Target_Id %ld,Rssi is %d,control %d,value %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Gateway_ID,Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
+                rt_thread_mdelay(600);
                 wifi_led(3);
                 break;
             default:break;

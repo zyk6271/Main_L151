@@ -22,6 +22,7 @@ static agile_led_t *wifi_R = RT_NULL;
 
 uint8_t led_id_temp = 0;
 uint8_t led_mode_temp = 0;
+extern uint32_t Gateway_ID;
 
 void led_Init(void)
 {
@@ -119,7 +120,10 @@ void wifi_led(uint8_t num)
     case 3://正在通讯
         agile_led_stop(wifi_G);
         agile_led_set_light_mode(wifi_G, "50,50", 1);
-        agile_led_set_compelete_callback(wifi_G,wifi_G_resume_callback);
+        if(Gateway_ID)
+        {
+            agile_led_set_compelete_callback(wifi_G,wifi_G_resume_callback);
+        }
         agile_led_start(wifi_G);
         break;
     }

@@ -19,6 +19,7 @@ void Gateway_Sync(void);
 void Gateway_RemoteDelete(void);
 void WarUpload_GW(uint8_t ack,uint32_t device_id,uint8_t warn_id,uint8_t value);
 void ControlUpload_GW(uint8_t ack,uint32_t device_id,uint8_t control_id,uint8_t value);
+void Replace_Door(uint32_t old);
 void Heart_Refresh(void);
 
 #endif /* APPLICATIONS_GATEWAY_H_ */

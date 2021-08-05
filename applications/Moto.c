@@ -44,11 +44,17 @@ void Moto_InitOpen(uint8_t ActFlag)
         rt_pin_write(Turn1,1);
         rt_pin_write(Turn2,1);
     }
-    else {
+    else if(Global_Device.LastFlag == OtherOff && ActFlag == NormalOpen)
+    {
         beep_start(0,7);//蜂鸣器三下
         LOG_D("No permissions to Open\r\n");
     }
-    //ControlUpload_GW(0,1,ValveStatus);
+    else
+    {
+      beep_start(0,6);//蜂鸣器一下
+      LOG_D("No permissions to Open\r\n");
+    }
+    //ControlUpload_GW(0,0,1,ValveStatus);//初次上发
 }
 void Moto_Open(uint8_t ActFlag)
 {
@@ -68,8 +74,10 @@ void Moto_Open(uint8_t ActFlag)
         rt_pin_write(Turn1,1);
         rt_pin_write(Turn2,1);
         rt_timer_start(Moto_Detect_Timer);
+        just_ring();
     }
-    else {
+    else if(Global_Device.LastFlag == OtherOff && ActFlag == NormalOpen)
+    {
         beep_start(0,7);//蜂鸣器三下
         LOG_D("No permissions to Open\r\n");
     }
@@ -91,12 +99,13 @@ void Moto_Close(uint8_t ActFlag)
         }
         rt_pin_write(Turn1,0);
         rt_pin_write(Turn2,0);
+        just_ring();
     }
     else if(Global_Device.LastFlag == OtherOff && ActFlag == OtherOff)
     {
         Now_Status = Close;
         ValveStatus=0;
-        beep_start(0,7);//蜂鸣器三下
+        just_ring();
         LOG_D("Moto is alreay otheroff\r\n");
     }
     else

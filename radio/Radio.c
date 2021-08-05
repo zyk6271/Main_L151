@@ -561,7 +561,7 @@ static void TransmitData(void)
                     }
                     SpiWriteSingleAddressRegister(REG_AX5043_FIFODATA, byte);
                 }
-                LOG_D("B Send\r\n");
+                //LOG_D("B Send\r\n");
                 break;
             case trxstate_tx_packet:  //C
                 SpiWriteSingleAddressRegister(REG_AX5043_FIFODATA, AX5043_FIFOCMD_DATA | (7 << 5));
@@ -572,7 +572,7 @@ static void TransmitData(void)
                 ubRFState = trxstate_tx_waitdone;
                 SpiWriteSingleAddressRegister(REG_AX5043_RADIOEVENTMASK0,0x01);
                 SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK0,0x40);
-                LOG_D("C Send,Len is %d\r\n",TxLen);
+                //LOG_D("C Send,Len is %d\r\n",TxLen);
                 break;
             default:
                 return;

@@ -151,6 +151,7 @@ void Device_Learn(Message buf)
                     Add_GatewayDevice(buf.From_ID);//向数据库写入
                     LOG_I("Gateway Write to Flash With ID %d\r\n",buf.From_ID);
                 }
+                Device_AliveChange(buf.From_ID,1);
             }
             else//存在该值
             {
@@ -172,7 +173,7 @@ void Device_Learn(Message buf)
                 just_ring();    //响一声
                 Relearn();
                 RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,2);
-                GatewaySyncEnqueue(0,3,buf.From_ID,0,0);
+                GatewaySyncEnqueue(0,3,buf.From_ID,1,0);
             }
             break;
         }
@@ -204,9 +205,16 @@ void DataSolve(Message buf)
         }
         else if(buf.Data==1)
         {
-            RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,1);
-            Warning_Enable_Num(7);
-            WarUpload_GW(1,buf.From_ID,6,1);//终端低电量报警
+            if(buf.From_ID!=GetDoorID())
+            {
+                RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,1);
+                Warning_Enable_Num(7);
+                WarUpload_GW(1,buf.From_ID,6,1);//终端低电量报警
+            }
+            else
+            {
+                RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,1);
+            }
         }
         else
         {
@@ -285,7 +293,6 @@ void DataSolve(Message buf)
             Warning_Disable();
             Last_Close_Flag=1;
             Moto_Close(OtherOff);
-            just_ring();
         }
         else if(Now_Status == SlaverWaterAlarmActive)
         {
@@ -359,9 +366,9 @@ void GatewayDataSolve(uint8_t *rx_buffer,uint8_t rx_len)
                     ControlUpload_GW(0,Rx_message.From_ID,2,ValveStatus);
                 }
                 break;
-            case 3://请求心跳
-                LOG_I("Request Heart\r\n");
-                ControlUpload_GW(0,0,4,0);
+            case 3://心跳应答
+                LOG_I("Heart Reponse\r\n");
+                ControlUpload_GW(0,0,4,ValveStatus);
                 break;
             case 4://请求同步
                 LOG_I("Request Sync\r\n");
@@ -403,7 +410,6 @@ void Rx_Done_Callback(uint8_t *rx_buffer,uint8_t rx_len,int8_t rssi)
             sscanf((const char *)&rx_buffer[1],"{%ld,%ld,%d,%d,%d}",&Rx_message.Target_ID,&Rx_message.From_ID,&Rx_message.Counter,&Rx_message.Command,&Rx_message.Data);
             if(Rx_message.Target_ID==Self_Id ||Rx_message.Target_ID==99999999)
             {
-                Update_Device_Rssi(Rx_message.From_ID,rssi);
                 if(Learn_Flag)
                 {
                     Device_Learn(Rx_message);
@@ -416,6 +422,8 @@ void Rx_Done_Callback(uint8_t *rx_buffer,uint8_t rx_len,int8_t rssi)
                     }
                     if(Flash_Get_Key_Valid(Rx_message.From_ID)==RT_EOK)
                     {
+                        Update_Device_Rssi(Rx_message.From_ID,rssi);
+                        Device_AliveChange(Rx_message.From_ID,1);
                         DataSolve(Rx_message);
                     }
                     else

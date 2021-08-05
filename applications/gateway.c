@@ -19,6 +19,7 @@
 #include <rtdbg.h>
 
 extern Device_Info Global_Device;
+extern uint8_t ValveStatus;
 
 rt_timer_t Heart_Check_t = RT_NULL;
 rt_timer_t Heart_Test_t = RT_NULL;
@@ -32,9 +33,10 @@ void Gateway_Sync(void)
     {
         if(Global_Device.ID[i]<40000000)
         {
-            GatewaySyncEnqueue(1,3,Global_Device.ID[i],Global_Device.Rssi[i],Global_Device.Bat[i]);
+            GatewaySyncEnqueue(1,3,Global_Device.ID[i],Global_Device.Alive[i],Global_Device.Bat[i]);
         }
     }
+    ControlUpload_GW(0,0,5,ValveStatus);
 }
 void Gateway_RemoteDelete(void)
 {
@@ -114,7 +116,7 @@ void Gateway_Init(void)
         LOG_I("Gateway_ID is %ld\r\n",Gateway_ID);
         if(Heart_Test_t==RT_NULL)
         {
-            Heart_Test_t = rt_timer_create("Heart_Test", Heart_Test,RT_NULL,3000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_PERIODIC);
+            Heart_Test_t = rt_timer_create("Heart_Test", Heart_Test,RT_NULL,5000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_PERIODIC);
         }
         if(Heart_Check_t==RT_NULL)
         {
@@ -138,4 +140,8 @@ void ControlUpload_GW(uint8_t ack,uint32_t device_id,uint8_t control_id,uint8_t 
     {
         GatewayControlEnqueue(ack,device_id,Flash_GetRssi(device_id),control_id,value);
     }
+}
+void Replace_Door(uint32_t old)
+{
+    GatewayWarningEnqueue(1,old,Flash_GetRssi(old),4,0);
 }
