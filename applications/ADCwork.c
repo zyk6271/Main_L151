@@ -143,7 +143,7 @@ void NTC_Work_Callback(void *parameter)
                 Moto_Close(NormalOff);
             }
         }
-        rt_thread_mdelay(100);
+        rt_thread_mdelay(1000);
     }
 }
 void NTC_Init(void)

@@ -44,7 +44,7 @@ void led_Init(void)
     if(beep == RT_NULL)
     {
         beep = agile_led_create(BEEP_PIN, PIN_HIGH, "200,200", -1);
-        singlebeep = agile_led_create(BEEP_PIN, PIN_HIGH, "200,200", 1);
+        singlebeep = agile_led_create(BEEP_PIN, PIN_HIGH, "200,1", 1);
         beep_three = agile_led_create(BEEP_PIN, PIN_HIGH, "200,200", 3);
         LOG_D("Beep Init Success\r\n");
     }

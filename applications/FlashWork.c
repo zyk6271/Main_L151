@@ -273,7 +273,7 @@ void Flash_AliveChange(uint32_t Device_ID,uint8_t value)
     ef_set_env(Temp_KeyBuf, Temp_ValueBuf);
     rt_free(Temp_KeyBuf);
     rt_free(Temp_ValueBuf);
-    LOG_D("Writing Rssi %d to key %ld\r\n", value,Device_ID);
+    LOG_D("Writing Alive %d to key %ld\r\n", value,Device_ID);
 }
 uint8_t Device_BatGet(uint32_t Device_ID)
 {
@@ -528,6 +528,7 @@ void Detect_All_Time(void)
             if(num == Global_Device.DoorNum)
             {
                 LOG_D("Door is Offline\r\n");
+                Device_AliveChange(Global_Device.ID[num],0);
             }
             else if(num == Global_Device.GatewayNum)
             {

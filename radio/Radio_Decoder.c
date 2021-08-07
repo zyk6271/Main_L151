@@ -151,7 +151,6 @@ void Device_Learn(Message buf)
                     Add_GatewayDevice(buf.From_ID);//向数据库写入
                     LOG_I("Gateway Write to Flash With ID %d\r\n",buf.From_ID);
                 }
-                Device_AliveChange(buf.From_ID,1);
             }
             else//存在该值
             {
@@ -171,6 +170,7 @@ void Device_Learn(Message buf)
                 }
                 LOG_D("Include This Device，Send Confirmed\r\n");
                 just_ring();    //响一声
+                Device_AliveChange(buf.From_ID,1);
                 Relearn();
                 RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,2);
                 GatewaySyncEnqueue(0,3,buf.From_ID,1,0);
@@ -368,7 +368,7 @@ void GatewayDataSolve(uint8_t *rx_buffer,uint8_t rx_len)
                 break;
             case 3://心跳应答
                 LOG_I("Heart Reponse\r\n");
-                ControlUpload_GW(0,0,4,ValveStatus);
+                ControlUpload_GW(1,0,4,ValveStatus);
                 break;
             case 4://请求同步
                 LOG_I("Request Sync\r\n");

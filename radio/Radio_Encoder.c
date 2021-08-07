@@ -23,20 +23,6 @@
 #define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
-typedef struct
-{
-    uint8_t NowNum;
-    uint8_t TargetNum;
-    uint8_t SendNum;
-    uint8_t ack[30];
-    uint8_t trials[30];
-    uint8_t type[30];
-    uint32_t Taget_Id[30];
-    uint8_t counter[30];
-    uint8_t Command[30];
-    uint8_t Data[30];
-}Radio_Queue;
-
 rt_thread_t Radio_QueueTask = RT_NULL;
 rt_timer_t AckCheck_t = RT_NULL;
 Radio_Queue Main_Queue={0};

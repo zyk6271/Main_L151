@@ -34,7 +34,6 @@
 
 #define RT_USING_MEMPOOL
 #define RT_USING_SMALL_MEM
-#define RT_USING_MEMTRACE
 #define RT_USING_HEAP
 /* end of Memory Management */
 
@@ -78,7 +77,6 @@
 #define RT_USING_SERIAL
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_PIN
-#define RT_USING_ADC
 #define RT_USING_SPI
 #define RT_USING_SFUD
 #define RT_SFUD_USING_FLASH_INFO_TABLE

@@ -88,7 +88,7 @@ void Key_Reponse_Callback(void *parameter)
                 LOG_D("Valve Open With ON\r\n");
                 break;
             case Open:
-                key_down();
+                just_ring();
                 LOG_D("Valve Already Open With ON\r\n");
                 break;
             case SlaverLowPower:
