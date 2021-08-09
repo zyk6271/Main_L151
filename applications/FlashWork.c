@@ -22,10 +22,8 @@ typedef struct _env_list {
 } env_list;
 
 Device_Info Global_Device={0};
-
 rt_spi_flash_device_t fm25q128;
-
-char read_value_temp[64] = {0};
+char read_value_temp[32] = {0};
 
 int flash_Init(void)
 {
@@ -36,6 +34,24 @@ int flash_Init(void)
         return -RT_ERROR;
     };
     return RT_EOK;
+}
+uint8_t Get_LearnNums_Valid(void)
+{
+    uint16_t num = 1;
+    while(num<MaxSupport)
+    {
+        if(Global_Device.ID[num] == 0)
+        {
+            if(num>Global_Device.Num)//新序列号
+            {
+                Global_Device.Num = num;
+                Flash_LearnNums_Change(num);
+            }
+            return num;
+        }
+        num++;
+    }
+    return 0;
 }
 uint32_t Flash_Get_Boot_Times(void)
 {
@@ -308,14 +324,14 @@ void Device_BatChange(uint32_t Device_ID,uint8_t value)
 }
 uint8_t Add_Device(uint32_t Device_ID)
 {
-    uint32_t Num=0;
-    Num = Flash_Get_Learn_Nums();
-    if(Num>20)return RT_ERROR;
-    Num++;
-    Flash_LearnNums_Change(Num);
-    Global_Device.Num = Num;
-    Global_Device.ID[Num] = Device_ID;
-    Flash_Key_Change(Num,Device_ID);
+    uint8_t num;
+    num = Get_LearnNums_Valid();
+    if(num == 0)
+    {
+        return RT_ERROR;
+    }
+    Global_Device.ID[num] = Device_ID;
+    Flash_Key_Change(num,Device_ID);
     return RT_EOK;
 }
 uint8_t Add_DoorDevice(uint32_t Device_ID)
@@ -334,11 +350,11 @@ uint8_t Add_DoorDevice(uint32_t Device_ID)
     }
     else
     {
-        Num = Flash_Get_Learn_Nums();
-        if(Num>20)return RT_ERROR;
-        Num++;
-        Flash_LearnNums_Change(Num);
-        Global_Device.Num = Num;
+        Num = Get_LearnNums_Valid();
+        if(Num == 0)
+        {
+            return RT_ERROR;
+        }
         Global_Device.ID[Num] = Device_ID;
         Flash_Key_Change(Num,Device_ID);
         Global_Device.DoorNum = Num;
@@ -362,11 +378,11 @@ uint8_t Add_GatewayDevice(uint32_t Device_ID)
     }
     else
     {
-        Num = Flash_Get_Learn_Nums();
-        if(Num>20)return RT_ERROR;
-        Num++;
-        Flash_LearnNums_Change(Num);
-        Global_Device.Num = Num;
+        Num = Get_LearnNums_Valid();
+        if(Num == 0)
+        {
+            return RT_ERROR;
+        }
         Global_Device.ID[Num] = Device_ID;
         Flash_Key_Change(Num,Device_ID);
         Global_Device.GatewayNum = Num;
@@ -665,13 +681,12 @@ void LoadDevice2Memory(void)//数据载入到内存中
     for(uint8_t i=1;i<=Global_Device.Num;i++)
     {
         Global_Device.ID[i] = Flash_Get_Key_Value(i);
-        LOG_D("GOT ID is %ld\r\n",Global_Device.ID[i]);
-        Global_Device.Bat[i] = Device_BatGet(Global_Device.ID[i]);
-        LOG_D("GOT Bat is %ld\r\n",Global_Device.Bat[i]);
-        Global_Device.Rssi[i] = Device_RssiGet(Global_Device.ID[i]);
-        LOG_D("GOT Rssi is %ld\r\n",Global_Device.Rssi[i]);
-        Global_Device.Alive[i] = Flash_AliveGet(Global_Device.ID[i]);
-        LOG_D("GOT Alive is %ld\r\n",Global_Device.Alive[i]);
+        if(Global_Device.ID[i])
+        {
+            Global_Device.Bat[i] = Device_BatGet(Global_Device.ID[i]);
+            Global_Device.Rssi[i] = Device_RssiGet(Global_Device.ID[i]);
+            Global_Device.Alive[i] = Flash_AliveGet(Global_Device.ID[i]);
+        }
     }
     Global_Device.DoorNum = Flash_Get_Key_Value(88888888);
     Global_Device.GatewayNum = Flash_Get_Key_Value(88887777);

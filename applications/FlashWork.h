@@ -3,18 +3,19 @@
 #endif
 #include "stdint.h"
 
+#define MaxSupport 50
 typedef struct
 {
     uint8_t  LastFlag;
     uint32_t Num;
     uint32_t DoorNum;
     uint32_t GatewayNum;
-    uint32_t ID[20];
-    uint8_t Reponse[20];
-    uint32_t ID_Time[20];
-    uint32_t Alive[20];
-    uint8_t  Bat[20];
-    uint8_t  Rssi[20];
+    uint32_t ID[MaxSupport];
+    uint8_t Reponse[MaxSupport];
+    uint32_t ID_Time[MaxSupport];
+    uint32_t Alive[MaxSupport];
+    uint8_t  Bat[MaxSupport];
+    uint8_t  Rssi[MaxSupport];
 }Device_Info;
 
 #define NormalOff   1
