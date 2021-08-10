@@ -8,6 +8,7 @@ static agile_led_t *led0 = RT_NULL;
 static agile_led_t *led1 = RT_NULL;
 static agile_led_t *beep = RT_NULL;
 static agile_led_t *singlebeep = RT_NULL;
+static agile_led_t *learnbeep = RT_NULL;
 static agile_led_t *singleled0 = RT_NULL;
 static agile_led_t *beep_three = RT_NULL;
 static agile_led_t *led0_three = RT_NULL;
@@ -46,6 +47,7 @@ void led_Init(void)
         beep = agile_led_create(BEEP_PIN, PIN_HIGH, "200,200", -1);
         singlebeep = agile_led_create(BEEP_PIN, PIN_HIGH, "200,1", 1);
         beep_three = agile_led_create(BEEP_PIN, PIN_HIGH, "200,200", 3);
+        learnbeep = agile_led_create(BEEP_PIN, PIN_HIGH, "50,50,200,200", 3);
         LOG_D("Beep Init Success\r\n");
     }
     if(wifi_G == RT_NULL)
@@ -356,6 +358,10 @@ void key_down(void)
 void just_ring(void)
 {
     agile_led_start(singlebeep);
+}
+void learn_fail_ring(void)
+{
+    agile_led_start(learnbeep);
 }
 void Relearn(void)
 {

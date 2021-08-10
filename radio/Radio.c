@@ -161,7 +161,7 @@ void ChangeMaxPower(void)
     }
     else
     {
-        LOG_D("Power Already Max\r\n");
+        //LOG_D("Power Already Max\r\n");
     }
 }
 void BackNormalPower(void)
@@ -175,7 +175,7 @@ void BackNormalPower(void)
     }
     else
     {
-        LOG_D("Power Already Normal\r\n");
+        //LOG_D("Power Already Normal\r\n");
     }
 }
 uint8_t InitAX5043(void)

@@ -132,24 +132,47 @@ void Device_Learn(Message buf)
         switch(buf.Data)
         {
         case 1:
-            RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,1);
             if(Check_Valid(buf.From_ID))//如果数据库不存在该值
             {
                 LOG_D("Not Include This Device\r\n");
                 if(buf.From_ID<30000000)
                 {
-                    Add_Device(buf.From_ID);//向数据库写入
-                    LOG_I("Slaver Write to Flash With ID %d\r\n",buf.From_ID);
+                    if(Add_Device(buf.From_ID)==RT_EOK)
+                    {
+                        LOG_I("Slaver Write to Flash With ID %d\r\n",buf.From_ID);
+                        RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,1);
+                    }
+                    else
+                    {
+                        LOG_W("Slaver Write to Flash Fail With ID %d\r\n",buf.From_ID);
+                        learn_fail_ring();
+                    }
                 }
                 else if(buf.From_ID>=30000000 && buf.From_ID<40000000)
                 {
-                    Add_DoorDevice(buf.From_ID);//向数据库写入
-                    LOG_I("Door Write to Flash With ID %d\r\n",buf.From_ID);
+                    if(Add_DoorDevice(buf.From_ID)==RT_EOK)
+                    {
+                        LOG_I("Door Write to Flash With ID %d\r\n",buf.From_ID);
+                        RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,1);
+                    }
+                    else
+                    {
+                        LOG_W("Door Write to Flash Fail With ID %d\r\n",buf.From_ID);
+                        learn_fail_ring();
+                    }
                 }
                 else if(buf.From_ID>=40000000 && buf.From_ID<50000000)
                 {
-                    Add_GatewayDevice(buf.From_ID);//向数据库写入
-                    LOG_I("Gateway Write to Flash With ID %d\r\n",buf.From_ID);
+                    if(Add_GatewayDevice(buf.From_ID)==RT_EOK)
+                    {
+                        LOG_I("Gateway Write to Flash With ID %d\r\n",buf.From_ID);
+                        RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,1);
+                    }
+                    else
+                    {
+                        LOG_W("Gateway Write to Flash Fail With ID %d\r\n",buf.From_ID);
+                        learn_fail_ring();
+                    }
                 }
             }
             else//存在该值

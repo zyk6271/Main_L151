@@ -21,6 +21,7 @@ void beep_stop(void);
 void key_down(void);
 void Relearn(void);
 void just_ring(void);
+void learn_fail_ring(void);
 void beeplive(void);
 void beepback(void);
 void loss_led_start(void);

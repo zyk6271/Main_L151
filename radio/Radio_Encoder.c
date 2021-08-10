@@ -166,6 +166,7 @@ void RadioDequeue(void *paramaeter)
                         }
                         else if(Main_Queue.trials[Main_Queue.NowNum+1]<3)
                         {
+                            ChangeMaxPower();
                             Main_Queue.SendNum = Main_Queue.NowNum+1;
                             Main_Queue.trials[Main_Queue.NowNum+1]++;
                             LOG_I("Ack Retry again\r\n");
@@ -193,28 +194,29 @@ void RadioDequeue(void *paramaeter)
             case 1:
                 RadioSend(Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
                 LOG_D("Normal Send With Now Num %d,Target Num is %d,Target_Id %ld,counter %d,command %d,data %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                rt_thread_mdelay(300);
+                rt_thread_mdelay(500);
                 break;
             case 2:
                 GatewaySyncSend(Main_Queue.ack[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
                 LOG_D("GatewaySync With Now Num %d,Target Num is %d,Type is %d,Target_Id %ld,rssi %d,bat %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Main_Queue.counter[Main_Queue.SendNum],Gateway_ID,Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                rt_thread_mdelay(600);
+                rt_thread_mdelay(800);
                 wifi_led(3);
                 break;
             case 3:
                 GatewayWarningSend(Main_Queue.ack[Main_Queue.SendNum],Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
                 LOG_D("GatewayWarningSend With Now Num %d,Target Num is %d,Target_Id %ld,Rssi is %d,warn_id %d,value %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Gateway_ID,Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                rt_thread_mdelay(600);
+                rt_thread_mdelay(800);
                 wifi_led(3);
                 break;
             case 4:
                 GatewayControlSend(Main_Queue.ack[Main_Queue.SendNum],Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
                 LOG_D("GatewayControl With Now Num %d,Target Num is %d,Target_Id %ld,Rssi is %d,control %d,value %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Gateway_ID,Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                rt_thread_mdelay(600);
+                rt_thread_mdelay(800);
                 wifi_led(3);
                 break;
             default:break;
             }
+            BackNormalPower();
         }
         rt_thread_mdelay(10);
     }
