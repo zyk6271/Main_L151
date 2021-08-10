@@ -70,22 +70,9 @@ void loss_led_stop(void)
 {
     agile_led_stop(lossled0);
 }
-void led_resume_callback(agile_led_t *led)
-{
-    rt_pin_write(LED0_PIN, 1);
-    rt_pin_write(BEEP_PIN, 0);
-    agile_led_resume(led0);
-    agile_led_resume(led1);
-    agile_led_resume(beep);
-    agile_led_resume(singlebeep);
-    agile_led_resume(singleled0);
-}
 void beep_three_times(void)
 {
-    led_Stop(2);
-    agile_led_set_compelete_callback(led0_three,led_resume_callback);
     agile_led_start(beep_three);
-    agile_led_start(led0_three);
 }
 void wifi_G_resume_callback(agile_led_t *led)
 {
