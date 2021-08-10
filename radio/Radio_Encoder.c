@@ -59,6 +59,7 @@ void RadioSend(uint32_t Taget_Id,uint8_t counter,uint8_t Command,uint8_t Data)
 
 void GatewaySyncEnqueue(uint8_t ack,uint8_t type,uint32_t device_id,uint8_t rssi,uint8_t bat)
 {
+    if(Gateway_ID==0)return;
     RadioEnqueue(ack,2,device_id,type,rssi,bat);
 }
 void GatewaySyncSend(uint8_t ack,uint8_t type,uint32_t device_id,uint8_t rssi,uint8_t bat)
@@ -76,6 +77,7 @@ void GatewaySyncSend(uint8_t ack,uint8_t type,uint32_t device_id,uint8_t rssi,ui
 }
 void GatewayWarningEnqueue(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t warn_id,uint8_t value)
 {
+    if(Gateway_ID==0)return;
     RadioEnqueue(ack,3,device_id,rssi,warn_id,value);
 }
 void GatewayWarningSend(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t warn_id,uint8_t value)
@@ -93,6 +95,7 @@ void GatewayWarningSend(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t warn
 }
 void GatewayControlEnqueue(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t control,uint8_t value)
 {
+    if(Gateway_ID==0)return;
     RadioEnqueue(ack,4,device_id,rssi,control,value);
 }
 void GatewayControlSend(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t control,uint8_t value)
