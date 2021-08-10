@@ -73,6 +73,7 @@ void loss_led_stop(void)
 void beep_three_times(void)
 {
     agile_led_start(beep_three);
+    agile_led_start(led0_three);
 }
 void wifi_G_resume_callback(agile_led_t *led)
 {
