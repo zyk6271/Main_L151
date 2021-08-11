@@ -177,6 +177,7 @@ void Device_Learn(Message buf)
             }
             else//存在该值
             {
+                RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,1);
                 LOG_I("Include This Device，Send Ack\r\n");
             }
             break;
@@ -196,7 +197,7 @@ void Device_Learn(Message buf)
                 Device_AliveChange(buf.From_ID,1);
                 Relearn();
                 RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,2);
-                GatewaySyncEnqueue(0,3,buf.From_ID,1,0);
+                GatewaySyncEnqueue(1,3,buf.From_ID,1,0);
             }
             break;
         }
