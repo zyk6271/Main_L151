@@ -3,7 +3,7 @@
 #endif
 #include "stdint.h"
 
-#define MaxSupport 12
+#define MaxSupport 13
 typedef struct
 {
     uint8_t  LastFlag;
