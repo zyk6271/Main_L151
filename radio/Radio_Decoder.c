@@ -216,28 +216,20 @@ void DataSolve(Message buf)
         LOG_D("HandShake\r\n");
         if(buf.Data==2)
         {
+            RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,2);
+            WarUpload_GW(1,buf.From_ID,6,2);//终端低电量报警
             if(buf.From_ID!=GetDoorID())
             {
-                RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,2);
                 Warning_Enable_Num(1);
-                WarUpload_GW(1,buf.From_ID,6,2);//终端低电量报警
-            }
-            else
-            {
-                RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,2);
             }
         }
         else if(buf.Data==1)
         {
+            RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,1);
+            WarUpload_GW(1,buf.From_ID,6,1);//终端低电量报警
             if(buf.From_ID!=GetDoorID())
             {
-                RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,1);
                 Warning_Enable_Num(7);
-                WarUpload_GW(1,buf.From_ID,6,1);//终端低电量报警
-            }
-            else
-            {
-                RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,1);
             }
         }
         else
