@@ -125,8 +125,6 @@ void Ax5043SetRegisters_TX(void)
     {
         SpiWriteLongAddressRegister(TXMODE_REG[ubi][0] , TXMODE_REG[ubi][1] );
     }
-    SpiWriteLongAddressRegister(REG_AX5043_PLLLOOP,0x0b);
-    SpiWriteLongAddressRegister(REG_AX5043_PLLCPI,0x10);
 
 }
 void Ax5043SetRegisters_RX(void)
@@ -230,7 +228,6 @@ uint8_t InitAX5043(void)
         while (ubRFState == trxstate_pll_ranging); //while(ubRFState != trxstate_pll_ranging_done); wait for trxstate_pll_ranging_done
 
         ubRFState = trxstate_off;
-        SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK0, 0x00);
         SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK1, 0x00);     //AX5043_IRQMASK1 = 0x00;
         ubTemp = SpiReadSingleAddressRegister(REG_AX5043_PLLRANGINGA);
         AxRadioPHYChanPllRng_RX[ubi] = ubTemp;                        //AX5043_PLLRANGINGA;
@@ -338,10 +335,10 @@ void AX5043Receiver_Continuous(void)
     ubTemp &= ~0x40;
     SpiWriteLongAddressRegister(REG_AX5043_PKTSTOREFLAGS, ubTemp);
     SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK0,0x01);
-    SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK1,0x00);
     SpiWriteSingleAddressRegister(REG_AX5043_FIFOSTAT,0x03);
     SpiWriteSingleAddressRegister(REG_AX5043_PWRMODE,AX5043_PWRSTATE_FULL_RX);
     ubRFState = trxstate_rx;
+    SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK1,0x00);
 }
 void SetReceiveMode(void)
 {
@@ -470,6 +467,7 @@ void transmit_packet_task(uint8_t *Buf, uint8_t u8Len)
     ubRFState = trxstate_tx_xtalwait;
     SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK0, 0x00);
     SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK1, 0x01);
+    SpiReadSingleAddressRegister(REG_AX5043_POWSTICKYSTAT);
 }
 void Normal_send(uint8_t *Buf, uint8_t u8Len)
 {
@@ -606,13 +604,11 @@ void Radio_Task_Callback(void *parameter)
                 break;
 
             case trxstate_wait_xtal:     //3
-                SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK0, 0x00);
                 SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK1, 0x00);//AX5043_IRQMASK1 = 0x00 otherwise crystal ready will fire all over again
                 ubRFState = trxstate_xtal_ready;
                 break;
 
             case trxstate_pll_ranging:     //5
-                SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK0, 0x00);
                 SpiWriteSingleAddressRegister(REG_AX5043_IRQMASK1, 0x00);//AX5043_IRQMASK1 = 0x00 otherwise autoranging done will fire all over again
                 ubRFState = trxstate_pll_ranging_done;
                 break;
