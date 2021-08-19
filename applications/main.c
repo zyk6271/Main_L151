@@ -38,7 +38,6 @@ int main(void)
     easyflash_init();
     LoadDevice2Memory();
     Moto_Init();
-    wdt_sample();
     Delay_Timer_Init();
     RTC_Init();
     WarningInit();
@@ -49,7 +48,6 @@ int main(void)
     button_Init();
     while (1)
     {
-        FeedDog();
         rt_thread_mdelay(1000);
     }
     return RT_EOK;
