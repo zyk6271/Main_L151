@@ -290,7 +290,7 @@ void DataSolve(Message buf)
             LOG_D("Pwr On From %ld\r\n",buf.From_ID);
             RadioEnqueue(0,1,buf.From_ID,buf.Counter,5,1);
             Moto_Open(OtherOpen);
-            Delay_Timer_Close();
+            Delay_Timer_Close_NoWiFi();
             Last_Close_Flag=0;
             just_ring();
         }

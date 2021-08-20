@@ -177,6 +177,11 @@ void Delay_Timer_Close(void)
     ControlUpload_GW(0,0,3,0);
     rt_timer_stop(Delay_Timer);
 }
+void Delay_Timer_Close_NoWiFi(void)
+{
+    LOG_D("Delay_Timer is Close\r\n");
+    rt_timer_stop(Delay_Timer);
+}
 void OfflineWarning(void *parameter)
 {
     if(Now_Status!=Offline)
