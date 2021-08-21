@@ -200,6 +200,7 @@ void Key_Reponse_Callback(void *parameter)
             }
             else if(Now_Status==Learn)
             {
+                rt_timer_stop(Learn_Timer);
                 Stop_Learn();
             }
             else

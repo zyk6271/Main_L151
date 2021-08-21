@@ -13,6 +13,7 @@ void led_Init(void);
 void beep_three_times(void);
 void wifi_led(uint8_t num);
 void led_Long_Start(uint8_t led_id);
+void Green_Long_Start(void);
 void led_Slow_Start(uint8_t led_id,int count);
 void led_Fast_Start(uint8_t led_id,int count);
 void led_Stop(uint8_t led_id);

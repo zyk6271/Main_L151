@@ -129,7 +129,7 @@ void Turn1_Timer_Callback(void *parameter)
     rt_pin_irq_enable(Senor1, PIN_IRQ_DISABLE);
     LOG_D("Moto is Open\r\n");
     Now_Status = Open;
-    led_Long_Start(1);//绿灯
+    Green_Long_Start();//绿灯
     ValveStatus=1;
     Global_Device.LastFlag = NormalOpen;
     Flash_Moto_Change(NormalOpen);
@@ -152,7 +152,7 @@ void Turn2_Timer_Callback(void *parameter)
     rt_pin_irq_enable(Senor2, PIN_IRQ_DISABLE);
     LOG_D("Moto is Open\r\n");
     Now_Status = Open;
-    led_Long_Start(1);//绿灯
+    Green_Long_Start();//绿灯
     ValveStatus=1;
     Global_Device.LastFlag = NormalOpen;
     Flash_Moto_Change(NormalOpen);

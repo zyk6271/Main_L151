@@ -385,6 +385,11 @@ void led_Long_Start(uint8_t led_id)
         break;
     }
 }
+void Green_Long_Start(void)
+{
+    agile_led_set_light_mode(led1, "200,0", -1);
+    agile_led_start(led1);
+}
 void led_Slow_Start(uint8_t led_id,int count)
 {
     switch (led_id)
