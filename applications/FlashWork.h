@@ -23,7 +23,7 @@ typedef struct
 #define NormalOpen  3
 #define OtherOpen   4
 
-int flash_Init(void);
+void flash_Init(void);
 uint32_t Flash_Get(uint32_t id);
 uint8_t Flash_Get_Key_Valid(uint32_t key);
 uint8_t Flash_GetRssi(uint32_t Device_ID);//查询内存中的RSSI

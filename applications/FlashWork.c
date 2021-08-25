@@ -25,15 +25,11 @@ Device_Info Global_Device={0};
 rt_spi_flash_device_t fm25q128;
 char read_value_temp[32] = {0};
 
-int flash_Init(void)
+void flash_Init(void)
 {
-    rt_hw_spi_device_attach("spi2", "spi20", GPIOB, GPIO_PIN_12);//往总线spi2上挂载一个spi20设备，cs脚：PB12
-    fm25q128 = rt_sfud_flash_probe("norflash0", "spi20");//使用sfud探测spi20从设备，并且将spi20连接的flash初始化为块设备，名称为FAL_USING_NOR_FLASH_DEV_NAME
-    if (RT_NULL == fm25q128)
-    {
-        return -RT_ERROR;
-    };
-    return RT_EOK;
+    rt_hw_spi_device_attach("spi2", "spi20", GPIOB, GPIO_PIN_12);
+    fm25q128 = rt_sfud_flash_probe("norflash0", "spi20");
+    RT_ASSERT(fm25q128);
 }
 uint8_t Get_LearnNums_Valid(void)
 {

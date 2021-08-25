@@ -25,6 +25,7 @@
 #include "adcwork.h"
 #include "radio_decoder.h"
 #include "gateway.h"
+#include "factory.h"
 
 #define DBG_TAG "main"
 #define DBG_LVL DBG_LOG
@@ -46,6 +47,7 @@ int main(void)
     Gateway_Init();
     ADC_Init();
     button_Init();
+    DetectFactory();
     while (1)
     {
         rt_thread_mdelay(1000);

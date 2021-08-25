@@ -368,6 +368,26 @@ void NTC_Ring(void)
     agile_led_start(led1);
     agile_led_start(beep);
 }
+void Factory_WarningRing(void)
+{
+    agile_led_stop(led1);
+    agile_led_set_light_mode(beep, "200,200", 1);
+    agile_led_set_light_mode(led0, "200,200", 1);
+    agile_led_start(led0);
+    agile_led_start(beep);
+}
+void Factory_NormalRing(void)
+{
+    agile_led_stop(led0);
+    agile_led_set_light_mode(beep, "200,200", 1);
+    agile_led_set_light_mode(led1, "200,200", 1);
+    agile_led_set_light_mode(wifi_G, "200,200", 1);
+    agile_led_set_light_mode(wifi_R, "200,200", 1);
+    agile_led_start(wifi_G);
+    agile_led_start(wifi_R);
+    agile_led_start(led1);
+    agile_led_start(beep);
+}
 void led_Long_Start(uint8_t led_id)
 {
     switch (led_id)

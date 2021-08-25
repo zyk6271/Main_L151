@@ -29,5 +29,7 @@ void loss_led_start(void);
 void loss_led_stop(void);
 void led_on(uint8_t id);
 void NTC_Ring(void);
+void Factory_WarningRing(void);
+void Factory_NormalRing(void);
 
 #endif /* APPLICATIONS_LED_H_ */

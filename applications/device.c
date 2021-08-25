@@ -30,6 +30,7 @@ uint16_t K1_Long_Sem_Counter=0;
 uint8_t  K0_OnceFlag=0;
 uint8_t  K1_OnceFlag=0;
 uint8_t  K0_K1_OnceFlag=0;
+extern uint8_t Factory_Flag;
 void Key_SemInit(void)
 {
     K0_Sem=rt_sem_create("K0", 0, RT_IPC_FLAG_FIFO);

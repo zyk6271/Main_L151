@@ -442,6 +442,18 @@ void Rx_Done_Callback(uint8_t *rx_buffer,uint8_t rx_len,int8_t rssi)
                         Device_AliveChange(Rx_message.From_ID,1);
                         DataSolve(Rx_message);
                     }
+                    else if(Rx_message.From_ID == 98989898)
+                    {
+                        LOG_W("Factory Get Rssi is %d\r\n",rssi-64);
+                        if(rssi<-6)
+                        {
+                            Factory_WarningRing();
+                        }
+                        else
+                        {
+                            Factory_NormalRing();
+                        }
+                    }
                     else
                     {
                         LOG_I("Device_ID %ld is not include\r\n",Rx_message.From_ID);

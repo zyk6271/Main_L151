@@ -46,6 +46,7 @@ extern uint8_t Learn_Flag;
 extern uint8_t Last_Close_Flag;
 
 extern enum Device_Status Now_Status;
+extern uint8_t Factory_Flag;
 void release_k0(void)
 {
     if(K0_Sem != RT_NULL)
@@ -124,61 +125,70 @@ void Key_Reponse_Callback(void *parameter)
         }
         else if(K1_Status==RT_EOK)//OFF
         {
-            switch(Now_Status)
+            if(Factory_Flag)
             {
-            case Close:
-                if(Last_Close_Flag==0)
-                {
-                    key_down();
-                }
-                else
-                {
-                    beep_start(0,7);//蜂鸣器三下
-                }
-                LOG_D("Valve Already Close With OFF\r\n");
-                break;
-            case Open:
-                key_down();
-                Last_Close_Flag = 0;
-                Moto_Close(NormalOff);
-                LOG_D("Valve Close With OFF\r\n");
-                break;
-            case SlaverLowPower:
-                break;
-            case SlaverUltraLowPower:
-                just_ring();
-                break;
-            case SlaverWaterAlarmActive:
-                beep_stop();
-                break;
-            case MasterLostPeak:
-                key_down();
-                Moto_Close(NormalOff);
-                beep_stop();
-                Now_Status = Close;
-                LOG_D("MasterLostPeak With OFF\r\n");
-                break;
-            case MasterWaterAlarmActive:
-                beep_stop();
-                break;
-            case MasterWaterAlarmDeActive:
-                key_down();
-                Now_Status = Close;
+                Stop_Factory_Cycle();
                 Warning_Disable();
-                LOG_D("MasterWaterAlarmActive With OFF\r\n");
-                break;
-            case Learn:
-                break;
-            case MotoFail:
-                key_down();
-                LOG_D("MotoFail With OFF\r\n");
-                break;
-            case Offline:
-                break;
-            case NTCWarning:
-                beep_stop();
-                key_down();
-                break;
+                Moto_Detect();
+            }
+            else
+            {
+                switch(Now_Status)
+                {
+                case Close:
+                    if(Last_Close_Flag==0)
+                    {
+                        key_down();
+                    }
+                    else
+                    {
+                        beep_start(0,7);//蜂鸣器三下
+                    }
+                    LOG_D("Valve Already Close With OFF\r\n");
+                    break;
+                case Open:
+                    key_down();
+                    Last_Close_Flag = 0;
+                    Moto_Close(NormalOff);
+                    LOG_D("Valve Close With OFF\r\n");
+                    break;
+                case SlaverLowPower:
+                    break;
+                case SlaverUltraLowPower:
+                    just_ring();
+                    break;
+                case SlaverWaterAlarmActive:
+                    beep_stop();
+                    break;
+                case MasterLostPeak:
+                    key_down();
+                    Moto_Close(NormalOff);
+                    beep_stop();
+                    Now_Status = Close;
+                    LOG_D("MasterLostPeak With OFF\r\n");
+                    break;
+                case MasterWaterAlarmActive:
+                    beep_stop();
+                    break;
+                case MasterWaterAlarmDeActive:
+                    key_down();
+                    Now_Status = Close;
+                    Warning_Disable();
+                    LOG_D("MasterWaterAlarmActive With OFF\r\n");
+                    break;
+                case Learn:
+                    break;
+                case MotoFail:
+                    key_down();
+                    LOG_D("MotoFail With OFF\r\n");
+                    break;
+                case Offline:
+                    break;
+                case NTCWarning:
+                    beep_stop();
+                    key_down();
+                    break;
+                }
             }
         }
         else if(K0_K1_Status==RT_EOK)
