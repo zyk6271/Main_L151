@@ -28,7 +28,7 @@ void RTC_Timer_Entry(void *parameter)
             {
                 Moto_Detect();
             }
-            if(RTC_Counter<24)
+            if(RTC_Counter<25)
             {
                 LOG_D("RTC Handler Increase\r\n");
                 Update_All_Time();//24小时更新全部时间
