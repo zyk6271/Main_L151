@@ -249,6 +249,7 @@ uint8_t Device_AliveChange(uint32_t Device_ID,uint8_t value)
         if(Global_Device.ID[num]==Device_ID)
         {
             Global_Device.Alive[num] = value;
+            Global_Device.GetMesssage[num] = value;
             Flash_AliveChange(Device_ID,value);
             return RT_EOK;
         }
@@ -467,9 +468,20 @@ uint8_t Update_Device_Rssi(uint32_t Device_ID,uint8_t rssi)//更新Rssi
     {
         if(Global_Device.ID[num]==Device_ID)
         {
-            Global_Device.Rssi[num] = rssi;
-            Device_RssiChange(Device_ID,rssi);
-            LOG_D("Device rssi %d is Increase to %d",Global_Device.ID[num],rssi);
+            if(rssi>85)
+            {
+                Global_Device.Rssi[num] = 0;
+            }
+            else if(rssi <= 85 && rssi>54)
+            {
+                Global_Device.Rssi[num] = 1;
+            }
+            else if(rssi <= 54)
+            {
+                Global_Device.Rssi[num] = 2;
+            }
+            Device_RssiChange(Device_ID,Global_Device.Rssi[num]);
+            LOG_I("Device rssi %d is Write to %d",Global_Device.Rssi[num],Global_Device.ID[num]);
             return RT_EOK;
         }
         num--;
@@ -517,9 +529,9 @@ void Clear_All_Time(void)
     {
         for(uint8_t i=1;i<=Num;i++)
         {
-            if(Global_Device.ID_Time[i]<25 || Global_Device.Alive[i] == 1)
+            if(Global_Device.ID_Time[i]<25 || Global_Device.GetMesssage[i] == 1)
             {
-                Global_Device.Alive[i] = 0;//更新内存中的时间
+                Global_Device.GetMesssage[i] = 0;//更新内存中的时间
                 Global_Device.ID_Time[i] = 0;//更新内存中的时间
                 LOG_D("Device %ld's time is cleard",Global_Device.ID[i]);
             }
@@ -534,7 +546,7 @@ void Detect_All_Time(void)
     if(!num)return;
     while(num)
     {
-        if(Global_Device.ID_Time[num]==25 && Global_Device.Alive[num]==0)
+        if(Global_Device.ID_Time[num]==25 && Global_Device.GetMesssage[num]==0)
         {
             //掉线ID上报
             if(num == Global_Device.DoorNum)

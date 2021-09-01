@@ -214,29 +214,39 @@ void DataSolve(Message buf)
         break;
     case 2://握手包
         LOG_D("HandShake\r\n");
-        if(buf.Data==2)
+        switch(buf.Data)
         {
-            RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,2);
-            WarUpload_GW(1,buf.From_ID,6,2);//终端低电量报警
-            if(buf.From_ID!=GetDoorID())
-            {
-                Warning_Enable_Num(1);
-            }
-        }
-        else if(buf.Data==1)
-        {
+        case 0:
+            Update_Device_Bat(buf.From_ID,buf.Data);//写入电量
+            RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,0);
+            WarUpload_GW(1,buf.From_ID,6,0);//终端低电量报警
+            break;
+        case 1:
             RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,1);
             WarUpload_GW(1,buf.From_ID,6,1);//终端低电量报警
             if(buf.From_ID!=GetDoorID())
             {
                 Warning_Enable_Num(7);
             }
-        }
-        else
-        {
+            break;
+        case 2:
+            RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,2);
+            WarUpload_GW(1,buf.From_ID,6,2);//终端低电量报警
+            if(buf.From_ID!=GetDoorID())
+            {
+                Warning_Enable_Num(1);
+            }
+            break;
+        case 3:
             Update_Device_Bat(buf.From_ID,buf.Data);//写入电量
-            RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,0);
-            WarUpload_GW(1,buf.From_ID,6,0);//终端低电量报警
+            RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,3);
+            WarUpload_GW(1,buf.From_ID,6,3);//终端低电量报警
+            break;
+        case 4:
+            Update_Device_Bat(buf.From_ID,buf.Data);//写入电量
+            RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,4);
+            WarUpload_GW(1,buf.From_ID,6,4);//终端低电量报警
+            break;
         }
         LOG_D("Handshake With %ld\r\n",buf.From_ID);
         break;
@@ -438,7 +448,7 @@ void Rx_Done_Callback(uint8_t *rx_buffer,uint8_t rx_len,int8_t rssi)
                     }
                     if(Flash_Get_Key_Valid(Rx_message.From_ID)==RT_EOK)
                     {
-                        Update_Device_Rssi(Rx_message.From_ID,rssi);
+                        Update_Device_Rssi(Rx_message.From_ID,abs(rssi-64));
                         Device_AliveChange(Rx_message.From_ID,1);
                         DataSolve(Rx_message);
                     }

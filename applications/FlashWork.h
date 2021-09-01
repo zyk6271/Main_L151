@@ -14,6 +14,7 @@ typedef struct
     uint8_t Reponse[20];
     uint32_t ID_Time[20];
     uint32_t Alive[20];
+    uint32_t GetMesssage[20];
     uint8_t  Bat[20];
     uint8_t  Rssi[20];
 }Device_Info;
