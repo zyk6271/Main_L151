@@ -143,9 +143,9 @@ uint8_t ANT_SW_Status,ANT_SW_Status_Temp = 0;
 void RF_Init(void)
 {
     ANT_SW_Status = rt_pin_read(ANT_SW);
-    rt_pin_write(ANT_EXT,ANT_SW_Status);
-    rt_pin_write(ANT_INT,!ANT_SW_Status);
-    LOG_I("ANT_EXT is %d , ANT_INT is %d\r\n",ANT_SW_Status,!ANT_SW_Status);
+    rt_pin_write(ANT_EXT,!ANT_SW_Status);
+    rt_pin_write(ANT_INT,ANT_SW_Status);
+    LOG_I("ANT_EXT is %d , ANT_INT is %d\r\n",!ANT_SW_Status,ANT_SW_Status);
 }
 void RF_Switch(void)
 {
@@ -153,9 +153,9 @@ void RF_Switch(void)
     if(ANT_SW_Status_Temp != ANT_SW_Status)
     {
         ANT_SW_Status = ANT_SW_Status_Temp;
-        rt_pin_write(ANT_EXT,ANT_SW_Status);
-        rt_pin_write(ANT_INT,!ANT_SW_Status);
-        LOG_I("ANT_EXT is %d , ANT_INT is %d\r\n",ANT_SW_Status,!ANT_SW_Status);
+        rt_pin_write(ANT_EXT,!ANT_SW_Status);
+        rt_pin_write(ANT_INT,ANT_SW_Status);
+        LOG_I("ANT_EXT is %d , ANT_INT is %d\r\n",!ANT_SW_Status,ANT_SW_Status);
         just_ring();
     }
 }
