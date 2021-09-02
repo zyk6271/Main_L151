@@ -611,7 +611,7 @@ void Offline_React(uint32_t ID)
     if(!num)return;
     while(num)
     {
-        if(Global_Device.ID_Time[num]==25 && Global_Device.Alive[num]==0)
+        if(Global_Device.Alive[num]==0)
         {
             //掉线ID上报
             if(num == Global_Device.DoorNum)
