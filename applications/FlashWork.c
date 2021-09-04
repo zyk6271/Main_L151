@@ -499,7 +499,6 @@ uint8_t Clear_Device_Time(uint32_t Device_ID)//更新时间戳为0
         if(Global_Device.ID[num]==Device_ID)
         {
             Global_Device.ID_Time[num] = 0;
-            Global_Device.Alive[num] = 1;
             LOG_D("Device %d is Clear to 0",Global_Device.ID[num]);
             return RT_EOK;
         }
@@ -632,7 +631,6 @@ void Offline_React(uint32_t ID)
     }
     if(WarnFlag==0)
     {
-        WarUpload_GW(1,ID,4,0);//Offline报警
         OfflineDisableWarning();
     }
     LOG_D("Detect_All_Time OK\r\n");
