@@ -455,7 +455,7 @@ void Rx_Done_Callback(uint8_t *rx_buffer,uint8_t rx_len,int8_t rssi)
                     else if(Rx_message.From_ID == 98989898)
                     {
                         LOG_W("Factory Get Rssi is %d\r\n",rssi-64);
-                        if(rssi<-6)
+                        if(rssi<-16)
                         {
                             Factory_WarningRing();
                         }
