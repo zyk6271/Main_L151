@@ -67,13 +67,13 @@ void Moto_Open(uint8_t ActFlag)
         ValveStatus=1;
         Global_Device.LastFlag = ActFlag;
         Flash_Moto_Change(ActFlag);
+        rt_pin_write(Turn1,1);
+        rt_pin_write(Turn2,1);
         if(ActFlag==NormalOpen)
         {
             ControlUpload_GW(1,0,1,1);
+            rt_timer_start(Moto_Detect_Timer);
         }
-        rt_pin_write(Turn1,1);
-        rt_pin_write(Turn2,1);
-        rt_timer_start(Moto_Detect_Timer);
         just_ring();
     }
     else if(Global_Device.LastFlag == OtherOff && ActFlag == NormalOpen)

@@ -26,6 +26,7 @@
 
 enum Device_Status Now_Status=Close;
 extern uint8_t ValveStatus;
+extern uint32_t Self_Id;
 
 WariningEvent NowStatusEvent;
 WariningEvent SlaverLowPowerEvent;
@@ -134,6 +135,7 @@ void NTCWarningEvent_Callback(void *parameter)
 void Delay_Timer_Callback(void *parameter)
 {
     LOG_D("Delay_Timer_Callback is Now\r\n");
+    ControlUpload_GW(1,Self_Id,3,0);
     Moto_Close(OtherOff);
 }
 void Delay_Timer_Init(void)
