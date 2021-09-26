@@ -120,7 +120,7 @@ void Gateway_Init(void)
         }
         if(Heart_Check_t==RT_NULL)
         {
-            Heart_Check_t = rt_timer_create("Heart_Check", Heart_Check,RT_NULL,10*60000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_PERIODIC);
+            Heart_Check_t = rt_timer_create("Heart_Check", Heart_Check,RT_NULL,20*60000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_PERIODIC);
         }
         ControlUpload_GW(0,0,5,ValveStatus);
         Heart_Test_Start();
