@@ -240,10 +240,10 @@ uint8_t Detect_Learn(void)
 }
 void BackToNormal(void)
 {
-    if(Now_Status!=Open && Now_Status!=Close && Now_Status!=Learn)
-    {
-        WarUpload_GW(1,0,7,0);//消警
-    }
+//    if(Now_Status!=Open && Now_Status!=Close && Now_Status!=Learn)
+//    {
+//        WarUpload_GW(1,0,7,0);//消警
+//    }
     WaterScan_Clear();
     beep_stop();
     led_Stop(0);

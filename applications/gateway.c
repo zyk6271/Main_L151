@@ -13,6 +13,7 @@
 #include "gateway.h"
 #include "flashwork.h"
 #include "led.h"
+#include "status.h"
 
 #define DBG_TAG "GATEWAY"
 #define DBG_LVL DBG_LOG
@@ -37,12 +38,15 @@ void Gateway_Sync(void)
         }
     }
     ControlUpload_GW(0,0,5,ValveStatus);
+    if(GetNowStatus() == Open || Close)
+    {
+        WarUpload_GW(1,0,7,0);//消警
+    }
 }
 void Gateway_RemoteDelete(void)
 {
     GatewaySyncEnqueue(1,4,0,0,0);
 }
-
 void Heart_Refresh(void)
 {
     Heart_Flag = 1;
@@ -69,6 +73,10 @@ void Heart_Test(void *parameter)
         rt_timer_stop(Heart_Test_t);
         wifi_led(1);
         LOG_I("Gateway Test Check Success\r\n");
+        if(GetNowStatus() == Open || Close)
+        {
+            WarUpload_GW(1,0,7,0);//消警
+        }
     }
     else
     {

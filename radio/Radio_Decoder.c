@@ -117,7 +117,6 @@ void Stop_Learn(void)
     Learn_Flag = 0;
     Warning_Disable();//消警
     beep_start(0, 6);
-    //if(ValveStatus)Moto_Open(NormalOpen);else Moto_Close(NormalOff);
     LOG_D("Learn timer is stop\r\n");
     if(Gw_Flag)
     {
@@ -197,7 +196,7 @@ void Device_Learn(Message buf)
                 Device_AliveChange(buf.From_ID,1);
                 Relearn();
                 RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,2);
-                GatewaySyncEnqueue(1,3,buf.From_ID,1,0);
+                GatewaySyncEnqueue(1,3,buf.From_ID,Flash_GetRssi(buf.From_ID),0);
             }
             break;
         }
@@ -272,7 +271,7 @@ void DataSolve(Message buf)
             else//是否为来自终端的数据
             {
                 RadioEnqueue(0,1,buf.From_ID,buf.Counter,4,0);
-                WarUpload_GW(1,buf.From_ID,5,1);//终端消除水警
+                WarUpload_GW(1,buf.From_ID,5,0);//终端消除水警
             }
         }
         else if(buf.Data==1)
@@ -288,7 +287,7 @@ void DataSolve(Message buf)
                 if(Now_Status!=SlaverWaterAlarmActive)
                 {
                     Warning_Enable_Num(2);
-                    WarUpload_GW(1,buf.From_ID,5,0);//终端水警
+                    WarUpload_GW(1,buf.From_ID,5,1);//终端水警
                     LOG_D("SlaverWaterAlarm is Active\r\n");
                 }
             }
@@ -300,7 +299,7 @@ void DataSolve(Message buf)
             LOG_D("Pwr On From %ld\r\n",buf.From_ID);
             RadioEnqueue(0,1,buf.From_ID,buf.Counter,5,1);
             Moto_Open(OtherOpen);
-            Delay_Timer_Close_NoWiFi();
+            Delay_Timer_Close();
             Last_Close_Flag=0;
             just_ring();
         }
@@ -309,7 +308,13 @@ void DataSolve(Message buf)
             LOG_D("Pwr On From %ld On Warning\r\n",buf.From_ID);
             RadioEnqueue(0,1,buf.From_ID,buf.Counter,5,2);
         }
-        ControlUpload_GW(1,buf.From_ID,2,ValveStatus);
+        if(buf.From_ID == GetDoorID())
+        {
+            ControlUpload_GW(0,buf.From_ID,6,ValveStatus);
+        }
+        else {
+            ControlUpload_GW(0,buf.From_ID,2,ValveStatus);
+        }
         break;
     case 6://关机
         RadioEnqueue(0,1,buf.From_ID,buf.Counter,6,0);
@@ -323,10 +328,19 @@ void DataSolve(Message buf)
         else if(Now_Status == SlaverWaterAlarmActive)
         {
             LOG_D("Warning With Command 6\r\n");
-            Warning_Disable();
-            Moto_Close(OtherOff);
+            if(buf.From_ID!=GetDoorID())
+            {
+                Warning_Disable();
+                Moto_Close(OtherOff);
+            }
         }
-        ControlUpload_GW(1,buf.From_ID,2,ValveStatus);
+        if(buf.From_ID == GetDoorID())
+        {
+            ControlUpload_GW(0,buf.From_ID,6,ValveStatus);
+        }
+        else {
+            ControlUpload_GW(0,buf.From_ID,2,ValveStatus);
+        }
         break;
     case 8://延迟
         LOG_I("Delay Open %d From %ld\r\n",buf.Data,buf.From_ID);
@@ -450,6 +464,8 @@ void Rx_Done_Callback(uint8_t *rx_buffer,uint8_t rx_len,int8_t rssi)
             {
                 if(Learn_Flag)
                 {
+                    Update_Device_Rssi(Rx_message.From_ID,abs(rssi-64));
+                    Device_AliveChange(Rx_message.From_ID,1);
                     Device_Learn(Rx_message);
                 }
                 else

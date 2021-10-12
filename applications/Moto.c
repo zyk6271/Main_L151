@@ -127,46 +127,34 @@ void Turn2_Edge_Callback(void *parameter)
 void Turn1_Timer_Callback(void *parameter)
 {
     rt_pin_irq_enable(Senor1, PIN_IRQ_DISABLE);
-    LOG_D("Moto is Open\r\n");
-    Now_Status = Open;
-    Green_Long_Start();//绿灯
-    ValveStatus=1;
-    Global_Device.LastFlag = NormalOpen;
-    Flash_Moto_Change(NormalOpen);
     rt_pin_write(Turn1,1);
     rt_pin_write(Turn2,1);
     if(!Turn1_Flag)
     {
         LOG_E("Moto1 is Fail\r\n");
         Warning_Enable_Num(6);
-        WarUpload_GW(1,0,2,1);//MOTO报警
+        WarUpload_GW(1,0,2,2);//MOTO1解除报警
     }
     else
     {
-        WarUpload_GW(1,0,2,0);//MOTO报警
+        WarUpload_GW(1,0,2,0);//MOTO1报警
         LOG_D("Moto1 is Good\r\n");
     }
 }
 void Turn2_Timer_Callback(void *parameter)
 {
     rt_pin_irq_enable(Senor2, PIN_IRQ_DISABLE);
-    LOG_D("Moto is Open\r\n");
-    Now_Status = Open;
-    Green_Long_Start();//绿灯
-    ValveStatus=1;
-    Global_Device.LastFlag = NormalOpen;
-    Flash_Moto_Change(NormalOpen);
     rt_pin_write(Turn1,1);
     rt_pin_write(Turn2,1);
     if(!Turn2_Flag)
     {
         LOG_E("Moto2 is Fail\r\n");
         Warning_Enable_Num(6);
-        WarUpload_GW(1,0,2,1);//MOTO报警
+        WarUpload_GW(1,0,2,3);//MOTO2解除报警
     }
     else
     {
-        WarUpload_GW(1,0,2,0);//MOTO报警
+        WarUpload_GW(1,0,2,1);//MOTO2报警
         LOG_D("Moto2 is Good\r\n");
     }
 }
@@ -185,7 +173,7 @@ void Moto_Init(void)
     rt_pin_attach_irq(Senor2, PIN_IRQ_MODE_FALLING, Turn2_Edge_Callback, RT_NULL);
     Moto_Timer1 = rt_timer_create("Moto_Timer1", Turn1_Timer_Callback, RT_NULL, 5100, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
     Moto_Timer2 = rt_timer_create("Moto_Timer2", Turn2_Timer_Callback, RT_NULL, 5000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
-    Moto_Detect_Timer = rt_timer_create("Moto_Detect", Moto_Detect_Timer_Callback, RT_NULL, 1000*60*5, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
+    Moto_Detect_Timer = rt_timer_create("Moto_Detect", Moto_Detect_Timer_Callback, RT_NULL, 1000*30, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
     if(Global_Device.LastFlag == 0 || Global_Device.LastFlag == NormalOpen || Global_Device.LastFlag == OtherOpen)
     {
         Global_Device.LastFlag = NormalOpen;
@@ -214,14 +202,16 @@ void Moto_Detect(void)
     {
         Turn1_Flag = 0;
         rt_pin_irq_enable(Senor1, PIN_IRQ_ENABLE);
-        Moto_Close(NormalOff);
+        rt_pin_write(Turn1,0);
+        rt_pin_write(Turn2,0);
         rt_timer_start(Moto_Timer1);
     }
     if(rt_pin_read(Senor2)==1&&ValveFuncFlag==1)
     {
         Turn2_Flag = 0;
         rt_pin_irq_enable(Senor2, PIN_IRQ_ENABLE);
-        Moto_Close(NormalOff);
+        rt_pin_write(Turn1,0);
+        rt_pin_write(Turn2,0);
         rt_timer_start(Moto_Timer2);
     }
 }
