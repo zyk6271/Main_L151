@@ -312,7 +312,8 @@ void DataSolve(Message buf)
         {
             ControlUpload_GW(0,buf.From_ID,6,ValveStatus);
         }
-        else {
+        else
+        {
             ControlUpload_GW(0,buf.From_ID,2,ValveStatus);
         }
         break;
@@ -325,7 +326,7 @@ void DataSolve(Message buf)
             Last_Close_Flag=1;
             Moto_Close(OtherOff);
         }
-        else if(Now_Status == SlaverWaterAlarmActive)
+        else if(Now_Status == SlaverWaterAlarmActive || Now_Status==MasterWaterAlarmDeActive)
         {
             LOG_D("Warning With Command 6\r\n");
             if(buf.From_ID!=GetDoorID())
@@ -338,7 +339,8 @@ void DataSolve(Message buf)
         {
             ControlUpload_GW(0,buf.From_ID,6,ValveStatus);
         }
-        else {
+        else
+        {
             ControlUpload_GW(0,buf.From_ID,2,ValveStatus);
         }
         break;
@@ -390,7 +392,7 @@ void GatewayDataSolve(uint8_t *rx_buffer,uint8_t rx_len)
         if(Rx_message.Target_ID != Self_Id)return;
         if(Check_Valid(Rx_message.From_ID) == RT_EOK)
         {
-            Heart_Refresh();
+            Heart_Refresh(Rx_message.From_ID);
             switch(Rx_message.Command)
             {
             case 1://延迟
@@ -404,6 +406,7 @@ void GatewayDataSolve(uint8_t *rx_buffer,uint8_t rx_len)
                 {
                     Delay_Timer_Close();
                 }
+                ControlUpload_GW(1,0,3,Rx_message.Data);
                 break;
             case 2://网关开
                 just_ring();

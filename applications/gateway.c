@@ -30,6 +30,11 @@ uint32_t Gateway_ID = 0;
 
 void Gateway_Sync(void)
 {
+    ControlUpload_GW(0,0,5,ValveStatus);
+    if(GetNowStatus() == Open || Close)
+    {
+        WarUpload_GW(1,0,7,0);//消警
+    }
     for(uint8_t i = 1;i<=Global_Device.Num;i++)
     {
         if(Global_Device.ID[i]<40000000)
@@ -37,19 +42,18 @@ void Gateway_Sync(void)
             GatewaySyncEnqueue(1,3,Global_Device.ID[i],Global_Device.Alive[i],Global_Device.Bat[i]);
         }
     }
-    ControlUpload_GW(0,0,5,ValveStatus);
-    if(GetNowStatus() == Open || Close)
-    {
-        WarUpload_GW(1,0,7,0);//消警
-    }
 }
 void Gateway_RemoteDelete(void)
 {
     GatewaySyncEnqueue(1,4,0,0,0);
 }
-void Heart_Refresh(void)
+void Heart_Refresh(uint32_t ID)
 {
-    Heart_Flag = 1;
+    if(ID == Gateway_ID)
+    {
+        Heart_Flag = 1;
+        LOG_D("Gateway Heart_Refresh\r\n");
+    }
 }
 void Heart_Check(void *parameter)
 {
@@ -73,10 +77,6 @@ void Heart_Test(void *parameter)
         rt_timer_stop(Heart_Test_t);
         wifi_led(1);
         LOG_I("Gateway Test Check Success\r\n");
-        if(GetNowStatus() == Open || Close)
-        {
-            WarUpload_GW(1,0,7,0);//消警
-        }
     }
     else
     {
@@ -104,9 +104,9 @@ void Gateway_Reload(void)
 {
     extern uint8_t Gw_Flag;
     Gw_Flag = 1;
-    Heart_Refresh();
     wifi_led(1);
     Gateway_ID = Global_Device.ID[Global_Device.GatewayNum];
+    Heart_Refresh(Gateway_ID);
     LOG_I("Gateway_ID is %ld\r\n",Gateway_ID);
 }
 void Gateway_Init(void)
@@ -128,9 +128,8 @@ void Gateway_Init(void)
         }
         if(Heart_Check_t==RT_NULL)
         {
-            Heart_Check_t = rt_timer_create("Heart_Check", Heart_Check,RT_NULL,20*60000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_PERIODIC);
+            Heart_Check_t = rt_timer_create("Heart_Check", Heart_Check,RT_NULL,1000*60*20,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_PERIODIC);
         }
-        ControlUpload_GW(0,0,5,ValveStatus);
         Heart_Test_Start();
         rt_timer_start(Heart_Check_t);
     }

@@ -174,6 +174,7 @@ void Key_Reponse_Callback(void *parameter)
                     key_down();
                     Now_Status = Close;
                     Warning_Disable();
+                    WarUpload_GW(1,0,1,0);//主控消除水警
                     LOG_D("MasterWaterAlarmActive With OFF\r\n");
                     break;
                 case Learn:
