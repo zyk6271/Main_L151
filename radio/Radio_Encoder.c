@@ -29,7 +29,7 @@ Radio_Queue Main_Queue={0};
 
 extern uint32_t Gateway_ID;
 uint32_t Self_Id = 0;
-uint32_t Self_Default_Id = 10000000;
+uint32_t Self_Default_Id = 10000002;
 uint32_t Self_Counter = 0;
 
 void RadioSend(uint32_t Taget_Id,uint8_t counter,uint8_t Command,uint8_t Data)
