@@ -196,7 +196,7 @@ void Device_Learn(Message buf)
                 Device_AliveChange(buf.From_ID,1);
                 Relearn();
                 RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,2);
-                GatewaySyncEnqueue(1,3,buf.From_ID,Flash_GetRssi(buf.From_ID),0);
+                GatewaySyncEnqueue(0,3,buf.From_ID,Flash_GetRssi(buf.From_ID),0);
             }
             break;
         }
@@ -312,7 +312,8 @@ void DataSolve(Message buf)
         {
             ControlUpload_GW(0,buf.From_ID,6,ValveStatus);
         }
-        else {
+        else
+        {
             ControlUpload_GW(0,buf.From_ID,2,ValveStatus);
         }
         break;
@@ -325,7 +326,7 @@ void DataSolve(Message buf)
             Last_Close_Flag=1;
             Moto_Close(OtherOff);
         }
-        else if(Now_Status == SlaverWaterAlarmActive)
+        else if(Now_Status == SlaverWaterAlarmActive || Now_Status==MasterWaterAlarmDeActive)
         {
             LOG_D("Warning With Command 6\r\n");
             if(buf.From_ID!=GetDoorID())
@@ -338,7 +339,8 @@ void DataSolve(Message buf)
         {
             ControlUpload_GW(0,buf.From_ID,6,ValveStatus);
         }
-        else {
+        else
+        {
             ControlUpload_GW(0,buf.From_ID,2,ValveStatus);
         }
         break;
@@ -359,14 +361,7 @@ void DataSolve(Message buf)
     case 9://终端测水线掉落
         LOG_I("Slave Lost %d From %ld\r\n",buf.Data,buf.From_ID);
         RadioEnqueue(0,1,buf.From_ID,buf.Counter,9,buf.Data);
-        if(buf.Data)
-        {
-            WarUpload_GW(1,buf.From_ID,9,0);
-        }
-        else
-        {
-            WarUpload_GW(1,buf.From_ID,9,1);
-        }
+        WarUpload_GW(0,buf.From_ID,9,buf.Data);
         break;
     }
     if(buf.Counter==0)
@@ -390,20 +385,21 @@ void GatewayDataSolve(uint8_t *rx_buffer,uint8_t rx_len)
         if(Rx_message.Target_ID != Self_Id)return;
         if(Check_Valid(Rx_message.From_ID) == RT_EOK)
         {
-            Heart_Refresh();
+            Heart_Refresh(Rx_message.From_ID);
             switch(Rx_message.Command)
             {
             case 1://延迟
-                just_ring();
-                LOG_I("Delay Open %d From %ld\r\n",Rx_message.Data,Rx_message.From_ID);
-                if(Rx_message.Data)
-                {
-                    Delay_Timer_Open();
-                }
-                else
-                {
-                    Delay_Timer_Close();
-                }
+//                just_ring();
+//                LOG_I("Delay Open %d From %ld\r\n",Rx_message.Data,Rx_message.From_ID);
+//                if(Rx_message.Data)
+//                {
+//                    Delay_Timer_Open();
+//                }
+//                else
+//                {
+//                    Delay_Timer_Close();
+//                }
+//                ControlUpload_GW(1,0,3,Rx_message.Data);
                 break;
             case 2://网关开
                 just_ring();

@@ -468,15 +468,15 @@ uint8_t Update_Device_Rssi(uint32_t Device_ID,uint8_t rssi)//更新Rssi
     {
         if(Global_Device.ID[num]==Device_ID)
         {
-            if(rssi>85)
+            if(rssi>94)
             {
                 Global_Device.Rssi[num] = 0;
             }
-            else if(rssi <= 85 && rssi>54)
+            else if(rssi <= 94 && rssi>78)
             {
                 Global_Device.Rssi[num] = 1;
             }
-            else if(rssi <= 54)
+            else if(rssi <= 78)
             {
                 Global_Device.Rssi[num] = 2;
             }

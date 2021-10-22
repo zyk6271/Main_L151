@@ -27,10 +27,10 @@
 #define LED5_PIN                25
 #define Peak_ON                 15
 #define Peak_Loss               19
-#define Turn1                   11
-#define Turn2                   9
-#define Senor1                  10
-#define Senor2                  8
+#define Turn1                   9
+#define Turn2                   11
+#define Senor1                  8
+#define Senor2                  10
 #define TEST                    45
 
 

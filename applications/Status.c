@@ -135,7 +135,7 @@ void NTCWarningEvent_Callback(void *parameter)
 void Delay_Timer_Callback(void *parameter)
 {
     LOG_D("Delay_Timer_Callback is Now\r\n");
-    ControlUpload_GW(1,Self_Id,3,0);
+    ControlUpload_GW(0,0,3,0);
     Moto_Close(OtherOff);
 }
 void Delay_Timer_Init(void)
@@ -176,7 +176,6 @@ void Delay_Timer_Open(void)
 void Delay_Timer_Close(void)
 {
     LOG_D("Delay_Timer is Close\r\n");
-    ControlUpload_GW(0,0,3,0);
     rt_timer_stop(Delay_Timer);
 }
 void Delay_Timer_Close_NoWiFi(void)

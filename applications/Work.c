@@ -23,7 +23,6 @@
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
-
 uint8_t WarningNowStatus=0;
 uint8_t WarningPastStatus=0;
 uint8_t WarningStatus=0;
@@ -43,10 +42,6 @@ void WarningWithPeak(uint8_t past,uint8_t status)
             {
                 WarUpload_GW(1,0,3,0);//掉落消除报警
 
-            }
-            else
-            {
-                WarUpload_GW(1,0,1,0);//主控消除水警
             }
             beep_stop();
             loss_led_stop();
