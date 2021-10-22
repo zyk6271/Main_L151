@@ -133,11 +133,11 @@ void Turn1_Timer_Callback(void *parameter)
     {
         LOG_E("Moto1 is Fail\r\n");
         Warning_Enable_Num(6);
-        WarUpload_GW(0,0,2,2);//MOTO1解除报警
+        WarUpload_GW(0,0,2,2);//MOTO1报警
     }
     else
     {
-        WarUpload_GW(0,0,2,0);//MOTO1报警
+        WarUpload_GW(0,0,2,0);//MOTO1解除报警
         LOG_D("Moto1 is Good\r\n");
     }
 }
@@ -150,11 +150,11 @@ void Turn2_Timer_Callback(void *parameter)
     {
         LOG_E("Moto2 is Fail\r\n");
         Warning_Enable_Num(6);
-        WarUpload_GW(0,0,2,3);//MOTO2解除报警
+        WarUpload_GW(0,0,2,3);//MOTO2报警
     }
     else
     {
-        WarUpload_GW(0,0,2,1);//MOTO2报警
+        WarUpload_GW(0,0,2,1);//MOTO2解除报警
         LOG_D("Moto2 is Good\r\n");
     }
 }

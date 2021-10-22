@@ -230,9 +230,9 @@ void RadioDequeue(void *paramaeter)
 
 void RadioDequeueTaskInit(void)
 {
-//    int *p;
-//    p=(int *)(0x0801FFFC);//这就是已知的地址，要强制类型转换
-//    Self_Id = *p;//从Flash加载ID
+    int *p;
+    p=(int *)(0x0801FFFC);//这就是已知的地址，要强制类型转换
+    Self_Id = *p;//从Flash加载ID
     if(Self_Id==0xFFFFFFFF || Self_Id==0)
     {
         Self_Id = Self_Default_Id;

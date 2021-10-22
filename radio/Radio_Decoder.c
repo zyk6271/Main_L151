@@ -361,14 +361,7 @@ void DataSolve(Message buf)
     case 9://终端测水线掉落
         LOG_I("Slave Lost %d From %ld\r\n",buf.Data,buf.From_ID);
         RadioEnqueue(0,1,buf.From_ID,buf.Counter,9,buf.Data);
-        if(buf.Data)
-        {
-            WarUpload_GW(1,buf.From_ID,9,0);
-        }
-        else
-        {
-            WarUpload_GW(1,buf.From_ID,9,1);
-        }
+        WarUpload_GW(0,buf.From_ID,9,buf.Data);
         break;
     }
     if(buf.Counter==0)
