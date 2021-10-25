@@ -403,15 +403,22 @@ void GatewayDataSolve(uint8_t *rx_buffer,uint8_t rx_len)
                 break;
             case 2://网关开
                 just_ring();
-                if(Rx_message.Data)
+                if(GetNowStatus()==Close || GetNowStatus()==Open)
                 {
-                    Remote_Open();
-                    ControlUpload_GW(0,Self_Id,2,ValveStatus);
+                    if(Rx_message.Data)
+                    {
+                        Remote_Open();
+                        ControlUpload_GW(0,Self_Id,2,ValveStatus);
+                    }
+                    else
+                    {
+                        Remote_Close();
+                        ControlUpload_GW(0,Self_Id,2,ValveStatus);
+                    }
                 }
                 else
                 {
-                    Remote_Close();
-                    ControlUpload_GW(0,Self_Id,2,ValveStatus);
+                    ControlUpload_GW(0,Self_Id,2,3);
                 }
                 break;
             case 3://心跳应答
