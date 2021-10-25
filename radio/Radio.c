@@ -601,7 +601,7 @@ void Radio_Task_Callback(void *parameter)
             switch (ubRFState)
             {
             case trxstate_rx: //0x01
-                LOG_D("RX Inturrpet\r\n");
+                //LOG_D("RX Inturrpet\r\n");
                 ReceiveData();
                 AX5043Receiver_Continuous();
                 if (RxLen != 0)

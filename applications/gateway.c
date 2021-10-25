@@ -51,7 +51,7 @@ void Gateway_Sync(void)
     ControlUpload_GW(0,0,5,ValveStatus);
     if(GetNowStatus() == Open || Close)
     {
-        WarUpload_GW(0,0,7,0);//消警
+        WarUpload_GW(1,0,7,0);//消警
     }
     rt_timer_start(Gateway_Sync_t);
 }
@@ -89,6 +89,7 @@ void Heart_Test(void *parameter)
         rt_timer_stop(Heart_Test_t);
         wifi_led(1);
         LOG_I("Gateway Test Check Success\r\n");
+        WarUpload_GW(1,0,7,0);//消警
     }
     else
     {
