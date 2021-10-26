@@ -196,7 +196,7 @@ void Device_Learn(Message buf)
                 Device_AliveChange(buf.From_ID,1);
                 Relearn();
                 RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,2);
-                GatewaySyncEnqueue(0,3,buf.From_ID,Flash_GetRssi(buf.From_ID),0);
+                GatewaySyncEnqueue(0,6,buf.From_ID,Flash_GetRssi(buf.From_ID),0);
             }
             break;
         }

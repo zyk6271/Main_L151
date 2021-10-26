@@ -36,7 +36,14 @@ void Gateway_Sync_Callback(void *parameter)
     {
         if(Global_Device.ID[Gateway_Sync_Num]<40000000)
         {
-            GatewaySyncEnqueue(1,3,Global_Device.ID[Gateway_Sync_Num],Global_Device.Alive[Gateway_Sync_Num],Global_Device.Bat[Gateway_Sync_Num]);
+            if(Global_Device.Alive[Gateway_Sync_Num])
+            {
+                GatewaySyncEnqueue(1,3,Global_Device.ID[Gateway_Sync_Num],Global_Device.Rssi[Gateway_Sync_Num],Global_Device.Bat[Gateway_Sync_Num]);
+            }
+            else
+            {
+                GatewaySyncEnqueue(1,5,Global_Device.ID[Gateway_Sync_Num],Global_Device.Rssi[Gateway_Sync_Num],Global_Device.Bat[Gateway_Sync_Num]);
+            }
         }
         Gateway_Sync_Num++;
     }
