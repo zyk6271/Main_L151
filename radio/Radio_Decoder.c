@@ -271,7 +271,12 @@ void DataSolve(Message buf)
             else//是否为来自终端的数据
             {
                 RadioEnqueue(0,1,buf.From_ID,buf.Counter,4,0);
+                Flash_Set_WarnFlag(buf.From_ID,0);
                 WarUpload_GW(1,buf.From_ID,5,0);//终端消除水警
+                if(Flash_Get_WarnFlag()==0)
+                {
+                    Warning_Disable();
+                }
             }
         }
         else if(buf.Data==1)
@@ -284,10 +289,11 @@ void DataSolve(Message buf)
             else//是否为来自终端的报警包
             {
                 RadioEnqueue(0,1,buf.From_ID,buf.Counter,4,1);
+                WarUpload_GW(1,buf.From_ID,5,1);//终端水警
+                Flash_Set_WarnFlag(buf.From_ID,1);
                 if(Now_Status!=SlaverWaterAlarmActive)
                 {
                     Warning_Enable_Num(2);
-                    WarUpload_GW(1,buf.From_ID,5,1);//终端水警
                     LOG_D("SlaverWaterAlarm is Active\r\n");
                 }
             }
@@ -325,15 +331,6 @@ void DataSolve(Message buf)
             Warning_Disable();
             Last_Close_Flag=1;
             Moto_Close(OtherOff);
-        }
-        else if(Now_Status == SlaverWaterAlarmActive || Now_Status==MasterWaterAlarmDeActive)
-        {
-            LOG_D("Warning With Command 6\r\n");
-            if(buf.From_ID!=GetDoorID())
-            {
-                Warning_Disable();
-                Moto_Close(OtherOff);
-            }
         }
         if(buf.From_ID == GetDoorID())
         {

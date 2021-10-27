@@ -10,13 +10,14 @@ typedef struct
     uint32_t Num;
     uint32_t DoorNum;
     uint32_t GatewayNum;
-    uint32_t ID[20];
-    uint8_t Reponse[20];
+    uint8_t  Reponse[20];
+    uint8_t  Bat[20];
+    uint8_t  Rssi[20];
+    uint8_t  Warn[20];
     uint32_t ID_Time[20];
     uint32_t Alive[20];
     uint32_t GetMesssage[20];
-    uint8_t  Bat[20];
-    uint8_t  Rssi[20];
+    uint32_t ID[20];
 }Device_Info;
 
 #define NormalOff   1
@@ -30,6 +31,7 @@ uint8_t Flash_Get_Key_Valid(uint32_t key);
 uint8_t Flash_GetRssi(uint32_t Device_ID);//查询内存中的RSSI
 uint8_t Remote_Delete(uint32_t Device_ID);
 void Flash_Key_Change(uint32_t key,uint32_t value);
+void Flash_LearnNums_Change(uint32_t value);
 void Flash_Set(uint8_t id,uint32_t value);
 void Flash_Factory(void);
 uint8_t Add_Device(uint32_t Device_ID);
@@ -66,4 +68,6 @@ void Flash_Moto1Total_Add(void);
 void Flash_Moto1Success_Add(void);
 void Flash_Moto2Total_Add(void);
 void Flash_Moto2Success_Add(void);
+uint8_t Flash_Get_WarnFlag(void);
+uint8_t Flash_Set_WarnFlag(uint32_t Device_ID,uint8_t Flag);
 

@@ -708,3 +708,38 @@ void DeleteAllDevice(void)//数据载入到内存中
     ef_env_set_default();
     LOG_D("After Delete num is %d",Global_Device.Num);
 }
+uint8_t Flash_Get_WarnFlag(void)//数据载入到内存中
+{
+    uint16_t num = Global_Device.Num;
+    if(!num)
+    {
+        return 0;
+    }
+    while(num)
+    {
+        if(Global_Device.Warn[num])
+        {
+            return 1;
+        }
+        num--;
+    }
+    return 0;
+}
+uint8_t Flash_Set_WarnFlag(uint32_t Device_ID,uint8_t Flag)//数据载入到内存中
+{
+    uint16_t num = Global_Device.Num;
+    if(!num)
+    {
+        return RT_ERROR;
+    }
+    while(num)
+    {
+        if(Global_Device.ID[num]==Device_ID)
+        {
+            Global_Device.Warn[num] = Flag;
+            return RT_EOK;
+        }
+        num--;
+    }
+    return RT_ERROR;
+}

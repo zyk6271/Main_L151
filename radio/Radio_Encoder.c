@@ -20,7 +20,7 @@
 #include "flashwork.h"
 
 #define DBG_TAG "radio_encoder"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 rt_thread_t Radio_QueueTask = RT_NULL;
@@ -29,7 +29,7 @@ Radio_Queue Main_Queue={0};
 
 extern uint32_t Gateway_ID;
 uint32_t Self_Id = 0;
-uint32_t Self_Default_Id = 10000088;
+uint32_t Self_Default_Id = 10000000;
 uint32_t Self_Counter = 0;
 
 void RadioSend(uint32_t Taget_Id,uint8_t counter,uint8_t Command,uint8_t Data)
