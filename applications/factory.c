@@ -11,6 +11,7 @@
 #include "rtdevice.h"
 #include "pin_config.h"
 #include "factory.h"
+#include "radio_encoder.h"
 
 #define DBG_TAG "Factory"
 #define DBG_LVL DBG_LOG
@@ -37,7 +38,6 @@ void DetectFactory(void)
     }
     LOG_I("DetectFactory Flag is %d\r\n",Factory_Flag);
 }
-
 void Stop_Factory_Cycle(void)
 {
     if(Factory_Cycle!=RT_NULL)

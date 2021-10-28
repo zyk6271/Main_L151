@@ -55,7 +55,7 @@ void Gateway_Sync_Callback(void *parameter)
 }
 void Gateway_Sync(void)
 {
-    ControlUpload_GW(0,0,5,ValveStatus);
+    ControlUpload_GW(1,0,5,ValveStatus);
     if(GetNowStatus() == Open || Close)
     {
         WarUpload_GW(1,0,7,0);//消警
@@ -143,7 +143,7 @@ void Gateway_Init(void)
     }
     if(Gateway_Sync_t == RT_NULL)
     {
-        Gateway_Sync_t = rt_timer_create("Gateway_Sync", Gateway_Sync_Callback,RT_NULL,1000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_PERIODIC);
+        Gateway_Sync_t = rt_timer_create("Gateway_Sync", Gateway_Sync_Callback,RT_NULL,2000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_PERIODIC);
     }
     if(Gateway_ID==0)
     {

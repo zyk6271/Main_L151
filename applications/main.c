@@ -38,13 +38,13 @@ int main(void)
     flash_Init();
     easyflash_init();
     LoadDevice2Memory();
-    Moto_Init();
     Delay_Timer_Init();
-    RTC_Init();
     WarningInit();
+    RTC_Init();
     WaterScan_Init();
     Radio_Task_Init();
     Gateway_Init();
+    Moto_Init();
     ADC_Init();
     button_Init();
     DetectFactory();

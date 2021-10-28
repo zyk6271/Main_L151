@@ -14,7 +14,7 @@
 #include "gateway.h"
 
 #define DBG_TAG "flash"
-#define DBG_LVL DBG_INFO
+#define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
 typedef struct _env_list {
@@ -263,6 +263,37 @@ uint8_t Flash_AliveGet(uint32_t Device_ID)
     uint32_t read_value = 0;
     char *keybuf = rt_malloc(64);
     sprintf(keybuf, "alive:%ld", Device_ID);//将传入的数字转换成数组
+    memset(read_value_temp,0,64);
+    read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
+    if(read_len>0)
+    {
+        read_value = atol(read_value_temp);
+    }
+    else
+    {
+        read_value = 0;
+    }
+    rt_free(keybuf);//释放临时buffer对应内存空间
+    LOG_D("Reading Key %s value %ld \r\n", keybuf, read_value);//输出
+    return read_value;
+}
+void Device_SlaveAlarmChange(uint32_t Device_ID,uint8_t value)
+{
+    char *Temp_KeyBuf = rt_malloc(64);
+    char *Temp_ValueBuf = rt_malloc(64);
+    sprintf(Temp_KeyBuf, "SlaveAlarm:%ld", Device_ID);
+    sprintf(Temp_ValueBuf, "%d", value);
+    ef_set_env(Temp_KeyBuf, Temp_ValueBuf);
+    rt_free(Temp_KeyBuf);
+    rt_free(Temp_ValueBuf);
+    LOG_D("Writing SlaveAlarm %d to key %ld\r\n", value,Device_ID);
+}
+uint8_t Flash_Get_SlaveAlarm(uint32_t Device_ID)
+{
+    uint8_t read_len = 0;
+    uint32_t read_value = 0;
+    char *keybuf = rt_malloc(64);
+    sprintf(keybuf, "SlaveAlarm:%ld", Device_ID);//将传入的数字转换成数组
     memset(read_value_temp,0,64);
     read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
     if(read_len>0)
@@ -692,6 +723,7 @@ void LoadDevice2Memory(void)//数据载入到内存中
             Global_Device.Bat[i] = Device_BatGet(Global_Device.ID[i]);
             Global_Device.Rssi[i] = Device_RssiGet(Global_Device.ID[i]);
             Global_Device.Alive[i] = Flash_AliveGet(Global_Device.ID[i]);
+            Global_Device.SlaveAlarm[i] = Flash_Get_SlaveAlarm(Global_Device.ID[i]);
         }
     }
     Global_Device.DoorNum = Flash_Get_Key_Value(88888888);
@@ -708,7 +740,7 @@ void DeleteAllDevice(void)//数据载入到内存中
     ef_env_set_default();
     LOG_D("After Delete num is %d",Global_Device.Num);
 }
-uint8_t Flash_Get_WarnFlag(void)//数据载入到内存中
+uint8_t Flash_Get_SlaveAlarmFlag(void)//数据载入到内存中
 {
     uint16_t num = Global_Device.Num;
     if(!num)
@@ -717,7 +749,7 @@ uint8_t Flash_Get_WarnFlag(void)//数据载入到内存中
     }
     while(num)
     {
-        if(Global_Device.Warn[num])
+        if(Global_Device.SlaveAlarm[num])
         {
             return 1;
         }
@@ -725,7 +757,7 @@ uint8_t Flash_Get_WarnFlag(void)//数据载入到内存中
     }
     return 0;
 }
-uint8_t Flash_Set_WarnFlag(uint32_t Device_ID,uint8_t Flag)//数据载入到内存中
+uint8_t Flash_Set_SlaveAlarmFlag(uint32_t Device_ID,uint8_t Flag)//数据载入到内存中
 {
     uint16_t num = Global_Device.Num;
     if(!num)
@@ -736,7 +768,8 @@ uint8_t Flash_Set_WarnFlag(uint32_t Device_ID,uint8_t Flag)//数据载入到内�
     {
         if(Global_Device.ID[num]==Device_ID)
         {
-            Global_Device.Warn[num] = Flag;
+            Global_Device.SlaveAlarm[num] = Flag;
+            Device_SlaveAlarmChange(Device_ID,Flag);
             return RT_EOK;
         }
         num--;

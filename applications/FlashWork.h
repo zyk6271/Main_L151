@@ -13,7 +13,7 @@ typedef struct
     uint8_t  Reponse[20];
     uint8_t  Bat[20];
     uint8_t  Rssi[20];
-    uint8_t  Warn[20];
+    uint8_t  SlaveAlarm[20];
     uint32_t ID_Time[20];
     uint32_t Alive[20];
     uint32_t GetMesssage[20];
@@ -68,6 +68,6 @@ void Flash_Moto1Total_Add(void);
 void Flash_Moto1Success_Add(void);
 void Flash_Moto2Total_Add(void);
 void Flash_Moto2Success_Add(void);
-uint8_t Flash_Get_WarnFlag(void);
-uint8_t Flash_Set_WarnFlag(uint32_t Device_ID,uint8_t Flag);
+uint8_t Flash_Get_SlaveAlarmFlag(void);
+uint8_t Flash_Set_SlaveAlarmFlag(uint32_t Device_ID,uint8_t Flag);
 

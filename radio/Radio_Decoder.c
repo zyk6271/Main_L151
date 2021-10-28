@@ -271,12 +271,7 @@ void DataSolve(Message buf)
             else//是否为来自终端的数据
             {
                 RadioEnqueue(0,1,buf.From_ID,buf.Counter,4,0);
-                Flash_Set_WarnFlag(buf.From_ID,0);
                 WarUpload_GW(1,buf.From_ID,5,0);//终端消除水警
-                if(Flash_Get_WarnFlag()==0)
-                {
-                    Warning_Disable();
-                }
             }
         }
         else if(buf.Data==1)
@@ -290,7 +285,7 @@ void DataSolve(Message buf)
             {
                 RadioEnqueue(0,1,buf.From_ID,buf.Counter,4,1);
                 WarUpload_GW(1,buf.From_ID,5,1);//终端水警
-                Flash_Set_WarnFlag(buf.From_ID,1);
+                Flash_Set_SlaveAlarmFlag(buf.From_ID,1);
                 if(Now_Status!=SlaverWaterAlarmActive)
                 {
                     Warning_Enable_Num(2);
@@ -305,7 +300,6 @@ void DataSolve(Message buf)
             LOG_D("Pwr On From %ld\r\n",buf.From_ID);
             RadioEnqueue(0,1,buf.From_ID,buf.Counter,5,1);
             Moto_Open(OtherOpen);
-            Delay_Timer_Close();
             Last_Close_Flag=0;
             just_ring();
         }
@@ -316,29 +310,38 @@ void DataSolve(Message buf)
         }
         if(buf.From_ID == GetDoorID())
         {
-            ControlUpload_GW(0,buf.From_ID,6,ValveStatus);
+            ControlUpload_GW(1,buf.From_ID,6,ValveStatus);
         }
         else
         {
-            ControlUpload_GW(0,buf.From_ID,2,ValveStatus);
+            ControlUpload_GW(1,buf.From_ID,2,ValveStatus);
         }
         break;
     case 6://关机
         RadioEnqueue(0,1,buf.From_ID,buf.Counter,6,0);
+        if(Flash_Get_SlaveAlarmFlag())
+        {
+            Flash_Set_SlaveAlarmFlag(buf.From_ID,0);
+            if(Flash_Get_SlaveAlarmFlag()==0)
+            {
+                Warning_Disable();
+            }
+        }
         if(Now_Status==Open||Now_Status==Close)
         {
             LOG_D("Pwr Off From %ld\r\n",buf.From_ID);
             Warning_Disable();
             Last_Close_Flag=1;
             Moto_Close(OtherOff);
+            just_ring();
         }
         if(buf.From_ID == GetDoorID())
         {
-            ControlUpload_GW(0,buf.From_ID,6,ValveStatus);
+            ControlUpload_GW(1,buf.From_ID,6,ValveStatus);
         }
         else
         {
-            ControlUpload_GW(0,buf.From_ID,2,ValveStatus);
+            ControlUpload_GW(1,buf.From_ID,2,ValveStatus);
         }
         break;
     case 8://延迟
@@ -346,13 +349,14 @@ void DataSolve(Message buf)
         RadioEnqueue(0,1,buf.From_ID,buf.Counter,8,buf.Data);
         if(buf.Data)
         {
-            Delay_Timer_Close();
-            ControlUpload_GW(1,buf.From_ID,3,0);
+            Delay_Timer_CloseDoor(buf.From_ID);
         }
         else
         {
-            Delay_Timer_Open();
-            ControlUpload_GW(1,buf.From_ID,3,1);
+            if(Now_Status==Open)
+            {
+                Delay_Timer_OpenDoor(buf.From_ID);
+            }
         }
         break;
     case 9://终端测水线掉落
@@ -386,17 +390,6 @@ void GatewayDataSolve(uint8_t *rx_buffer,uint8_t rx_len)
             switch(Rx_message.Command)
             {
             case 1://延迟
-//                just_ring();
-//                LOG_I("Delay Open %d From %ld\r\n",Rx_message.Data,Rx_message.From_ID);
-//                if(Rx_message.Data)
-//                {
-//                    Delay_Timer_Open();
-//                }
-//                else
-//                {
-//                    Delay_Timer_Close();
-//                }
-//                ControlUpload_GW(1,0,3,Rx_message.Data);
                 break;
             case 2://网关开
                 just_ring();

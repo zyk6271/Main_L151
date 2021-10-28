@@ -21,6 +21,7 @@
 #include "status.h"
 #include "device.h"
 #include "gateway.h"
+#include "factory.h"
 
 #define DBG_TAG "key"
 #define DBG_LVL DBG_INFO

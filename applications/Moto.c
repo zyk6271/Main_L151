@@ -54,7 +54,6 @@ void Moto_InitOpen(uint8_t ActFlag)
       beep_start(0,6);//蜂鸣器一下
       LOG_D("No permissions to Open\r\n");
     }
-    //ControlUpload_GW(0,0,1,ValveStatus);//初次上发
 }
 void Moto_Open(uint8_t ActFlag)
 {
@@ -75,6 +74,7 @@ void Moto_Open(uint8_t ActFlag)
             rt_timer_start(Moto_Detect_Timer);
         }
         just_ring();
+        Delay_Timer_Close();
     }
     else if(Global_Device.LastFlag == OtherOff && ActFlag == NormalOpen)
     {
@@ -100,12 +100,14 @@ void Moto_Close(uint8_t ActFlag)
         rt_pin_write(Turn1,0);
         rt_pin_write(Turn2,0);
         just_ring();
+        Delay_Timer_Close();
     }
     else if(Global_Device.LastFlag == OtherOff && ActFlag == OtherOff)
     {
         Now_Status = Close;
         ValveStatus=0;
         just_ring();
+        Delay_Timer_Close();
         LOG_D("Moto is alreay otheroff\r\n");
     }
     else
@@ -174,6 +176,12 @@ void Moto_Init(void)
     Moto_Timer1 = rt_timer_create("Moto_Timer1", Turn1_Timer_Callback, RT_NULL, 5100, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
     Moto_Timer2 = rt_timer_create("Moto_Timer2", Turn2_Timer_Callback, RT_NULL, 5000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
     Moto_Detect_Timer = rt_timer_create("Moto_Detect", Moto_Detect_Timer_Callback, RT_NULL, 60000*5, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
+    if(Flash_Get_SlaveAlarmFlag())
+    {
+        Warning_Enable_Num(2);
+        LOG_I("Moto is Init Fail,Last is Slaver Alarm\r\n");
+        return;
+    }
     if(Global_Device.LastFlag == 0 || Global_Device.LastFlag == NormalOpen || Global_Device.LastFlag == OtherOpen)
     {
         Global_Device.LastFlag = NormalOpen;
@@ -186,11 +194,10 @@ void Moto_Init(void)
     }
     else if(Global_Device.LastFlag == NormalOff)
     {
-
         Global_Device.LastFlag = NormalOff;
         Moto_InitOpen(NormalOpen);
     }
-    LOG_D("Moto is Init,Flag is %d\r\n",Global_Device.LastFlag);
+    LOG_D("Moto is Init Success,Flag is %d\r\n",Global_Device.LastFlag);
 }
 void Moto_Detect(void)
 {
