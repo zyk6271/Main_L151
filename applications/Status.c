@@ -229,14 +229,14 @@ void RadioInitFail(void)
 }
 void WarningInit(void)
 {
-    WarningEventInit(7,4,&SlaverLowPowerEvent,SlaverLowBatteryWarning);
-    WarningEventInit(2,7,&SlaverWaterAlarmActiveEvent,SlaverWaterAlarmWarning);
+    WarningEventInit(7,5,&SlaverLowPowerEvent,SlaverLowBatteryWarning);
+    WarningEventInit(2,8,&SlaverWaterAlarmActiveEvent,SlaverWaterAlarmWarning);
     WarningEventInit(3,1,&MasterLostPeakEvent,MasterLostPeakWarning);
-    WarningEventInit(4,6,&MasterWaterAlarmActiveEvent,MasterWaterAlarmWarning);
-    WarningEventInit(5,3,&OfflineEvent,OfflineWarning);
-    WarningEventInit(6,2,&MotoFailEvent,MotoFailCallback);
-    WarningEventInit(1,5,&SlaverUltraLowPowerEvent,SlaverUltraLowBatteryWarning);
-    WarningEventInit(8,1,&NTCWarningEvent,NTCWarningEvent_Callback);
+    WarningEventInit(4,7,&MasterWaterAlarmActiveEvent,MasterWaterAlarmWarning);
+    WarningEventInit(5,4,&OfflineEvent,OfflineWarning);
+    WarningEventInit(6,3,&MotoFailEvent,MotoFailCallback);
+    WarningEventInit(1,6,&SlaverUltraLowPowerEvent,SlaverUltraLowBatteryWarning);
+    WarningEventInit(8,2,&NTCWarningEvent,NTCWarningEvent_Callback);
     WarningEventInit(0,0,&NowStatusEvent,RT_NULL);//本地存储器
     LOG_D("Warning Event Init Success\r\n");
 }
