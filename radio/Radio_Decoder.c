@@ -398,12 +398,12 @@ void GatewayDataSolve(uint8_t *rx_buffer,uint8_t rx_len)
                     if(Rx_message.Data)
                     {
                         Remote_Open();
-                        ControlUpload_GW(0,Self_Id,2,ValveStatus);
+                        ControlUpload_GW(1,Self_Id,2,ValveStatus);
                     }
                     else
                     {
                         Remote_Close();
-                        ControlUpload_GW(0,Self_Id,2,ValveStatus);
+                        ControlUpload_GW(1,Self_Id,2,ValveStatus);
                     }
                 }
                 else

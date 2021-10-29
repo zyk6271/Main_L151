@@ -136,6 +136,7 @@ void Delay_Timer_Callback(void *parameter)
 {
     LOG_D("Delay_Timer_Callback is Now\r\n");
     Moto_Close(OtherOff);
+    ControlUpload_GW(1,0,1,0);
 }
 void Delay_Timer_Init(void)
 {
