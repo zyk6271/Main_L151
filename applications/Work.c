@@ -48,12 +48,10 @@ void WarningWithPeak(uint8_t past,uint8_t status)
             break;
         case 1://测水线掉落
             Warning_Enable_Num(3);
-            WarUpload_GW(1,0,3,1);//掉落报警
             LOG_D("MasterLostPeakWarning\r\n");
             break;
         case 2://测水线短路
             Warning_Enable_Num(4);
-            WarUpload_GW(1,0,1,1);//主控水警
             break;
         case 3://测水线短路解除
             MasterStatusChangeToDeAvtive();

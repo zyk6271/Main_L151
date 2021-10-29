@@ -36,7 +36,8 @@ WariningEvent MasterLostPeakEvent;
 WariningEvent MasterWaterAlarmActiveEvent;
 WariningEvent OfflineEvent;
 WariningEvent NTCWarningEvent;
-WariningEvent MotoFailEvent;
+WariningEvent Moto1FailEvent;
+WariningEvent Moto2FailEvent;
 
 rt_timer_t Delay_Timer = RT_NULL;
 
@@ -75,9 +76,10 @@ void Warning_Enable_Num(uint8_t id)
     case 3:Warning_Enable(MasterLostPeakEvent);break;
     case 4:Warning_Enable(MasterWaterAlarmActiveEvent);break;
     case 5:Warning_Enable(OfflineEvent);break;
-    case 6:Warning_Enable(MotoFailEvent);break;
+    case 6:Warning_Enable(Moto1FailEvent);break;
     case 7:Warning_Enable(SlaverLowPowerEvent);break;
     case 8:Warning_Enable(NTCWarningEvent);break;
+    case 9:Warning_Enable(Moto2FailEvent);break;
     }
 }
 void Warning_Disable(void)
@@ -109,6 +111,7 @@ void SlaverWaterAlarmWarning(void *parameter)
 }
 void MasterLostPeakWarning(void *parameter)
 {
+    WarUpload_GW(1,0,3,1);//掉落报警
     beep_start(0,1);//红灯,蜂鸣器三下
     loss_led_start();
     LOG_I("MasterLostPeakWarning\r\n");
@@ -120,6 +123,7 @@ void MasterStatusChangeToDeAvtive(void)
 }
 void MasterWaterAlarmWarning(void *parameter)
 {
+    WarUpload_GW(1,0,1,1);//主控水警
     Moto_Close(NormalOff);
     beep_start(0,2);//红灯,蜂鸣器三下
     Now_Status = MasterWaterAlarmActive;
@@ -127,6 +131,7 @@ void MasterWaterAlarmWarning(void *parameter)
 }
 void NTCWarningEvent_Callback(void *parameter)
 {
+    WarUpload_GW(1,0,8,1);//NTC报警
     Moto_Close(NormalOff);
     NTC_Ring();
     Now_Status = NTCWarning;
@@ -134,9 +139,9 @@ void NTCWarningEvent_Callback(void *parameter)
 }
 void Delay_Timer_Callback(void *parameter)
 {
-    LOG_D("Delay_Timer_Callback is Now\r\n");
-    Moto_Close(OtherOff);
     ControlUpload_GW(1,0,1,0);
+    Moto_Close(OtherOff);
+    LOG_D("Delay_Timer_Callback is Now\r\n");
 }
 void Delay_Timer_Init(void)
 {
@@ -209,8 +214,16 @@ void OfflineWarning(void *parameter)
         LOG_I("Already OfflineWarning Now\r\n");
     }
 }
-void MotoFailCallback(void *parameter)
+void Moto1FailCallback(void *parameter)
 {
+    WarUpload_GW(1,0,2,2);//MOTO1报警
+    beep_start(0,9);
+    Now_Status = MotoFail;
+    LOG_I("MotoFail\r\n");
+}
+void Moto2FailCallback(void *parameter)
+{
+    WarUpload_GW(1,0,2,3);//MOTO1报警
     beep_start(0,9);
     Now_Status = MotoFail;
     LOG_I("MotoFail\r\n");
@@ -229,12 +242,13 @@ void RadioInitFail(void)
 }
 void WarningInit(void)
 {
-    WarningEventInit(7,5,&SlaverLowPowerEvent,SlaverLowBatteryWarning);
+    WarningEventInit(7,4,&SlaverLowPowerEvent,SlaverLowBatteryWarning);
     WarningEventInit(2,8,&SlaverWaterAlarmActiveEvent,SlaverWaterAlarmWarning);
     WarningEventInit(3,1,&MasterLostPeakEvent,MasterLostPeakWarning);
     WarningEventInit(4,7,&MasterWaterAlarmActiveEvent,MasterWaterAlarmWarning);
-    WarningEventInit(5,4,&OfflineEvent,OfflineWarning);
-    WarningEventInit(6,3,&MotoFailEvent,MotoFailCallback);
+    WarningEventInit(5,5,&OfflineEvent,OfflineWarning);
+    WarningEventInit(6,3,&Moto1FailEvent,Moto1FailCallback);
+    WarningEventInit(9,3,&Moto2FailEvent,Moto2FailCallback);
     WarningEventInit(1,6,&SlaverUltraLowPowerEvent,SlaverUltraLowBatteryWarning);
     WarningEventInit(8,2,&NTCWarningEvent,NTCWarningEvent_Callback);
     WarningEventInit(0,0,&NowStatusEvent,RT_NULL);//本地存储器

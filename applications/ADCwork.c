@@ -128,7 +128,6 @@ void NTC_Work_Callback(void *parameter)
         {
             NTC_State_Save(ValveStatus);
             Warning_Enable_Num(8);
-            WarUpload_GW(1,0,8,1);//NTC报警
         }
         if(ADC_Voltage_Calc()>=1.133 && Now_Status==NTCWarning)
         {

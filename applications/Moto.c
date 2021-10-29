@@ -133,9 +133,8 @@ void Turn1_Timer_Callback(void *parameter)
     rt_pin_write(Turn2,1);
     if(!Turn1_Flag)
     {
-        LOG_E("Moto1 is Fail\r\n");
         Warning_Enable_Num(6);
-        WarUpload_GW(1,0,2,2);//MOTO1报警
+        LOG_E("Moto1 is Fail\r\n");
     }
     else
     {
@@ -151,8 +150,7 @@ void Turn2_Timer_Callback(void *parameter)
     if(!Turn2_Flag)
     {
         LOG_E("Moto2 is Fail\r\n");
-        Warning_Enable_Num(6);
-        WarUpload_GW(1,0,2,3);//MOTO2报警
+        Warning_Enable_Num(9);
     }
     else
     {
