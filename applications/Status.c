@@ -111,6 +111,7 @@ void SlaverWaterAlarmWarning(void *parameter)
 }
 void MasterLostPeakWarning(void *parameter)
 {
+    Now_Status = MasterLostPeak;
     WarUpload_GW(1,0,3,1);//掉落报警
     beep_start(0,1);//红灯,蜂鸣器三下
     loss_led_start();
