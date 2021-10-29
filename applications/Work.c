@@ -37,14 +37,16 @@ void WarningWithPeak(uint8_t past,uint8_t status)
         switch(status)
         {
         case 0://恢复正常
-            BackToNormal();
             if(past==1)
             {
                 WarUpload_GW(1,0,3,0);//掉落消除报警
-
             }
-            beep_stop();
-            loss_led_stop();
+            if(GetNowStatus()==MasterLostPeak)
+            {
+                BackToNormal();
+                beep_stop();
+                loss_led_stop();
+            }
             break;
         case 1://测水线掉落
             Warning_Enable_Num(3);
