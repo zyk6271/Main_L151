@@ -768,8 +768,11 @@ uint8_t Flash_Set_SlaveAlarmFlag(uint32_t Device_ID,uint8_t Flag)//数据载入�
     {
         if(Global_Device.ID[num]==Device_ID)
         {
-            Global_Device.SlaveAlarm[num] = Flag;
-            Device_SlaveAlarmChange(Device_ID,Flag);
+            if(Global_Device.SlaveAlarm[num] != Flag)
+            {
+                Global_Device.SlaveAlarm[num] = Flag;
+                Device_SlaveAlarmChange(Device_ID,Flag);
+            }
             return RT_EOK;
         }
         num--;

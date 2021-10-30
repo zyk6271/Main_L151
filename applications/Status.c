@@ -97,7 +97,7 @@ void SlaverLowBatteryWarning(void *parameter)
 }
 void SlaverUltraLowBatteryWarning(void *parameter)
 {
-    Moto_Close(NormalOff);
+    Moto_Close(OtherOff);
     beep_start(0,15);//红灯,蜂鸣器一下
     Now_Status = SlaverUltraLowPower;
     LOG_I("SlaverUltraLowBatteryWarning\r\n");
