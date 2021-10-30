@@ -124,24 +124,24 @@ void MasterStatusChangeToDeAvtive(void)
 }
 void MasterWaterAlarmWarning(void *parameter)
 {
-    WarUpload_GW(1,0,1,1);//主控水警
     Moto_Close(NormalOff);
+    WarUpload_GW(1,0,1,1);//主控水警
     beep_start(0,2);//红灯,蜂鸣器三下
     Now_Status = MasterWaterAlarmActive;
     LOG_I("MasterWaterAlarmWarning\r\n");
 }
 void NTCWarningEvent_Callback(void *parameter)
 {
-    WarUpload_GW(1,0,8,1);//NTC报警
     Moto_Close(NormalOff);
+    WarUpload_GW(1,0,8,1);//NTC报警
     NTC_Ring();
     Now_Status = NTCWarning;
     LOG_I("NTCWarning\r\n");
 }
 void Delay_Timer_Callback(void *parameter)
 {
-    ControlUpload_GW(1,0,1,0);
     Moto_Close(OtherOff);
+    ControlUpload_GW(1,0,1,0);
     LOG_D("Delay_Timer_Callback is Now\r\n");
 }
 void Delay_Timer_Init(void)
