@@ -582,6 +582,7 @@ void Detect_All_Time(void)
             if(num == Global_Device.DoorNum)
             {
                 LOG_D("Door is Offline\r\n");
+                WarUpload_GW(1,Global_Device.ID[num],4,1);//Offline报警
                 Device_AliveChange(Global_Device.ID[num],0);
             }
             else if(num == Global_Device.GatewayNum)
