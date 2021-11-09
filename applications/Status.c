@@ -224,7 +224,7 @@ void Moto1FailCallback(void *parameter)
 }
 void Moto2FailCallback(void *parameter)
 {
-    WarUpload_GW(1,0,2,3);//MOTO1报警
+    WarUpload_GW(1,0,2,3);//MOTO2报警
     beep_start(0,9);
     Now_Status = MotoFail;
     LOG_I("MotoFail\r\n");

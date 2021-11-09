@@ -14,7 +14,7 @@
 #include "gateway.h"
 
 #define DBG_TAG "flash"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 typedef struct _env_list {

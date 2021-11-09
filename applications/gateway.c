@@ -60,6 +60,29 @@ void Gateway_Sync(void)
     {
         WarUpload_GW(1,0,7,0);//消警
     }
+    else if(GetNowStatus() == MasterLostPeak)
+    {
+        WarUpload_GW(1,0,3,1);//掉落报警
+    }
+    else if(GetNowStatus() == MasterWaterAlarmActive || MasterWaterAlarmDeActive)
+    {
+        WarUpload_GW(1,0,1,1);//主控水警
+    }
+    else if(GetNowStatus() == NTCWarning)
+    {
+        WarUpload_GW(1,0,8,1);//NTC报警
+    }
+    else if(GetNowStatus() == MotoFail)
+    {
+        if(Get_Moto1_Fail_FLag())
+        {
+            WarUpload_GW(1,0,2,2);//MOTO1报警
+        }
+        if(Get_Moto2_Fail_FLag())
+        {
+            WarUpload_GW(1,0,2,3);//MOTO2报警
+        }
+    }
     rt_timer_start(Gateway_Sync_t);
 }
 void Gateway_RemoteDelete(void)

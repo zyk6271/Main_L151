@@ -16,6 +16,8 @@ void Moto_Init(void);
 void Moto_Detect(void);
 void Moto_OpenByWifi(void);
 void Moto_CloseByWifi(void);
+uint8_t Get_Moto1_Fail_FLag(void);
+uint8_t Get_Moto2_Fail_FLag(void);
 
 
 #endif /* APPLICATIONS_MOTO_H_ */

@@ -41,12 +41,12 @@ int main(void)
     Delay_Timer_Init();
     WarningInit();
     RTC_Init();
-    WaterScan_Init();
     Radio_Task_Init();
     Gateway_Init();
     Moto_Init();
     ADC_Init();
     button_Init();
+    WaterScan_Init();
     DetectFactory();
     while (1)
     {

@@ -116,6 +116,8 @@ void Moto_Close(uint8_t ActFlag)
         LOG_D("No permissions to Off\r\n");
     }
 }
+uint8_t Moto1_Fail_FLag;
+uint8_t Moto2_Fail_FLag;
 void Turn1_Edge_Callback(void *parameter)
 {
     LOG_D("Turn1_Edge_Callback\r\n");
@@ -126,6 +128,14 @@ void Turn2_Edge_Callback(void *parameter)
     LOG_D("Turn2_Edge_Callback\r\n");
     Turn2_Flag = 1;
 }
+uint8_t Get_Moto1_Fail_FLag(void)
+{
+    return Moto1_Fail_FLag;
+}
+uint8_t Get_Moto2_Fail_FLag(void)
+{
+    return Moto2_Fail_FLag;
+}
 void Turn1_Timer_Callback(void *parameter)
 {
     rt_pin_irq_enable(Senor1, PIN_IRQ_DISABLE);
@@ -134,11 +144,13 @@ void Turn1_Timer_Callback(void *parameter)
     if(!Turn1_Flag)
     {
         Warning_Enable_Num(6);
+        Moto1_Fail_FLag = 1;
         LOG_E("Moto1 is Fail\r\n");
     }
     else
     {
         WarUpload_GW(1,0,2,0);//MOTO1解除报警
+        Moto1_Fail_FLag = 0;
         LOG_D("Moto1 is Good\r\n");
     }
 }
@@ -150,11 +162,13 @@ void Turn2_Timer_Callback(void *parameter)
     if(!Turn2_Flag)
     {
         LOG_E("Moto2 is Fail\r\n");
+        Moto2_Fail_FLag = 1;
         Warning_Enable_Num(9);
     }
     else
     {
         WarUpload_GW(1,0,2,1);//MOTO2解除报警
+        Moto2_Fail_FLag = 0;
         LOG_D("Moto2 is Good\r\n");
     }
 }
