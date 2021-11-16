@@ -98,9 +98,13 @@ void Moto_Close(uint8_t ActFlag)
             ControlUpload_GW(1,0,1,0);
         }
         rt_pin_write(Turn1,0);
+        rt_pin_irq_enable(Senor1, PIN_IRQ_DISABLE);
         rt_pin_write(Turn2,0);
+        rt_pin_irq_enable(Senor2, PIN_IRQ_DISABLE);
         just_ring();
         Delay_Timer_Close();
+        rt_timer_stop(Moto_Timer1);
+        rt_timer_stop(Moto_Timer2);
     }
     else if(Global_Device.LastFlag == OtherOff && ActFlag == OtherOff)
     {
