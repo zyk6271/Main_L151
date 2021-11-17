@@ -576,7 +576,7 @@ void Detect_All_Time(void)
     if(!num)return;
     while(num)
     {
-        if(Global_Device.ID_Time[num]==25 && Global_Device.GetMesssage[num]==0)
+        if(Global_Device.ID_Time[num]==25 && Global_Device.GetMesssage[num]==0 && Global_Device.ID[num]!=0)
         {
             //掉线ID上报
             if(num == Global_Device.DoorNum)
