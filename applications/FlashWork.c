@@ -23,7 +23,7 @@ typedef struct _env_list {
 
 Device_Info Global_Device={0};
 rt_spi_flash_device_t fm25q128;
-char read_value_temp[32] = {0};
+char read_value_temp[64] = {0};
 
 void flash_Init(void)
 {
@@ -396,7 +396,7 @@ uint8_t Add_GatewayDevice(uint32_t Device_ID)
     uint32_t Num=0;
     if(GetGatewayID())
     {
-        Num = Flash_Get_Door_Nums();
+        Num = Flash_Get_Gateway_Nums();
         Global_Device.ID[Num] = Device_ID;
         Flash_Key_Change(Num,Device_ID);
         Global_Device.GatewayNum = Num;
