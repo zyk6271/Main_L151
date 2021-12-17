@@ -30,18 +30,15 @@ uint8_t ValvePastStatus=0;
 rt_thread_t WaterScan_t=RT_NULL;
 extern uint8_t ValveStatus;
 
-void WarningWithPeak(uint8_t past,uint8_t status)
+void WarningWithPeak(uint8_t status)
 {
     if(Detect_Learn())
     {
         switch(status)
         {
-        case 0://恢复正常
-            if(past==1)
-            {
-                WarUpload_GW(1,0,3,0);//掉落消除报警
-            }
-            if(GetNowStatus()==MasterLostPeak)
+        case 0://测水线掉落恢复
+            WarUpload_GW(1,0,3,0);//掉落消除报警
+            if(GetNowStatus()==Open || GetNowStatus()==Close || GetNowStatus()==MasterLostPeak)
             {
                 BackToNormal();
                 beep_stop();
@@ -100,7 +97,7 @@ void WaterScan_Callback(void *parameter)
                 if(WarningStatus != 1<<0)
                 {
                     WarningStatus = 1<<0;
-                    WarningWithPeak(WarningPastStatus,3);
+                    WarningWithPeak(3);
                     LOG_D("Change Status to Deactive\r\n");
                 }
             }
@@ -115,7 +112,7 @@ void WaterScan_Callback(void *parameter)
             {
                 if(WarningStatus != 1<<2)
                 {
-                    WarningWithPeak(WarningPastStatus,1);
+                    WarningWithPeak(1);
                     WarningPastStatus = WarningNowStatus;
                     WarningStatus = 1<<2;
                 }
@@ -124,7 +121,7 @@ void WaterScan_Callback(void *parameter)
             {
                 if(WarningStatus != 1<<3)
                 {
-                    WarningWithPeak(WarningPastStatus,2);
+                    WarningWithPeak(2);
                     WarningPastStatus = WarningNowStatus;
                     WarningStatus = 1<<3;
                 }
@@ -133,7 +130,7 @@ void WaterScan_Callback(void *parameter)
             {
                 if(WarningStatus != 1<<4)
                 {
-                    WarningWithPeak(WarningPastStatus,0);
+                    WarningWithPeak(0);
                     WarningPastStatus = WarningNowStatus;
                     WarningStatus = 1<<4;
                 }

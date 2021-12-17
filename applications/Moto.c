@@ -198,19 +198,8 @@ void Moto_Init(void)
         LOG_I("Moto is Init Fail,Last is Slaver Alarm\r\n");
         return;
     }
-    if(Global_Device.LastFlag == 0 || Global_Device.LastFlag == NormalOpen || Global_Device.LastFlag == OtherOpen)
+    if(Global_Device.LastFlag != OtherOff)
     {
-        Global_Device.LastFlag = NormalOpen;
-        Moto_InitOpen(NormalOpen);
-    }
-    else if(Global_Device.LastFlag == OtherOff)
-    {
-        Global_Device.LastFlag = OtherOff;
-        Moto_InitOpen(NormalOpen);
-    }
-    else if(Global_Device.LastFlag == NormalOff)
-    {
-        Global_Device.LastFlag = NormalOff;
         Moto_InitOpen(NormalOpen);
     }
     LOG_D("Moto is Init Success,Flag is %d\r\n",Global_Device.LastFlag);
