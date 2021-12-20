@@ -54,9 +54,8 @@ void Gateway_Sync_Callback(void *parameter)
         rt_timer_stop(Gateway_Sync_t);
     }
 }
-void Gateway_Sync(void)
+void PowerOn_Upload(void)
 {
-    ControlUpload_GW(1,0,5,ValveStatus);
     switch(GetNowStatus())
     {
     case Open:
@@ -90,6 +89,11 @@ void Gateway_Sync(void)
     default:
         break;
     }
+}
+void Gateway_Sync(void)
+{
+    ControlUpload_GW(1,0,5,ValveStatus);
+    PowerOn_Upload();
     rt_timer_start(Gateway_Sync_t);
 }
 void Gateway_RemoteDelete(void)
@@ -126,7 +130,7 @@ void Heart_Test(void *parameter)
         rt_timer_stop(Heart_Test_t);
         wifi_led(1);
         LOG_I("Gateway Test Check Success\r\n");
-        WarUpload_GW(1,0,7,0);//消警
+        PowerOn_Upload();
     }
     else
     {
