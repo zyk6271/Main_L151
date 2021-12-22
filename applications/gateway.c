@@ -35,7 +35,7 @@ void Gateway_Sync_Callback(void *parameter)
 {
     if(Gateway_Sync_Num <= Global_Device.Num)
     {
-        if(Global_Device.ID[Gateway_Sync_Num]<40000000)
+        if(Global_Device.ID[Gateway_Sync_Num]<40000000 && Global_Device.ID[Gateway_Sync_Num]>0)
         {
             if(Global_Device.Alive[Gateway_Sync_Num])
             {
