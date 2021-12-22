@@ -130,6 +130,7 @@ void Heart_Test(void *parameter)
         rt_timer_stop(Heart_Test_t);
         wifi_led(1);
         LOG_I("Gateway Test Check Success\r\n");
+        ControlUpload_GW(1,0,5,ValveStatus);
         PowerOn_Upload();
     }
     else
