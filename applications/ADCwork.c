@@ -124,12 +124,12 @@ void NTC_Work_Callback(void *parameter)
     LOG_D("NTC With ADC is Init Success\r\n");
     while(1)
     {
-        if(ADC_Voltage_Calc()<1.106 && Now_Status!=NTCWarning)
+        if(ADC_Voltage_Calc()<1.153 && Now_Status!=NTCWarning)
         {
             NTC_State_Save(ValveStatus);
             Warning_Enable_Num(8);
         }
-        if(ADC_Voltage_Calc()>=1.133 && Now_Status==NTCWarning)
+        if(ADC_Voltage_Calc()>=1.168 && Now_Status==NTCWarning)
         {
             WarUpload_GW(1,0,8,0);//NTC报警
             Warning_Disable();
