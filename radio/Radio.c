@@ -682,7 +682,7 @@ void Radio_Task_Init(void)
     Init_Timer = rt_timer_create("Init_Timer", Init_Timer_Callback, RT_NULL, 3000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
     rt_timer_start(Init_Timer);
 
-    Send_Timer = rt_timer_create("Send_Timeout", Send_Timer_Callback, RT_NULL, 120, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
+    Send_Timer = rt_timer_create("Send_Timeout", Send_Timer_Callback, RT_NULL, 1000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
 
     InitAX5043();
     SetReceiveMode();           //接收模式

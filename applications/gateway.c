@@ -163,6 +163,7 @@ void Gateway_Reload(void)
     Gateway_ID = Global_Device.ID[Global_Device.GatewayNum];
     Heart_Refresh(Gateway_ID);
     LOG_I("Gateway_ID is %ld\r\n",Gateway_ID);
+    rt_timer_start(Heart_Check_t);
 }
 void Gateway_Init(void)
 {
