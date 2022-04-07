@@ -62,8 +62,8 @@ EfErrCode ef_port_init(ef_env const **default_env, size_t *default_env_size) {
 
     rt_sem_init(&env_cache_lock, "env lock", 1, RT_IPC_FLAG_PRIO);
 
-    extern rt_spi_flash_device_t fm25q128;
-    flash = (sfud_flash_t)(fm25q128->user_data);
+    extern rt_spi_flash_device_t fm25q16;
+    flash = (sfud_flash_t)(fm25q16->user_data);
 
     return result;
 }

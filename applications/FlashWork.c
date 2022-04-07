@@ -22,14 +22,27 @@ typedef struct _env_list {
 } env_list;
 
 Device_Info Global_Device={0};
-rt_spi_flash_device_t fm25q128;
+rt_spi_flash_device_t fm25q16;
 char read_value_temp[64] = {0};
 
 void flash_Init(void)
 {
+    rt_err_t status;
+    extern rt_spi_flash_device_t rt_sfud_flash_probe(const char *spi_flash_dev_name, const char *spi_dev_name);
     rt_hw_spi_device_attach("spi2", "spi20", GPIOB, GPIO_PIN_12);
-    fm25q128 = rt_sfud_flash_probe("norflash0", "spi20");
-    RT_ASSERT(fm25q128);
+    fm25q16 = rt_sfud_flash_probe("norflash0", "spi20");
+    if (RT_NULL == fm25q16)
+    {
+        LOG_E("sfud fail\r\n");
+        return;
+    };
+    status = easyflash_init();
+    if (status != EF_NO_ERR)
+    {
+        LOG_E("easyflash_init fail\r\n");
+        return;
+    };
+    LOG_I("Storage Init Success\r\n");
 }
 uint8_t Get_LearnNums_Valid(void)
 {
@@ -491,7 +504,7 @@ uint8_t Update_Device_Bat(uint32_t Device_ID,uint8_t bat)//更新电量
     LOG_E("Device Bat %d is Increase Fail",Global_Device.ID[num]);
     return RT_ERROR;
 }
-uint8_t Update_Device_Rssi(uint32_t Device_ID,uint8_t rssi)//更新Rssi
+uint8_t Update_Device_Rssi(uint32_t Device_ID,int rssi)//更新Rssi
 {
     uint16_t num = Global_Device.Num;
     if(!num)return RT_ERROR;
@@ -499,15 +512,15 @@ uint8_t Update_Device_Rssi(uint32_t Device_ID,uint8_t rssi)//更新Rssi
     {
         if(Global_Device.ID[num]==Device_ID)
         {
-            if(rssi>94)
+            if(rssi<-94)
             {
                 Global_Device.Rssi[num] = 0;
             }
-            else if(rssi <= 94 && rssi>78)
+            else if(rssi >= -94 && rssi < -78)
             {
                 Global_Device.Rssi[num] = 1;
             }
-            else if(rssi <= 78)
+            else if(rssi >= -78)
             {
                 Global_Device.Rssi[num] = 2;
             }

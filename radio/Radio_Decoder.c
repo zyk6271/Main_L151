@@ -12,8 +12,6 @@
 #include "drv_spi.h"
 #include <string.h>
 #include "AX5043.h"
-#include "Radio_Config.h"
-#include "Radio.h"
 #include "Radio_Decoder.h"
 #include "Radio_Encoder.h"
 #include "stdio.h"
@@ -25,33 +23,26 @@
 #include "key.h"
 #include "pin_config.h"
 #include "gateway.h"
+#include "Radio_Common.h"
 
 #define DBG_TAG "radio_decoder"
-#define DBG_LVL DBG_INFO
+#define DBG_LVL DBG_LOG
 #include <rtdbg.h>
-
-typedef struct
-{
-    long Target_ID;
-    long From_ID;
-    long Device_ID;
-    int Counter;
-    int Command ;
-    int Data;
-    int Rssi;
-}Message;
 
 uint8_t Learn_Flag=0;
 uint8_t Last_Close_Flag=0;
 uint8_t Gw_Flag = 0;
+uint8_t Recv_Num;
 
 extern rt_timer_t Learn_Timer;
 extern uint8_t ValveStatus ;
 extern uint32_t Self_Id;
-extern enum Device_Status Now_Status;
 
-uint8_t Recv_Num;
+extern enum Device_Status Now_Status;
+extern struct ax5043 rf_433;
+
 rt_timer_t Factory_Test_Timer = RT_NULL;
+
 void Factory_Test_Timer_Callback(void *parameter)
 {
     if(Recv_Num>7)
@@ -367,21 +358,21 @@ void DataSolve(Message buf)
     }
     if(buf.Counter==0)
     {
-        ChangeMaxPower();
+        ChangeMaxPower(&rf_433);
     }
     else
     {
-        BackNormalPower();
+        BackNormalPower(&rf_433);
     }
     Clear_Device_Time(buf.From_ID);
     Offline_React(buf.From_ID);
 }
-void GatewayDataSolve(uint8_t *rx_buffer,uint8_t rx_len)
+void GatewayDataSolve(int rssi,uint8_t *rx_buffer,uint8_t rx_len)
 {
     Message Rx_message;
-    if(rx_buffer[rx_len-1]=='G')
+    if(rx_buffer[rx_len]=='G')
     {
-        LOG_D("GatewayDataSolve verify ok\r\n");
+        LOG_D("GatewayDataSolve is %s,RSSI is %d\r\n",rx_buffer,rssi);
         sscanf((const char *)&rx_buffer[2],"{%ld,%ld,%ld,%d,%d,%d}",&Rx_message.Target_ID,&Rx_message.From_ID,&Rx_message.Device_ID,&Rx_message.Counter,&Rx_message.Command,&Rx_message.Data);
         if(Rx_message.Target_ID != Self_Id)return;
         if(Check_Valid(Rx_message.From_ID) == RT_EOK)
@@ -433,73 +424,74 @@ void GatewayDataSolve(uint8_t *rx_buffer,uint8_t rx_len)
         }
         else
          {
-             LOG_W("GatewayControlSolve ID Error\r\n");
+             LOG_D("GatewayControlSolve ID Error\r\n");
          }
     }
     else
     {
-        LOG_W("GatewayControlSolve verify Fail\r\n");
+        LOG_D("GatewayControlSolve verify Fail\r\n");
     }
 }
-void Rx_Done_Callback(uint8_t *rx_buffer,uint8_t rx_len,int8_t rssi)
+void NormalSolve(int rssi,uint8_t *rx_buffer,uint8_t rx_len)
 {
     Message Rx_message;
-    switch(rx_buffer[1])
+    if(rx_buffer[rx_len]==0x0A&&rx_buffer[rx_len-1]==0x0D)
     {
-    case '{':
-        if(rx_buffer[rx_len-1]==0x0A&&rx_buffer[rx_len-2]==0x0D)
+        LOG_D("NormalSolve is %s,RSSI is %d\r\n",rx_buffer,rssi);
+        rx_buffer[rx_len-1]=0;
+        rx_buffer[rx_len-2]=0;
+        sscanf((const char *)&rx_buffer[1],"{%ld,%ld,%d,%d,%d}",&Rx_message.Target_ID,&Rx_message.From_ID,&Rx_message.Counter,&Rx_message.Command,&Rx_message.Data);
+        if(Rx_message.Target_ID==Self_Id ||Rx_message.Target_ID==99999999)
         {
-            LOG_D("Rx verify ok\r\n");
-            rx_buffer[rx_len-1]=0;
-            rx_buffer[rx_len-2]=0;
-            sscanf((const char *)&rx_buffer[1],"{%ld,%ld,%d,%d,%d}",&Rx_message.Target_ID,&Rx_message.From_ID,&Rx_message.Counter,&Rx_message.Command,&Rx_message.Data);
-            if(Rx_message.Target_ID==Self_Id ||Rx_message.Target_ID==99999999)
+            if(Learn_Flag)
             {
-                if(Learn_Flag)
+                Update_Device_Rssi(Rx_message.From_ID,rssi);
+                Device_AliveChange(Rx_message.From_ID,1);
+                Device_Learn(Rx_message);
+            }
+            else
+            {
+                if(Rx_message.From_ID==GetGatewayID())
                 {
-                    Update_Device_Rssi(Rx_message.From_ID,abs(rssi-64));
-                    Device_AliveChange(Rx_message.From_ID,1);
-                    Device_Learn(Rx_message);
+                    wifi_led(3);
                 }
-                else
+                if(Flash_Get_Key_Valid(Rx_message.From_ID)==RT_EOK)
                 {
-                    if(Rx_message.From_ID==GetGatewayID())
+                    Update_Device_Rssi(Rx_message.From_ID,rssi);
+                    Device_AliveChange(Rx_message.From_ID,1);
+                    DataSolve(Rx_message);
+                }
+                else if(Rx_message.From_ID == 98989898)
+                {
+                    LOG_W("Factory Get Rssi is %d\r\n",rssi);
+                    if(rssi<-80)
                     {
-                        wifi_led(3);
-                    }
-                    if(Flash_Get_Key_Valid(Rx_message.From_ID)==RT_EOK)
-                    {
-                        Update_Device_Rssi(Rx_message.From_ID,abs(rssi-64));
-                        Device_AliveChange(Rx_message.From_ID,1);
-                        DataSolve(Rx_message);
-                    }
-                    else if(Rx_message.From_ID == 98989898)
-                    {
-                        LOG_W("Factory Get Rssi is %d\r\n",rssi-64);
-                        if(rssi<-16)
-                        {
-                            Factory_WarningRing();
-                        }
-                        else
-                        {
-                            Factory_NormalRing();
-                        }
+                        Factory_WarningRing();
                     }
                     else
                     {
-                        LOG_I("Device_ID %ld is not include\r\n",Rx_message.From_ID);
+                        Factory_NormalRing();
                     }
                 }
-
+                else
+                {
+                    LOG_W("Device_ID %ld is not include\r\n",Rx_message.From_ID);
+                }
             }
+
         }
-        else
-        {
-            LOG_D("Rx verify Fail\r\n");
-        }
+    }
+}
+void rf433_rx_callback(int rssi,uint8_t *buffer,uint8_t len)
+{
+
+    switch(buffer[1])
+    {
+    case '{':
+        NormalSolve(rssi,buffer,len);
         break;
     case 'G':
-        GatewayDataSolve(rx_buffer,rx_len);
+        GatewayDataSolve(rssi,buffer,len);
         break;
     }
 }

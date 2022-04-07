@@ -20,7 +20,7 @@
 #include "gateway.h"
 
 #define DBG_TAG "work"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 uint8_t WarningNowStatus=0;
@@ -79,14 +79,14 @@ void WaterScan_Callback(void *parameter)
         if(Peak_Loss_Level!=0)
         {
             WarningNowStatus=1;//测水线掉落
-            LOG_D("Peak_Loss is active\r\n");
+            LOG_W("Peak_Loss is active\r\n");
         }
         else
         {
             if(Peak_ON_Level==0)
             {
                 WarningNowStatus=2;//测水线短路
-                LOG_D("Peak_ON is active\r\n");
+                LOG_W("Peak_ON is active\r\n");
             }
             else WarningNowStatus=0;//状态正常
         }
@@ -98,7 +98,7 @@ void WaterScan_Callback(void *parameter)
                 {
                     WarningStatus = 1<<0;
                     WarningWithPeak(3);
-                    LOG_D("Change Status to Deactive\r\n");
+                    LOG_W("Change Status to Deactive\r\n");
                 }
             }
             else if(WarningPastStatus==2 && WarningNowStatus==1)

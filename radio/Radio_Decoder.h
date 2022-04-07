@@ -10,8 +10,17 @@
 #ifndef RADIO_RADIO_DECODER_H_
 #define RADIO_RADIO_DECODER_H_
 
+typedef struct
+{
+    long Target_ID;
+    long From_ID;
+    long Device_ID;
+    int Counter;
+    int Command ;
+    int Data;
+    int Rssi;
+}Message;
 
-void Rx_Done_Callback(uint8_t *rx_buffer,uint8_t rx_len,int8_t rssi);
 void Start_Learn(void);
 void Stop_Learn(void);
 void Start_Learn_Key(void);

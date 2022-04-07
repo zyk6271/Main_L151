@@ -9,8 +9,6 @@
  */
 #include <rtthread.h>
 #include <rtdevice.h>
-#include "radio.h"
-#include "radio_config.h"
 #include "ax5043.h"
 #include "device.h"
 #include "led.h"
@@ -36,18 +34,18 @@ int main(void)
     led_Init();
     Key_Reponse();
     flash_Init();
-    easyflash_init();
     LoadDevice2Memory();
     Delay_Timer_Init();
     WarningInit();
     RTC_Init();
-    Radio_Task_Init();
-    Gateway_Init();
+    rf_433_start();
+    RadioDequeueTaskInit();
     Moto_Init();
     ADC_Init();
     button_Init();
     WaterScan_Init();
     DetectFactory();
+    Gateway_Init();
     while (1)
     {
         rt_thread_mdelay(1000);

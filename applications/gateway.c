@@ -17,7 +17,7 @@
 #include "moto.h"
 
 #define DBG_TAG "GATEWAY"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 extern Device_Info Global_Device;
@@ -169,26 +169,16 @@ void Gateway_Init(void)
 {
     extern uint8_t ValveStatus;
     Gateway_ID = Global_Device.ID[Global_Device.GatewayNum];
-    if(Heart_Test_t == RT_NULL)
-    {
-        Heart_Test_t = rt_timer_create("Heart_Test", Heart_Test,RT_NULL,5000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_PERIODIC);
-    }
-    if(Heart_Check_t == RT_NULL)
-    {
-        Heart_Check_t = rt_timer_create("Heart_Check", Heart_Check,RT_NULL,1000*60*20,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_PERIODIC);
-    }
-    if(Gateway_Sync_t == RT_NULL)
-    {
-        Gateway_Sync_t = rt_timer_create("Gateway_Sync", Gateway_Sync_Callback,RT_NULL,2000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_PERIODIC);
-    }
+    ControlUpload_GW(0,0,5,ValveStatus);
+    Heart_Test_t = rt_timer_create("Heart_Test", Heart_Test,RT_NULL,5000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_PERIODIC);
+    Heart_Check_t = rt_timer_create("Heart_Check", Heart_Check,RT_NULL,1000*60*20,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_PERIODIC);
+    Gateway_Sync_t = rt_timer_create("Gateway_Sync", Gateway_Sync_Callback,RT_NULL,2000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_PERIODIC);
     if(Gateway_ID==0)
     {
         LOG_W("Gateway_ID is 0\r\n");
-        wifi_led(0);
     }
     else
     {
-        wifi_led(0);
         LOG_I("Gateway_ID is %ld\r\n",Gateway_ID);
         Heart_Test_Start();
         rt_timer_start(Heart_Check_t);

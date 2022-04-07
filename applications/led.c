@@ -18,7 +18,7 @@ static agile_led_t *wifi_G_Com = RT_NULL;
 static agile_led_t *wifi_R = RT_NULL;
 
 #define DBG_TAG "led"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 uint8_t led_id_temp = 0;
