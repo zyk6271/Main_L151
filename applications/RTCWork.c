@@ -30,18 +30,16 @@ void RTC_Timer_Entry(void *parameter)
             }
             if(RTC_Counter<24)
             {
-                LOG_D("RTC Handler Increase\r\n");
                 Update_All_Time();//24小时更新全部时间
                 RTC_Counter++;
             }
             else
             {
-                LOG_D("RTC Handler Detect\r\n");
                 Update_All_Time();//24小时更新全部时间
                 Detect_All_Time();//25个小时检测计数器
                 RTC_Counter=0;
             }
-            LOG_D("RTC Handler Callback,Counter is %d\r\n",RTC_Counter);
+            LOG_D("Device RTC Detect,Hour is %d\r\n",RTC_Counter);
         }
     }
 }
@@ -91,7 +89,6 @@ void RTC_AlarmConfig(void)
 }
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *RtcHandle)
 {
-    LOG_D("RTC AlarmA is come\r\n");
     RTC_TimeTypeDef sTime = {0};
     sTime.Hours = 0;
     sTime.Minutes = 0;
@@ -130,7 +127,6 @@ void RTC_Init(void)
     {
     }
     RTC_AlarmConfig();
-    LOG_D("RTC Init Success\r\n");
 }
 void RTC_Alarm_IRQHandler(void)
 {

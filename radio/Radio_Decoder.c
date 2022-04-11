@@ -203,7 +203,6 @@ void DataSolve(Message buf)
         LOG_D("Test\r\n");
         break;
     case 2://握手包
-        LOG_D("HandShake\r\n");
         switch(buf.Data)
         {
         case 0:

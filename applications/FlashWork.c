@@ -80,7 +80,6 @@ uint32_t Flash_Get_Boot_Times(void)
     LOG_D("Reading Key %s value %ld \r\n", keybuf, read_value);//输出
     return read_value;
 }
-MSH_CMD_EXPORT(Flash_Get_Boot_Times,Flash_Get_Boot_Times);
 uint32_t Flash_Get_Learn_Nums(void)
 {
     uint8_t read_len = 0;
@@ -261,9 +260,12 @@ uint8_t Device_AliveChange(uint32_t Device_ID,uint8_t value)
     {
         if(Global_Device.ID[num]==Device_ID)
         {
-            Global_Device.Alive[num] = value;
-            Global_Device.GetMesssage[num] = value;
-            Flash_AliveChange(Device_ID,value);
+            if(Global_Device.Alive[num] != value || Global_Device.GetMesssage[num] != value)
+            {
+                Global_Device.Alive[num] = value;
+                Global_Device.GetMesssage[num] = value;
+                Flash_AliveChange(Device_ID,value);
+            }
             return RT_EOK;
         }
         num--;
@@ -494,9 +496,12 @@ uint8_t Update_Device_Bat(uint32_t Device_ID,uint8_t bat)//更新电量
     {
         if(Global_Device.ID[num]==Device_ID)
         {
-            Global_Device.Bat[num] = bat;
-            Device_BatChange(Device_ID,bat);
-            LOG_D("Device Bat %d is Increase to %d",Global_Device.ID[num],bat);
+            if(Global_Device.Bat[num] != bat)
+            {
+                Global_Device.Bat[num] = bat;
+                Device_BatChange(Device_ID,bat);
+                LOG_D("Device Bat %d is Increase to %d",Global_Device.ID[num],bat);
+            }
             return RT_EOK;
         }
         num--;
@@ -506,6 +511,7 @@ uint8_t Update_Device_Bat(uint32_t Device_ID,uint8_t bat)//更新电量
 }
 uint8_t Update_Device_Rssi(uint32_t Device_ID,int rssi)//更新Rssi
 {
+    uint8_t num = rssi_temp;
     uint16_t num = Global_Device.Num;
     if(!num)return RT_ERROR;
     while(num)
@@ -514,18 +520,22 @@ uint8_t Update_Device_Rssi(uint32_t Device_ID,int rssi)//更新Rssi
         {
             if(rssi<-94)
             {
-                Global_Device.Rssi[num] = 0;
+                rssi_temp = 0;
             }
             else if(rssi >= -94 && rssi < -78)
             {
-                Global_Device.Rssi[num] = 1;
+                rssi_temp = 1;
             }
             else if(rssi >= -78)
             {
-                Global_Device.Rssi[num] = 2;
+                rssi_temp = 2;
             }
-            Device_RssiChange(Device_ID,Global_Device.Rssi[num]);
-            LOG_I("Device rssi %d is Write to %d",Global_Device.Rssi[num],Global_Device.ID[num]);
+            if(rssi_temp != Global_Device.Rssi[num])
+            {
+                Global_Device.Rssi[num] = rssi_temp;
+                Device_RssiChange(Device_ID,Global_Device.Rssi[num]);
+                LOG_I("Device rssi %d is Write to %d",Global_Device.Rssi[num],Global_Device.ID[num]);
+            }
             return RT_EOK;
         }
         num--;
@@ -745,7 +755,6 @@ void LoadDevice2Memory(void)//数据载入到内存中
     Global_Device.LastFlag = Flash_Get_Moto_Flag();
     LOG_I("Num is %d",Global_Device.Num);
 }
-MSH_CMD_EXPORT(LoadDevice2Memory,LoadDevice2Memory);
 void DeleteAllDevice(void)//数据载入到内存中
 {
     Gateway_RemoteDelete();
