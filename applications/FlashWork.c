@@ -511,7 +511,7 @@ uint8_t Update_Device_Bat(uint32_t Device_ID,uint8_t bat)//更新电量
 }
 uint8_t Update_Device_Rssi(uint32_t Device_ID,int rssi)//更新Rssi
 {
-    uint8_t num = rssi_temp;
+    uint8_t rssi_temp = 0;
     uint16_t num = Global_Device.Num;
     if(!num)return RT_ERROR;
     while(num)
