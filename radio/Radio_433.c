@@ -12,6 +12,7 @@
 #include "drv_spi.h"
 #include <string.h>
 #include "AX5043.h"
+#include "led.h"
 #include "Radio_Common.h"
 #include "pin_config.h"
 #include "Radio_Decoder.h"
@@ -87,10 +88,8 @@ void rf_433_send_timer_callback(void *parameter)
     if(rf_433.ubRFState == trxstate_tx_waitdone)
     {
         LOG_W("rf_433 Send timeout\r\n");
-        SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_PWRMODE, AX5043_PWRSTATE_XTAL_ON);    //AX5043_PWRMODE = AX5043_PWRSTATE_XTAL_ON=0x00;
         SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_RADIOEVENTMASK0, 0x00);
-        Ax5043SetRegisters_RX(&rf_433);
-        AX5043Receiver_Continuous(&rf_433);
+        rf_restart(&rf_433);
     }
 }
 void rf_433_task_callback(void *parameter)
@@ -152,6 +151,9 @@ void rf_433_task_callback(void *parameter)
                 }
                 rt_timer_stop(rf_433_send_timer);
                 SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_RADIOEVENTMASK0, 0x00);
+                rf_restart(&rf_433);
+                break;
+            case trxstate_restart: //0x11
                 Ax5043SetRegisters_RX(&rf_433);
                 AX5043Receiver_Continuous(&rf_433);
                 break;
@@ -166,8 +168,8 @@ void rf_433_task_callback(void *parameter)
 void rf_433_start(void)
 {
     rf_433_sem_init();
+    rf_433_send_timer = rt_timer_create("rf_433_send timeout", rf_433_send_timer_callback, RT_NULL, 1000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
     rf_433_task = rt_thread_create("rf_433_task", rf_433_task_callback, RT_NULL, 2048, 8, 10);
     rt_thread_startup(rf_433_task);
-    rf_433_send_timer = rt_timer_create("rf_433_send timeout", rf_433_send_timer_callback, RT_NULL, 1000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
     rf_433_init();
 }

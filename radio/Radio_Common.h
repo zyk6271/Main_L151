@@ -23,6 +23,7 @@ void ReceiveData(struct ax5043 *dev);
 void AX5043_OFF(struct ax5043 *dev);
 void transmit_packet_task(struct ax5043 *dev,uint8_t *Buf, uint8_t Length);
 uint8_t rf_startup(struct ax5043 *dev);
+uint8_t rf_restart(struct ax5043 *dev);
 void Normal_send(struct ax5043 *dev,uint8_t *Buf, uint8_t Length);
 void Radio_Task_Init(void);
 void TransmitData(struct ax5043 *dev);

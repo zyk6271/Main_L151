@@ -26,5 +26,6 @@ void Stop_Learn(void);
 void Start_Learn_Key(void);
 uint8_t Factory_Detect(void);
 void Factory_Test(void);
+void rf433_rx_callback(int rssi,uint8_t *buffer,uint8_t len);
 
 #endif /* RADIO_RADIO_DECODER_H_ */
