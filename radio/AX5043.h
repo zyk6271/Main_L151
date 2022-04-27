@@ -18,7 +18,6 @@
 #define trxstate_txcw_xtalwait                  0x0E
 #define trxstate_txstream_xtalwait              0x0F
 #define trxstate_txstream                       0x10
-#define trxstate_restart                        0x11
 
 #define AXRADIO_MODE_UNINIT                     0x00
 #define AXRADIO_MODE_OFF                        0x01

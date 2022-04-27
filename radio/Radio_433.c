@@ -104,6 +104,7 @@ void rf_433_task_callback(void *parameter)
             {
             case trxstate_rx: //0x01
                 ReceiveData(&rf_433);
+                Ax5043SetRegisters_RX(&rf_433);
                 AX5043Receiver_Continuous(&rf_433);
                 if (rf_433.RxLen != 0)
                 {
@@ -152,10 +153,6 @@ void rf_433_task_callback(void *parameter)
                 rt_timer_stop(rf_433_send_timer);
                 SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_RADIOEVENTMASK0, 0x00);
                 rf_restart(&rf_433);
-                break;
-            case trxstate_restart: //0x11
-                Ax5043SetRegisters_RX(&rf_433);
-                AX5043Receiver_Continuous(&rf_433);
                 break;
             default:
                 SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_IRQMASK1, 0x00);

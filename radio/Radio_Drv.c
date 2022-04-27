@@ -65,6 +65,9 @@ void Ax5043_Spi_Reset(struct ax5043 *dev)
     msg[0] = REG_AX5043_PWRMODE|0x80 ;
     msg[1] = 0x80 ;
     rt_spi_send(dev->socket,msg,2);
+    msg[0] = REG_AX5043_PWRMODE|0x80 ;
+    msg[1] = 0x00 ;
+    rt_spi_send(dev->socket,msg,2);
 }
 void SpiWriteSingleAddressRegister(struct ax5043 *dev,uint8_t Addr, uint8_t Data)
 {
