@@ -26,7 +26,7 @@
 #include "Radio_Common.h"
 
 #define DBG_TAG "radio_decoder"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 uint8_t Learn_Flag=0;
@@ -441,7 +441,7 @@ void NormalSolve(int rssi,uint8_t *rx_buffer,uint8_t rx_len)
                 else if(Rx_message.From_ID == 98989898)
                 {
                     LOG_W("Factory Get Rssi is %d\r\n",rssi);
-                    if(rssi<-80)
+                    if(rssi<-85)
                     {
                         Factory_WarningRing();
                     }
