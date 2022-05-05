@@ -27,7 +27,7 @@ Radio_Queue Main_Queue={0};
 
 extern uint32_t Gateway_ID;
 uint32_t Self_Id = 0;
-uint32_t Self_Default_Id = 11000000;
+uint32_t Self_Default_Id = 10000000;
 uint32_t Self_Counter = 0;
 
 extern struct ax5043 rf_433;
@@ -207,7 +207,7 @@ void RadioDequeue(void *paramaeter)
 void RadioDequeueTaskInit(void)
 {
     int *p;
-    p=(int *)(0x0801FFFC);//这就是已知的地址，要强制类型转换
+    p=(int *)(0x0801FFF0);//这就是已知的地址，要强制类型转换
     Self_Id = *p;//从Flash加载ID
     if(Self_Id==0xFFFFFFFF || Self_Id==0)
     {
