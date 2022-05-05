@@ -26,7 +26,7 @@
 #include "Radio_Common.h"
 
 #define DBG_TAG "radio_decoder"
-#define DBG_LVL DBG_INFO
+#define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
 uint8_t Learn_Flag=0;
@@ -41,21 +41,6 @@ extern uint32_t Self_Id;
 extern enum Device_Status Now_Status;
 extern struct ax5043 rf_433;
 
-rt_timer_t Factory_Test_Timer = RT_NULL;
-
-void Factory_Test_Timer_Callback(void *parameter)
-{
-    if(Recv_Num>7)
-    {
-        led_on(1);
-        LOG_D("Test is Success,Reselt is %d\r\n",Recv_Num);
-    }
-    else
-    {
-        led_on(0);
-        LOG_D("Test is Failed,Reselt is %d\r\n",Recv_Num);
-    }
-}
 uint8_t Factory_Detect(void)
 {
     rt_pin_mode(TEST, PIN_MODE_INPUT_PULLUP);
@@ -67,13 +52,6 @@ uint8_t Factory_Detect(void)
     {
         return 0;
     }
-}
-void Factory_Test(void)
-{
-    Recv_Num = 0;
-    Factory_Test_Timer = rt_timer_create("Factory_Test", Factory_Test_Timer_Callback, RT_NULL, 1000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
-    rt_timer_start(Factory_Test_Timer);
-    LOG_D("Start Test\r\n");
 }
 uint8_t Check_Valid(uint32_t From_id)
 {

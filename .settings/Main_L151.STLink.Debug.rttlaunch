@@ -6,7 +6,7 @@
 <intAttribute key="org.eclipse.cdt.debug.gdbjtag.core.delay" value="3"/>
 <booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.doHalt" value="false"/>
 <booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.doReset" value="false"/>
-<stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.erase" value="-e all"/>
+<stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.erase" value=""/>
 <booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.externalLoaderButton" value="false"/>
 <booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.flashVerify" value="false"/>
 <stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.imageFileName" value=""/>
