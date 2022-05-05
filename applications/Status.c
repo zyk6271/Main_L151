@@ -163,42 +163,23 @@ void Remote_Open(void)
 }
 void Remote_Close(void)
 {
-    LOG_D("Remote_Close\r\n");
     Moto_Close(OtherOff);
-}
-void Delay_Timer_Open(void)
-{
-    if(Now_Status==Close || Now_Status==Open)
-    {
-        LOG_D("Delay_Timer is Open\r\n");
-        ControlUpload_GW(1,0,3,1);
-        rt_timer_start(Delay_Timer);
-    }
 }
 void Delay_Timer_OpenDoor(uint32_t device_id)
 {
     if(Now_Status==Close || Now_Status==Open)
     {
-        LOG_D("Delay_Timer_OpenDoor is Open\r\n");
         rt_timer_start(Delay_Timer);
         ControlUpload_GW(1,device_id,3,1);
     }
 }
-void Delay_Timer_Close(void)
+void Delay_Timer_Stop(void)
 {
-    LOG_I("Delay_Timer is Close\r\n");
-    ControlUpload_GW(1,0,3,0);
     rt_timer_stop(Delay_Timer);
 }
 void Delay_Timer_CloseDoor(uint32_t device_id)
 {
-    LOG_I("Delay_Timer_CloseDoor is Close\r\n");
     ControlUpload_GW(1,device_id,3,0);
-    rt_timer_stop(Delay_Timer);
-}
-void Delay_Timer_Close_NoWiFi(void)
-{
-    LOG_I("Delay_Timer_Close_NoWiFi is Close\r\n");
     rt_timer_stop(Delay_Timer);
 }
 void OfflineWarning(void *parameter)
@@ -255,7 +236,6 @@ void WarningInit(void)
     WarningEventInit(0,0,&NowStatusEvent,RT_NULL);//本地存储器
     LOG_D("Warning Event Init Success\r\n");
 }
-MSH_CMD_EXPORT(WarningInit,WarningInit);
 uint8_t Detect_Learn(void)
 {
     if(Now_Status!=Learn)

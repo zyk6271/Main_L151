@@ -26,7 +26,7 @@
 #include "Radio_Common.h"
 
 #define DBG_TAG "radio_decoder"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 uint8_t Learn_Flag=0;

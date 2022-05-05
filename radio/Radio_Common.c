@@ -19,7 +19,7 @@
 #include "Radio_Drv.h"
 
 #define DBG_TAG "radio_common"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 uint8_t axradio_get_pllvcoi(struct ax5043 *dev)
