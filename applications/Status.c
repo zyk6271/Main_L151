@@ -41,14 +41,6 @@ WariningEvent Moto2FailEvent;
 
 rt_timer_t Delay_Timer = RT_NULL;
 
-void WarningEventInit(uint8_t warning_id,uint8_t priority,WariningEvent *event,void (*callback)(void*))
-{
-    memset(event,0,sizeof(&event));
-    event->warning_id = warning_id;
-    event->last_id = 0;
-    event->priority = priority;
-    event->callback = callback;
-}
 void Warning_Enable(WariningEvent event)
 {
     if(event.priority >= NowStatusEvent.priority)
@@ -144,12 +136,6 @@ void Delay_Timer_Callback(void *parameter)
     ControlUpload_GW(1,0,1,0);
     LOG_D("Delay_Timer_Callback is Now\r\n");
 }
-void Delay_Timer_Init(void)
-{
-    LOG_D("Delay_Timer_Init Success\r\n");
-    Delay_Timer = rt_timer_create("Delay_Timer", Delay_Timer_Callback, RT_NULL, 4*60*60*1000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_ONE_SHOT);
-}
-MSH_CMD_EXPORT(Delay_Timer_Init,Delay_Timer_Init);
 void Remote_Open(void)
 {
     if(Now_Status==Close || Now_Status==Open)
@@ -222,6 +208,14 @@ void RadioInitFail(void)
 {
     rt_hw_cpu_reset();
 }
+void WarningEventInit(uint8_t warning_id,uint8_t priority,WariningEvent *event,void (*callback)(void*))
+{
+    memset(event,0,sizeof(&event));
+    event->warning_id = warning_id;
+    event->last_id = 0;
+    event->priority = priority;
+    event->callback = callback;
+}
 void WarningInit(void)
 {
     WarningEventInit(7,4,&SlaverLowPowerEvent,SlaverLowBatteryWarning);
@@ -234,7 +228,8 @@ void WarningInit(void)
     WarningEventInit(1,6,&SlaverUltraLowPowerEvent,SlaverUltraLowBatteryWarning);
     WarningEventInit(8,2,&NTCWarningEvent,NTCWarningEvent_Callback);
     WarningEventInit(0,0,&NowStatusEvent,RT_NULL);//本地存储器
-    LOG_D("Warning Event Init Success\r\n");
+    Delay_Timer = rt_timer_create("Delay_Timer", Delay_Timer_Callback, RT_NULL, 4*60*60*1000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_ONE_SHOT);
+    LOG_I("Warning Event Init Success\r\n");
 }
 uint8_t Detect_Learn(void)
 {
@@ -262,3 +257,4 @@ uint8_t GetNowStatus(void)
 {
     return Now_Status;
 }
+

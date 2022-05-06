@@ -21,7 +21,7 @@
 <stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.otherGdbserverOption" value=""/>
 <stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.pcRegister" value=""/>
 <intAttribute key="org.eclipse.cdt.debug.gdbjtag.core.portNumber" value="61235"/>
-<stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.resetMode" value=" -hardRst"/>
+<stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.resetMode" value=" -rst"/>
 <booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.resetRun" value="true"/>
 <stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.runCommands" value=""/>
 <booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.setPcRegister" value="false"/>

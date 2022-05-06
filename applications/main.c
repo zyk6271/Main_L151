@@ -29,13 +29,15 @@
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
+#define MCU_VER "1.1.5"
+
 int main(void)
 {
+    LOG_I("System Version is %s\r\n",MCU_VER);
     led_Init();
     Key_Reponse();
     flash_Init();
     LoadDevice2Memory();
-    Delay_Timer_Init();
     WarningInit();
     RTC_Init();
     rf_433_start();

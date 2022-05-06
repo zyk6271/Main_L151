@@ -7,7 +7,7 @@
 #include "stm32l1xx.h"
 
 #define DBG_TAG "RTC"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 uint8_t RTC_Counter=0;
@@ -114,7 +114,7 @@ void RTC_Init(void)
     }
     else
     {
-        LOG_D("RTC Init Fail\r\n");
+        LOG_W("RTC Init Fail\r\n");
     }
     RtcHandle.Instance = RTC;
     RtcHandle.Init.HourFormat = RTC_HOURFORMAT_24;

@@ -349,9 +349,8 @@ void GatewayDataSolve(int rssi,uint8_t *rx_buffer,uint8_t rx_len)
     Message Rx_message;
     if(rx_buffer[rx_len]=='G')
     {
-        sscanf((const char *)&rx_buffer[2],"{%ld,%ld,%ld,%d,%d,%d}",&Rx_message.Target_ID,&Rx_message.From_ID,&Rx_message.Device_ID,&Rx_message.Counter,&Rx_message.Command,&Rx_message.Data);
-        if(Rx_message.Target_ID != Self_Id)return;
-        if(Check_Valid(Rx_message.From_ID) == RT_EOK)
+        sscanf((const char *)&rx_buffer[1],"G{%ld,%ld,%ld,%d,%d,%d}G",&Rx_message.Target_ID,&Rx_message.From_ID,&Rx_message.Device_ID,&Rx_message.Counter,&Rx_message.Command,&Rx_message.Data);
+        if(Rx_message.Target_ID == Self_Id && Check_Valid(Rx_message.From_ID) == RT_EOK)
         {
             LOG_D("GatewayDataSolve is %s,RSSI is %d\r\n",rx_buffer,rssi);
             Heart_Refresh(Rx_message.From_ID);
@@ -414,8 +413,6 @@ void NormalSolve(int rssi,uint8_t *rx_buffer,uint8_t rx_len)
     Message Rx_message;
     if(rx_buffer[rx_len]==0x0A&&rx_buffer[rx_len-1]==0x0D)
     {
-        rx_buffer[rx_len-1]=0;
-        rx_buffer[rx_len-2]=0;
         sscanf((const char *)&rx_buffer[1],"{%ld,%ld,%d,%d,%d}",&Rx_message.Target_ID,&Rx_message.From_ID,&Rx_message.Counter,&Rx_message.Command,&Rx_message.Data);
         if(Rx_message.Target_ID==Self_Id ||Rx_message.Target_ID==99999999)
         {
