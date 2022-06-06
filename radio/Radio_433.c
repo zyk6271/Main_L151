@@ -85,12 +85,16 @@ void rf_433_init(void)
 }
 void rf_433_send_timer_callback(void *parameter)
 {
-    if(rf_433.ubRFState == trxstate_tx_waitdone)
+    if(rf_433.ubRFState != trxstate_rx)
     {
         LOG_W("rf_433 Send timeout\r\n");
         SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_RADIOEVENTMASK0, 0x00);
         rf_restart(&rf_433);
     }
+}
+void rf_433_send_timer_start(void)
+{
+    rt_timer_start(rf_433_send_timer);
 }
 void rf_433_task_callback(void *parameter)
 {
@@ -137,7 +141,6 @@ void rf_433_task_callback(void *parameter)
                 }
                 TransmitData(&rf_433);
                 SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_PWRMODE, AX5043_PWRSTATE_FULL_TX); //AX5043_PWRMODE = AX5043_PWRSTATE_FULL_TX;
-                rt_timer_start(rf_433_send_timer);
                 break;
             case trxstate_tx_longpreamble:
             case trxstate_tx_shortpreamble:
@@ -145,12 +148,12 @@ void rf_433_task_callback(void *parameter)
                 TransmitData(&rf_433);
                 break;
             case trxstate_tx_waitdone:                 //D
+                rt_timer_stop(rf_433_send_timer);
                 SpiReadSingleAddressRegister(&rf_433,REG_AX5043_RADIOEVENTREQ0);        //clear Interrupt flag
                 if (SpiReadSingleAddressRegister(&rf_433,REG_AX5043_RADIOSTATE) != 0)
                 {
                     break;
                 }
-                rt_timer_stop(rf_433_send_timer);
                 SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_RADIOEVENTMASK0, 0x00);
                 rf_restart(&rf_433);
                 break;

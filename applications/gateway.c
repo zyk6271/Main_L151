@@ -22,6 +22,7 @@
 
 extern Device_Info Global_Device;
 extern uint8_t ValveStatus;
+extern struct ax5043 rf_433;
 
 rt_timer_t Heart_Check_t = RT_NULL;
 rt_timer_t Heart_Test_t = RT_NULL;
@@ -120,6 +121,7 @@ void Heart_Check(void *parameter)
     {
         wifi_led(2);
         LOG_W("Gateway Heart Check Fail\r\n");
+        rf_restart(&rf_433);
     }
 }
 void Heart_Test(void *parameter)
