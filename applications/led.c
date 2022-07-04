@@ -261,11 +261,11 @@ void beep_start(uint8_t led_id,int mode)
         break;
 
     case 9://六声
-        agile_led_set_light_mode(beep, "200,200,200,200,200,200,200,200,200,200,200,5000", -1);
+        agile_led_set_light_mode(beep, "200,200,200,200,200,200,200,200,200,200,200,10000", -1);
         agile_led_start(beep);
         if(led_id)
         {
-            agile_led_set_light_mode(led1, "200,200,200,200,200,200,200,200,200,200,200,5000", -1);
+            agile_led_set_light_mode(led1, "200,200,200,200,200,200,200,200,200,200,200,10000", -1);
             agile_led_start(led1);
         }
         else
