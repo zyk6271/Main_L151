@@ -17,14 +17,22 @@
 #include "status.h"
 #include "gateway.h"
 #include "radio_encoder.h"
+#include "device.h"
+#include "work.h"
 
 #define DBG_TAG "moto"
 #define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
-rt_timer_t Moto_Timer1,Moto_Timer2 = RT_NULL;
+rt_timer_t Moto1_Timer_Act,Moto2_Timer_Act = RT_NULL;
+rt_timer_t Moto1_Timer_Detect,Moto2_Timer_Detect = RT_NULL;
 rt_timer_t Moto_Detect_Timer = RT_NULL;
-uint8_t Turn1_Flag,Turn2_Flag = 0;
+
+uint8_t Turn1_Flag;
+uint8_t Turn2_Flag;
+uint8_t Moto1_Fail_FLag;
+uint8_t Moto2_Fail_FLag;
+uint8_t Valve_Alarm_Flag;
 
 extern uint8_t ValveStatus;
 extern enum Device_Status Now_Status;
@@ -97,14 +105,18 @@ void Moto_Close(uint8_t ActFlag)
         {
             ControlUpload_GW(1,0,1,0);
         }
-        rt_pin_write(Turn1,0);
         rt_pin_irq_enable(Senor1, PIN_IRQ_DISABLE);
-        rt_pin_write(Turn2,0);
+        rt_pin_write(Turn1,0);
         rt_pin_irq_enable(Senor2, PIN_IRQ_DISABLE);
+        rt_pin_write(Turn2,0);
         just_ring();
         Delay_Timer_Stop();
-        rt_timer_stop(Moto_Timer1);
-        rt_timer_stop(Moto_Timer2);
+        rt_timer_stop(Moto1_Timer_Act);
+        rt_timer_stop(Moto2_Timer_Act);
+        rt_timer_stop(Moto1_Timer_Detect);
+        rt_timer_stop(Moto2_Timer_Detect);
+        Key_IO_Init();
+        WaterScan_IO_Init();
     }
     else if(Global_Device.LastFlag == OtherOff && ActFlag == OtherOff)
     {
@@ -120,17 +132,15 @@ void Moto_Close(uint8_t ActFlag)
         LOG_D("No permissions to Off\r\n");
     }
 }
-uint8_t Moto1_Fail_FLag;
-uint8_t Moto2_Fail_FLag;
 void Turn1_Edge_Callback(void *parameter)
 {
     LOG_D("Turn1_Edge_Callback\r\n");
-    Turn1_Flag = 1;
+    Turn1_Flag ++;
 }
 void Turn2_Edge_Callback(void *parameter)
 {
     LOG_D("Turn2_Edge_Callback\r\n");
-    Turn2_Flag = 1;
+    Turn2_Flag ++;
 }
 uint8_t Get_Moto1_Fail_FLag(void)
 {
@@ -142,39 +152,61 @@ uint8_t Get_Moto2_Fail_FLag(void)
 }
 void Turn1_Timer_Callback(void *parameter)
 {
+    Key_IO_Init();
+    WaterScan_IO_Init();
     rt_pin_irq_enable(Senor1, PIN_IRQ_DISABLE);
     rt_pin_write(Turn1,1);
-    rt_pin_write(Turn2,1);
-    if(!Turn1_Flag)
+    if(Turn1_Flag<2)
     {
-        Warning_Enable_Num(6);
+        if(!Moto2_Fail_FLag)
+        {
+            Warning_Enable_Num(6);
+            Valve_Alarm_Flag = 1;
+        }
         Moto1_Fail_FLag = 1;
         LOG_E("Moto1 is Fail\r\n");
     }
     else
     {
-        WarUpload_GW(1,0,2,0);//MOTO1解除报警
+        if(!Moto2_Fail_FLag)
+        {
+            WarUpload_GW(1,0,2,0);//MOTO1解除报警
+            Valve_Alarm_Flag = 0;
+        }
         Moto1_Fail_FLag = 0;
         LOG_D("Moto1 is Good\r\n");
     }
 }
 void Turn2_Timer_Callback(void *parameter)
 {
+    Key_IO_Init();
+    WaterScan_IO_Init();
     rt_pin_irq_enable(Senor2, PIN_IRQ_DISABLE);
-    rt_pin_write(Turn1,1);
     rt_pin_write(Turn2,1);
-    if(!Turn2_Flag)
+    if(Turn2_Flag<2)
     {
-        LOG_E("Moto2 is Fail\r\n");
-        Moto2_Fail_FLag = 1;
         Warning_Enable_Num(9);
+        Moto2_Fail_FLag = 1;
+        Valve_Alarm_Flag = 1;
+        LOG_E("Moto2 is Fail\r\n");
     }
     else
     {
         WarUpload_GW(1,0,2,1);//MOTO2解除报警
         Moto2_Fail_FLag = 0;
+        Valve_Alarm_Flag = 0;
         LOG_D("Moto2 is Good\r\n");
     }
+}
+void Moto1_Timer_Act_Callback(void *parameter)
+{
+    rt_pin_write(Turn1,1);
+    rt_timer_start(Moto1_Timer_Detect);
+}
+void Moto2_Timer_Act_Callback(void *parameter)
+{
+    rt_pin_write(Turn2,1);
+    rt_timer_start(Moto2_Timer_Detect);
 }
 void Moto_Detect_Timer_Callback(void *parameter)
 {
@@ -187,10 +219,12 @@ void Moto_Init(void)
     rt_pin_mode(Senor2,PIN_MODE_INPUT);
     rt_pin_mode(Turn1,PIN_MODE_OUTPUT);
     rt_pin_mode(Turn2,PIN_MODE_OUTPUT);
-    rt_pin_attach_irq(Senor1, PIN_IRQ_MODE_FALLING, Turn1_Edge_Callback, RT_NULL);
-    rt_pin_attach_irq(Senor2, PIN_IRQ_MODE_FALLING, Turn2_Edge_Callback, RT_NULL);
-    Moto_Timer1 = rt_timer_create("Moto_Timer1", Turn1_Timer_Callback, RT_NULL, 5100, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
-    Moto_Timer2 = rt_timer_create("Moto_Timer2", Turn2_Timer_Callback, RT_NULL, 5000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
+    rt_pin_attach_irq(Senor1, PIN_IRQ_MODE_RISING_FALLING, Turn1_Edge_Callback, RT_NULL);
+    rt_pin_attach_irq(Senor2, PIN_IRQ_MODE_RISING_FALLING, Turn2_Edge_Callback, RT_NULL);
+    Moto1_Timer_Act = rt_timer_create("Moto1_Timer_Act", Moto1_Timer_Act_Callback, RT_NULL, 5100, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
+    Moto2_Timer_Act = rt_timer_create("Moto2_Timer_Act", Moto2_Timer_Act_Callback, RT_NULL, 5000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
+    Moto1_Timer_Detect = rt_timer_create("Moto1_Timer_Detect", Turn1_Timer_Callback, RT_NULL, 3000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
+    Moto2_Timer_Detect = rt_timer_create("Moto2_Timer_Detect", Turn2_Timer_Callback, RT_NULL, 3000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
     Moto_Detect_Timer = rt_timer_create("Moto_Detect", Moto_Detect_Timer_Callback, RT_NULL, 60000*5, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
     if(Flash_Get_SlaveAlarmFlag())
     {
@@ -206,25 +240,27 @@ void Moto_Init(void)
 }
 void Moto_Detect(void)
 {
-    if(Now_Status==MotoFail)
-    {
-        return;
-    }
-    uint8_t ValveFuncFlag = ValveStatus;
-    if(rt_pin_read(Senor1)==1&&ValveFuncFlag==1)
+    if(ValveStatus == 1)
     {
         Turn1_Flag = 0;
-        rt_pin_irq_enable(Senor1, PIN_IRQ_ENABLE);
-        rt_pin_write(Turn1,0);
-        rt_pin_write(Turn2,0);
-        rt_timer_start(Moto_Timer1);
-    }
-    if(rt_pin_read(Senor2)==1&&ValveFuncFlag==1)
-    {
         Turn2_Flag = 0;
-        rt_pin_irq_enable(Senor2, PIN_IRQ_ENABLE);
-        rt_pin_write(Turn1,0);
-        rt_pin_write(Turn2,0);
-        rt_timer_start(Moto_Timer2);
+        Moto1_Fail_FLag = 0;
+        Moto2_Fail_FLag = 0;
+        if(rt_pin_read(Senor1))
+        {
+            Key_IO_DeInit();
+            WaterScan_IO_DeInit();
+            rt_pin_irq_enable(Senor1, PIN_IRQ_ENABLE);
+            rt_pin_write(Turn1,0);
+            rt_timer_start(Moto1_Timer_Act);
+        }
+        if(rt_pin_read(Senor2))
+        {
+            Key_IO_DeInit();
+            WaterScan_IO_DeInit();
+            rt_pin_irq_enable(Senor2, PIN_IRQ_ENABLE);
+            rt_pin_write(Turn2,0);
+            rt_timer_start(Moto2_Timer_Act);
+        }
     }
 }

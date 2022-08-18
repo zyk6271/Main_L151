@@ -181,10 +181,10 @@ void DataSolve(Message buf)
         LOG_D("Test\r\n");
         break;
     case 2://握手包
+        Update_Device_Bat(buf.From_ID,buf.Data);//写入电量
         switch(buf.Data)
         {
         case 0:
-            Update_Device_Bat(buf.From_ID,buf.Data);//写入电量
             RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,0);
             WarUpload_GW(1,buf.From_ID,6,0);//终端低电量报警
             break;
@@ -205,12 +205,10 @@ void DataSolve(Message buf)
             }
             break;
         case 3:
-            Update_Device_Bat(buf.From_ID,buf.Data);//写入电量
             RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,3);
             WarUpload_GW(1,buf.From_ID,6,3);//终端低电量报警
             break;
         case 4:
-            Update_Device_Bat(buf.From_ID,buf.Data);//写入电量
             RadioEnqueue(0,1,buf.From_ID,buf.Counter,2,4);
             WarUpload_GW(1,buf.From_ID,6,4);//终端低电量报警
             break;

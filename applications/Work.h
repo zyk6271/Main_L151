@@ -12,6 +12,8 @@
 
 void WaterScan_Init(void);
 void WaterScan_Clear(void);
+void WaterScan_IO_Init(void);
+void WaterScan_IO_DeInit(void);
 
 
 #endif /* APPLICATIONS_WORK_H_ */

@@ -9,8 +9,11 @@
  */
 #ifndef APPLICATIONS_DEVICE_H_
 #define APPLICATIONS_DEVICE_H_
+
 void button_Init(void);
 void Key_SemInit(void);
+void Key_IO_Init(void);
+void Key_IO_DeInit(void);
 
 
 #endif /* APPLICATIONS_DEVICE_H_ */
