@@ -119,6 +119,10 @@ void RadioXtalON(struct ax5043 *dev)
     ubTemp = SpiReadSingleAddressRegister(dev,REG_AX5043_IRQMASK1);
     SpiWriteSingleAddressRegister(dev,REG_AX5043_IRQMASK1, ubTemp|0x01);
     SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_XTAL_ON);
+    do
+    {
+        rt_thread_mdelay(10);
+    }
     while (dev->ubRFState == trxstate_wait_xtal);
 }
 void AX5043ReceiverON(struct ax5043 *dev)

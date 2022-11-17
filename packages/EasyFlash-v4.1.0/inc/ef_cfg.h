@@ -92,7 +92,7 @@
 #define EF_START_ADDR             PKG_EASYFLASH_START_ADDR
 
 /* ENV area size. It's at least one empty sector for GC. So it's definition must more then or equal 2 flash sector size. */
-#define ENV_AREA_SIZE             (EF_ERASE_MIN_SIZE * 2) /* default is the double erase min size */
+#define ENV_AREA_SIZE             (EF_ERASE_MIN_SIZE * 4) /* default is the double erase min size */
 
 /* print debug information of flash */
 #ifdef PKG_EASYFLASH_DEBUG
