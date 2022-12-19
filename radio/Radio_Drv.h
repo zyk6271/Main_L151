@@ -18,9 +18,9 @@ struct ax5043
     char name[10];
     int ubRssi;
     uint8_t ubRFState;
-    uint8_t TXBuff[64];
+    uint8_t TXBuff[255];
     uint8_t TxLen;
-    uint8_t RXBuff[64];
+    uint8_t RXBuff[255];
     uint8_t RxLen;
     uint8_t axradio_phy_chanpllrng[1];
     uint8_t axradio_phy_chanvcoi[1];

@@ -19,7 +19,6 @@
 #include "moto.h"
 #include "RTCWork.h"
 #include "status.h"
-#include "dog.h"
 #include "adcwork.h"
 #include "radio_decoder.h"
 #include "gateway.h"
@@ -29,7 +28,7 @@
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
-#define MCU_VER "1.1.9"
+#define MCU_VER "1.2.0"
 
 int main(void)
 {
