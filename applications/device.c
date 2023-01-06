@@ -44,7 +44,7 @@ void Key_SemInit(void)
     K1_Long_Sem = rt_sem_create("K1_Long", 0, RT_IPC_FLAG_FIFO);
     K0_K1_Long_Sem = rt_sem_create("K0_K1_Long_Sem", 0, RT_IPC_FLAG_FIFO);
 }
-void Key_Init(void)
+void Key_Pin_Init(void)
 {
     rt_pin_mode(K0, PIN_MODE_INPUT);
     rt_pin_mode(K1, PIN_MODE_INPUT);
@@ -166,7 +166,7 @@ void Detect_KO_K1(void)
         k0_K1_LongSem_Release();
     }
 }
-void RF_Init(void)
+void RF_Switch_Pin_Init(void)
 {
     ANT_SW_Status = rt_pin_read(ANT_SW);
     rt_pin_write(ANT_EXT, !ANT_SW_Status);
@@ -188,8 +188,8 @@ void RF_Switch(void)
 }
 void button_task_entry(void *parameter)
 {
-    Key_Init();
-    RF_Init();
+    Key_Pin_Init();
+    RF_Switch_Pin_Init();
     Button_t Key0;
     Button_t Key1;
     Button_Create("Key0", &Key0, Read_K0_Level, 0);
@@ -208,10 +208,8 @@ void button_task_entry(void *parameter)
         rt_thread_mdelay(10);
     }
 }
-void button_Init(void)
+void Button_Init(void)
 {
     button_task = rt_thread_create("button_task", button_task_entry, RT_NULL, 1024, 5, 10);
-    if (button_task != RT_NULL)
-        rt_thread_startup(button_task);
+    rt_thread_startup(button_task);
 }
-MSH_CMD_EXPORT(button_Init, button_Init);

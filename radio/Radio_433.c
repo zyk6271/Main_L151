@@ -165,11 +165,12 @@ void rf_433_task_callback(void *parameter)
         }
     }
 }
-void rf_433_start(void)
+void RF_Init(void)
 {
     rf_433_sem_init();
     rf_433_send_timer = rt_timer_create("rf_433_send timeout", rf_433_send_timer_callback, RT_NULL, 1000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
     rf_433_task = rt_thread_create("rf_433_task", rf_433_task_callback, RT_NULL, 2048, 8, 10);
     rt_thread_startup(rf_433_task);
     rf_433_init();
+    RadioDequeueTaskInit();
 }

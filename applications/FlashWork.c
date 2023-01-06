@@ -42,6 +42,7 @@ void flash_Init(void)
         LOG_E("easyflash_init fail\r\n");
         return;
     };
+    LoadDevice2Memory();
     LOG_I("Storage Init Success\r\n");
 }
 uint8_t Get_LearnNums_Valid(void)
@@ -442,7 +443,8 @@ uint32_t GetDoorID(void)
         {
             return Global_Device.ID[Global_Device.DoorNum];
         }
-        else {
+        else
+        {
             LOG_D("Not Include Door Device\r\n");
             return 0;
         }
@@ -451,6 +453,17 @@ uint32_t GetDoorID(void)
     {
         LOG_W("Not Include Door Device ID\r\n");
         return 0;
+    }
+}
+uint8_t GetDoorValid(uint32_t Device_id)
+{
+    if(Device_id>=30000000 && Device_id<40000000)
+    {
+        return RT_EOK;
+    }
+    else
+    {
+        return RT_ERROR;
     }
 }
 uint32_t GetGatewayID(void)
@@ -482,6 +495,11 @@ uint8_t Delete_Device(uint32_t device_id)
         {
             Global_Device.ID[num]=0;
             Flash_Key_Change(num,0);
+            if(GetDoorValid(device_id) == RT_EOK)
+            {
+                Global_Device.DoorNum = 0;
+                Flash_Key_Change(88888888,0);
+            }
             return RT_EOK;
         }
         num--;

@@ -108,7 +108,6 @@ double ADC_Voltage_Calc(void)
         voltage_temp += adc_value[i];
     }
     adc_voltage = voltage_temp/20*3.3/4096+0.018;
-    //printf("voltage is %1.3f\r\n",adc_voltage);
     return adc_voltage;
 }
 void NTC_State_Save(uint8_t result)

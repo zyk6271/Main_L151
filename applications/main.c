@@ -28,7 +28,7 @@
 #define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
-#define MCU_VER "1.2.0"
+#define MCU_VER "1.2.1"
 
 int main(void)
 {
@@ -36,14 +36,12 @@ int main(void)
     led_Init();
     Key_Reponse();
     flash_Init();
-    LoadDevice2Memory();
     WarningInit();
     RTC_Init();
-    rf_433_start();
-    RadioDequeueTaskInit();
+    RF_Init();
     Moto_Init();
     ADC_Init();
-    button_Init();
+    Button_Init();
     WaterScan_Init();
     DetectFactory();
     Gateway_Init();
