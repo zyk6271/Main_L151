@@ -221,4 +221,3 @@ void RadioDequeueTaskInit(void)
     Radio_QueueTask = rt_thread_create("Radio_QueueTask", RadioDequeue, RT_NULL, 1024, 10, 10);
     if(Radio_QueueTask)rt_thread_startup(Radio_QueueTask);
 }
-MSH_CMD_EXPORT(RadioDequeueTaskInit,RadioDequeueTaskInit);
