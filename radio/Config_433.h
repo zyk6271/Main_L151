@@ -130,25 +130,12 @@ uint16_t set_registers_433[][2]=
     { REG_AX5043_0xF26,               0x98},
     { REG_AX5043_0xF34,               0x28},
     { REG_AX5043_0xF35,               0x11},
-    { REG_AX5043_0xF44,               0x25}
-};
-uint16_t set_registers_tx_433[][2]=
-{
-    {REG_AX5043_PLLLOOP,             0x0B},
-    {REG_AX5043_PLLCPI,              0x10},
-    {REG_AX5043_PLLVCODIV,           0x24},
-    {REG_AX5043_XTALCAP,             0x00},
-    {REG_AX5043_0xF00,               0x0F},
-    {REG_AX5043_0xF18,               0x06}
-};
-uint16_t set_registers_rx_433[][2]=
-{
-    {REG_AX5043_PLLLOOP,             0x0B},
-    {REG_AX5043_PLLCPI,              0x10},
-    {REG_AX5043_PLLVCODIV,           0x24},
-    {REG_AX5043_XTALCAP,             0x00},
-    {REG_AX5043_0xF00,               0x0F},
-    {REG_AX5043_0xF18,               0x02}
+    { REG_AX5043_0xF44,               0x25},
+    { REG_AX5043_PLLLOOP,             0x0B},
+    { REG_AX5043_PLLCPI,              0x10},
+    { REG_AX5043_PLLVCODIV,           0x24},
+    { REG_AX5043_XTALCAP,             0x00},
+    { REG_AX5043_0xF00,               0x0F},
 };
 
 #endif

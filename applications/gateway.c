@@ -121,7 +121,6 @@ void Heart_Check(void *parameter)
     {
         wifi_led(2);
         LOG_W("Gateway Heart Check Fail\r\n");
-        rf_restart(&rf_433);
     }
 }
 void Heart_Test(void *parameter)

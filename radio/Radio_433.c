@@ -12,7 +12,6 @@
 #include "drv_spi.h"
 #include <string.h>
 #include "AX5043.h"
-#include "led.h"
 #include "Radio_Common.h"
 #include "pin_config.h"
 #include "Radio_Decoder.h"
@@ -68,18 +67,15 @@ void rf_433_sem_init(void)
 {
     IRQ1_Sem = rt_sem_create("IRQ1_Sem", 0, RT_IPC_FLAG_FIFO);
 }
-void rf_433_init(void)
+void rf_433_driver_init(void)
 {
     rf_433.config = rf_433_config_init();
     rf_433.socket = rf_433_radio_spi_init();
     strcpy(rf_433.name,"rf_433");
     memcpy(rf_433.RegValue,set_registers_433,sizeof(set_registers_433));
-    memcpy(rf_433.TXRegValue,set_registers_tx_433,sizeof(set_registers_tx_433));
-    memcpy(rf_433.RXRegValue,set_registers_rx_433,sizeof(set_registers_rx_433));
     IRQ1_Bounding();
     rf_startup(&rf_433);
     vcoi_rng_get(&rf_433);
-    Ax5043SetRegisters_RX(&rf_433);
     AX5043ReceiverON(&rf_433);
     just_ring();
 }
@@ -89,13 +85,15 @@ void rf_433_send_timer_callback(void *parameter)
     {
         LOG_W("rf_433 Send timeout\r\n");
         SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_RADIOEVENTMASK0, 0x00);
-        rf_restart(&rf_433);
+        AX5043Receiver_Continuous(&rf_433);
     }
 }
+
 void rf_433_send_timer_start(void)
 {
     rt_timer_start(rf_433_send_timer);
 }
+
 void rf_433_task_callback(void *parameter)
 {
     while(1)
@@ -108,12 +106,11 @@ void rf_433_task_callback(void *parameter)
             {
             case trxstate_rx: //0x01
                 ReceiveData(&rf_433);
-                Ax5043SetRegisters_RX(&rf_433);
-                AX5043Receiver_Continuous(&rf_433);
                 if (rf_433.RxLen != 0)
                 {
                     rf433_rx_callback(rf_433.ubRssi,rf_433.RXBuff,rf_433.RxLen-1);
                 }
+                AX5043Receiver_Continuous(&rf_433);
                 break;
             case trxstate_wait_xtal:     //3
                 SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_IRQMASK1, 0x00);//AX5043_IRQMASK1 = 0x00 otherwise crystal ready will fire all over again
@@ -140,12 +137,21 @@ void rf_433_task_callback(void *parameter)
                     SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_FIFODATA, 0x11); // dummy byte for forcing dibit sync
                 }
                 TransmitData(&rf_433);
-                SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_PWRMODE, AX5043_PWRSTATE_FULL_TX); //AX5043_PWRMODE = AX5043_PWRSTATE_FULL_TX;
                 break;
-            case trxstate_tx_longpreamble:
-            case trxstate_tx_shortpreamble:
             case trxstate_tx_packet:
-                TransmitData(&rf_433);
+                if (rf_433.TxLen < 11)
+                {
+                    SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_FIFOSTAT, 4); // commit
+                }
+                SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_FIFODATA, AX5043_FIFOCMD_DATA | (7 << 5));//AX5043_FIFODATA = AX5043_FIFOCMD_DATA | (7 << 5);
+                SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_FIFODATA,rf_433.TxLen + 1);//write FIFO chunk length byte (data length+MAC_len + Flag byte=64+3+1)
+                SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_FIFODATA,3);//AX5043_FIFODATA = flags=0x03;
+                SpiWriteData(&rf_433,rf_433.TXBuff,rf_433.TxLen);
+                SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_FIFOSTAT, 4); // commit
+
+                rf_433.ubRFState = trxstate_tx_waitdone;
+                SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_RADIOEVENTMASK0, 0x01); // enable REVRDONE event
+                SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_IRQMASK0, 0x40); // enable radio controller irq
                 break;
             case trxstate_tx_waitdone:                 //D
                 rt_timer_stop(rf_433_send_timer);
@@ -155,7 +161,7 @@ void rf_433_task_callback(void *parameter)
                     break;
                 }
                 SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_RADIOEVENTMASK0, 0x00);
-                rf_restart(&rf_433);
+                AX5043Receiver_Continuous(&rf_433);
                 break;
             default:
                 SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_IRQMASK1, 0x00);
@@ -165,12 +171,13 @@ void rf_433_task_callback(void *parameter)
         }
     }
 }
+
 void RF_Init(void)
 {
     rf_433_sem_init();
     rf_433_send_timer = rt_timer_create("rf_433_send timeout", rf_433_send_timer_callback, RT_NULL, 1000, RT_TIMER_FLAG_ONE_SHOT|RT_TIMER_FLAG_SOFT_TIMER);
     rf_433_task = rt_thread_create("rf_433_task", rf_433_task_callback, RT_NULL, 2048, 8, 10);
     rt_thread_startup(rf_433_task);
-    rf_433_init();
-    RadioDequeueTaskInit();
+    rf_433_driver_init();
+    RadioQueue_Init();
 }

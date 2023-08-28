@@ -25,9 +25,7 @@ struct ax5043
     uint8_t axradio_phy_chanpllrng[1];
     uint8_t axradio_phy_chanvcoi[1];
     uint8_t axradio_power_now;
-    uint16_t RegValue[126][2];
-    uint16_t TXRegValue[6][2];
-    uint16_t RXRegValue[6][2];
+    uint16_t RegValue[131][2];
     uint32_t axradio_txbuffer_cnt;
 };
 struct ax5043_config

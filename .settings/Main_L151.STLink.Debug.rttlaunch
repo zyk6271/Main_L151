@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.rtthread.studio.debug.gdbjtag.stlink.launchConfigurationType">
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.svdPath" value="${studio_install_path}\repo\Extract\Chip_Support_Packages\RealThread\STM32L1\0.1.9\debug\svd\STM32L151xxAxx.svd"/>
-<stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.connectMode" value="NORMAL"/>
+<stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.connectMode" value="UR"/>
 <stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.debugInterface" value="SWD"/>
 <intAttribute key="org.eclipse.cdt.debug.gdbjtag.core.delay" value="3"/>
 <booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.doHalt" value="false"/>
@@ -21,7 +21,7 @@
 <stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.otherGdbserverOption" value=""/>
 <stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.pcRegister" value=""/>
 <intAttribute key="org.eclipse.cdt.debug.gdbjtag.core.portNumber" value="61235"/>
-<stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.resetMode" value=" -rst"/>
+<stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.resetMode" value=" -hardRst"/>
 <booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.resetRun" value="true"/>
 <stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.runCommands" value=""/>
 <booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.setPcRegister" value="false"/>

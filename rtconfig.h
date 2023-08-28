@@ -192,10 +192,6 @@
 
 /* end of enhanced kernel services */
 
-/* POSIX extension functions */
-
-/* end of POSIX extension functions */
-
 /* acceleration: Assembly language or algorithmic acceleration packages */
 
 /* end of acceleration: Assembly language or algorithmic acceleration packages */
@@ -224,6 +220,13 @@
 
 /* peripheral libraries and drivers */
 
+/* sensors drivers */
+
+/* end of sensors drivers */
+
+/* touch drivers */
+
+/* end of touch drivers */
 #define PKG_USING_BUTTON
 #define BUTTON_DEBOUNCE_TIME 1
 #define BUTTON_CONTINUOS_CYCLE 1
@@ -231,6 +234,10 @@
 #define BUTTON_DOUBLE_TIME 15
 #define BUTTON_LONG_TIME 200
 #define PKG_USING_BUTTON_V101
+
+/* Kendryte SDK */
+
+/* end of Kendryte SDK */
 #define PKG_USING_AGILE_LED
 #define PKG_AGILE_LED_DEBUG
 #define PKG_AGILE_LED_USING_THREAD_AUTO_INIT
@@ -258,6 +265,49 @@
 
 /* end of entertainment: terminal games and other interesting software packages */
 /* end of miscellaneous packages */
+
+/* Arduino libraries */
+
+
+/* Projects */
+
+/* end of Projects */
+
+/* Sensors */
+
+/* end of Sensors */
+
+/* Display */
+
+/* end of Display */
+
+/* Timing */
+
+/* end of Timing */
+
+/* Data Processing */
+
+/* end of Data Processing */
+
+/* Data Storage */
+
+/* Communication */
+
+/* end of Communication */
+
+/* Device Control */
+
+/* end of Device Control */
+
+/* Other */
+
+/* Signal IO */
+
+/* end of Signal IO */
+
+/* Uncategorized */
+
+/* end of Arduino libraries */
 /* end of RT-Thread online packages */
 
 /* samples: kernel and components samples */

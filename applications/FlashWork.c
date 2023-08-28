@@ -451,7 +451,7 @@ uint32_t GetDoorID(void)
     }
     else
     {
-        LOG_W("Not Include Door Device ID\r\n");
+        LOG_D("Not Include Door Device ID\r\n");
         return 0;
     }
 }
@@ -481,7 +481,7 @@ uint32_t GetGatewayID(void)
     }
     else
     {
-        LOG_W("Not Include Gateway Device ID\r\n");
+        LOG_D("Not Include Gateway Device ID\r\n");
         return 0;
     }
 }

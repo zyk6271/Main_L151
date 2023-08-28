@@ -44,16 +44,18 @@ uint8_t axradio_get_pllvcoi(struct ax5043 *dev)
     }
     return SpiReadLongAddressRegister(dev,REG_AX5043_PLLVCOI);
 }
+
 void vcoi_rng_get(struct ax5043 *dev)
 {
-    LOG_I("%s VCO is %x\r\n",dev->name,axradio_get_pllvcoi(dev));
-    LOG_I("%s RNG is %d\r\n",dev->name,dev->axradio_phy_chanpllrng[0]);
+    LOG_D("%s VCO is %x\r\n",dev->name,axradio_get_pllvcoi(dev));
+    LOG_D("%s RNG is %d\r\n",dev->name,dev->axradio_phy_chanpllrng[0]);
 }
+
 void InitAx5043REG(struct ax5043 *dev)
 {
     static uint8_t i;
 
-    for (i = 0; i<125 ; i++)
+    for (i = 0; i < 131 ; i++)
     {
         SpiWriteLongAddressRegister(dev,dev->RegValue[i][0],dev->RegValue[i][1] );
     }
@@ -61,40 +63,7 @@ void InitAx5043REG(struct ax5043 *dev)
     SpiWriteSingleAddressRegister(dev,REG_AX5043_PINFUNCIRQ, 0x03);    // AX5043_PINFUNCIRQ = 0x03;  use as IRQ pin
     SpiWriteLongAddressRegister(dev,REG_AX5043_PKTSTOREFLAGS, (0 ? 0x13 : 0x15)); // store RF offset, RSSI and delimiter timing
 }
-uint8_t ax5043_init_registers_common(struct ax5043 *dev)
-{
-    uint8_t rng = dev->axradio_phy_chanpllrng[0];
-    if (rng & 0x20)
-        return AXRADIO_ERR_RANGING;
-    if (SpiReadSingleAddressRegister(dev,REG_AX5043_PLLLOOP) & 0x80)
-        SpiWriteSingleAddressRegister(dev,REG_AX5043_PLLRANGINGB, (rng & 0x0F));
-    else
-        SpiWriteSingleAddressRegister(dev,REG_AX5043_PLLRANGINGA, (rng & 0x0F));
-    rng = axradio_get_pllvcoi(dev);
-    if (rng & 0x80)
-        SpiWriteLongAddressRegister(dev,REG_AX5043_PLLVCOI, rng);
-    return AXRADIO_ERR_NOERROR;
-}
-uint8_t Ax5043SetRegisters_TX(struct ax5043 *dev)
-{
-    static uint8_t i;
 
-    for (i = 0 ; i < 6 ; i++)
-    {
-        SpiWriteLongAddressRegister(dev,dev->TXRegValue[i][0],dev->TXRegValue[i][1] );
-    }
-    return ax5043_init_registers_common(dev);
-}
-uint8_t Ax5043SetRegisters_RX(struct ax5043 *dev)
-{
-    static uint8_t i;
-
-    for (i = 0 ; i < 6 ; i++)
-    {
-        SpiWriteLongAddressRegister(dev,dev->RXRegValue[i][0],dev->RXRegValue[i][1] );
-    }
-    return ax5043_init_registers_common(dev);
-}
 void Ax5043_Reset(struct ax5043 *dev)
 {
     static uint8_t ubAddres;
@@ -112,6 +81,7 @@ void Ax5043_Reset(struct ax5043 *dev)
     SpiWriteSingleAddressRegister(dev,REG_AX5043_PINFUNCIRQ, 0x00);
     SpiWriteSingleAddressRegister(dev,REG_AX5043_PINFUNCIRQ, 0x03);
 }
+
 void RadioXtalON(struct ax5043 *dev)
 {
     static uint8_t ubTemp;
@@ -125,6 +95,7 @@ void RadioXtalON(struct ax5043 *dev)
     }
     while (dev->ubRFState == trxstate_wait_xtal);
 }
+
 void AX5043ReceiverON(struct ax5043 *dev)
 {
     SpiWriteLongAddressRegister(dev,REG_AX5043_RSSIREFERENCE, dev->config->axradio_phy_rssireference);
@@ -136,9 +107,14 @@ void AX5043ReceiverON(struct ax5043 *dev)
     SpiWriteSingleAddressRegister(dev,REG_AX5043_IRQMASK0,0x01);
     SpiWriteSingleAddressRegister(dev,REG_AX5043_IRQMASK1,0x00);
 }
+
 void AX5043Receiver_Continuous(struct ax5043 *dev)
 {
     uint32_t ubTemp=0;
+
+    //disable interrupts of fifo
+    SpiWriteSingleAddressRegister(dev,REG_AX5043_IRQMASK0, 0x00);
+    SpiWriteSingleAddressRegister(dev,REG_AX5043_IRQMASK1, 0x00);
 
     SpiWriteSingleAddressRegister(dev,REG_AX5043_RADIOEVENTMASK0, 0x04);
     SpiWriteLongAddressRegister(dev,REG_AX5043_RSSIREFERENCE, dev->config->axradio_phy_rssireference);
@@ -151,12 +127,16 @@ void AX5043Receiver_Continuous(struct ax5043 *dev)
     ubTemp &= ~0x40;
     SpiWriteLongAddressRegister(dev,REG_AX5043_PKTSTOREFLAGS, ubTemp);
 
-    SpiWriteSingleAddressRegister(dev,REG_AX5043_IRQMASK0,0x01);
-    SpiWriteSingleAddressRegister(dev,REG_AX5043_FIFOSTAT,0x03);
-    SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE,AX5043_PWRSTATE_FULL_RX);
     dev->ubRFState = trxstate_rx;
-    SpiWriteSingleAddressRegister(dev,REG_AX5043_IRQMASK1,0x00);
+    //error-d necessary
+    SpiWriteSingleAddressRegister(dev,REG_AX5043_FIFOSTAT,0x03);
+    SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_XTAL_ON); //AX5043_PWRMODE = AX5043_PWRSTATE_XTAL_ON;    Crystal Oscillator enabled
 
+    SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_FIFO_ON); //AX5043_PWRMODE = AX5043_PWRSTATE_FIFO_ON;    FIFO enabled
+    SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_FULL_RX); //AX5043_PWRMODE = AX5043_PWRSTATE_FULL_RX;
+
+    SpiWriteSingleAddressRegister(dev,REG_AX5043_IRQMASK0,0x01);
+    SpiWriteSingleAddressRegister(dev,REG_AX5043_IRQMASK1,0x00);
 }
 void ReceiveData(struct ax5043 *dev)
 {
@@ -358,46 +338,44 @@ void TransmitData(struct ax5043 *dev)
                     SpiWriteSingleAddressRegister(dev,REG_AX5043_FIFODATA, byte);
                 }
                 break;
-            case trxstate_tx_packet:  //C
-                if (dev->TxLen < 11)goto fifocommit;
-                SpiWriteSingleAddressRegister(dev,REG_AX5043_FIFODATA, AX5043_FIFOCMD_DATA | (7 << 5));//AX5043_FIFODATA = AX5043_FIFOCMD_DATA | (7 << 5);
-                SpiWriteSingleAddressRegister(dev,REG_AX5043_FIFODATA,1 + dev->TxLen);//write FIFO chunk length byte (data length+MAC_len + Flag byte=64+3+1)
-                SpiWriteSingleAddressRegister(dev,REG_AX5043_FIFODATA,3);//AX5043_FIFODATA = flags=0x03;
-                SpiWriteData(dev,dev->TXBuff,dev->TxLen);          //ax5043_writefifo(&axradio_txbuffer[axradio_txbuffer_cnt], cnt);
-                goto pktend;
             default:
                 return;
         }
     }
     fifocommit:
         SpiWriteSingleAddressRegister(dev,REG_AX5043_FIFOSTAT, 4); // commit
-    pktend:
-        SpiWriteSingleAddressRegister(dev,REG_AX5043_FIFOSTAT, 4); // commit
-        dev->ubRFState = trxstate_tx_waitdone;
-        SpiWriteSingleAddressRegister(dev,REG_AX5043_RADIOEVENTMASK0, 0x01); // enable REVRDONE event
-        SpiWriteSingleAddressRegister(dev,REG_AX5043_IRQMASK0, 0x40); // enable radio controller irq
 }
-void transmit_packet_task(struct ax5043 *dev,uint8_t *Buf, uint8_t Length)
+void transmit_packet_task(struct ax5043 *dev,char *buffer, uint8_t len)
 {
+    //disable interrupts of fifo
+    SpiWriteSingleAddressRegister(dev,REG_AX5043_IRQMASK0, 0x00);
+    SpiWriteSingleAddressRegister(dev,REG_AX5043_IRQMASK1, 0x00);
+    //error-d necessary
+    SpiWriteSingleAddressRegister(dev,REG_AX5043_FIFOSTAT,0x03);
     SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_XTAL_ON); //AX5043_PWRMODE = AX5043_PWRSTATE_XTAL_ON;    Crystal Oscillator enabled
+
     SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_FIFO_ON); //AX5043_PWRMODE = AX5043_PWRSTATE_FIFO_ON;    FIFO enabled
-    Ax5043SetRegisters_TX(dev);
-    dev->TxLen = Length;
+    SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_FULL_TX); //AX5043_PWRMODE = AX5043_PWRSTATE_FULL_TX;
+
+    //copy length to buff[0]
+    dev->TxLen = len;
     dev->TxLen++;
     dev->TXBuff[0] = dev->TxLen;
-    memcpy(dev->TXBuff+1, Buf, Length);
-    SpiWriteSingleAddressRegister(dev,REG_AX5043_FIFOTHRESH1, 0x00);  //AX5043_FIFOTHRESH1(0x2E) = 0;
-    SpiWriteSingleAddressRegister(dev,REG_AX5043_FIFOTHRESH0, 0x80);  //AX5043_FIFOTHRESH0(0x2F) = 0x80;
+    memcpy(dev->TXBuff+1, buffer, len);
+
+    //wait irq to send data
     dev->ubRFState = trxstate_tx_xtalwait;
-    SpiWriteSingleAddressRegister(dev,REG_AX5043_IRQMASK0, 0x00);     //AX5043_IRQMASK0 = 0x00;
-    SpiWriteSingleAddressRegister(dev,REG_AX5043_IRQMASK1, 0x01);     //AX5043_IRQMASK1 = 0x01; // enable xtal ready interrupt
-    SpiReadSingleAddressRegister(dev,REG_AX5043_POWSTICKYSTAT);
+    SpiWriteSingleAddressRegister(dev,REG_AX5043_IRQMASK1, 0x01);
+
+    rf_433_send_timer_start();
 }
-void Normal_send(struct ax5043 *dev,uint8_t *Buf, uint8_t Length)
+
+void RF_Send(struct ax5043 *dev,char *send_buf, uint8_t send_len)
 {
     dev->axradio_txbuffer_cnt = 0;
-    transmit_packet_task(dev,Buf,Length);
+    transmit_packet_task(dev,send_buf,send_len);
 }
+
 void ChangeMaxPower(struct ax5043 *dev)
 {
     if(dev->axradio_power_now==0)
@@ -408,6 +386,7 @@ void ChangeMaxPower(struct ax5043 *dev)
         LOG_D("ChangeMaxPower Now\r\n");
     }
 }
+
 void BackNormalPower(struct ax5043 *dev)
 {
     if(dev->axradio_power_now)
@@ -503,7 +482,6 @@ uint8_t rf_startup(struct ax5043 *dev)
     Ax5043_OFF(dev);
     Ax5043_Reset(dev);
     InitAx5043REG(dev);
-    Ax5043SetRegisters_TX(dev);
     SpiWriteSingleAddressRegister(dev,REG_AX5043_PLLLOOP, 0x09);
     SpiWriteSingleAddressRegister(dev,REG_AX5043_PLLCPI, 0x08);
     SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_XTAL_ON);
@@ -551,54 +529,8 @@ uint8_t rf_startup(struct ax5043 *dev)
         SpiWriteSingleAddressRegister(dev,REG_AX5043_IRQMASK1, 0x00);
         dev->axradio_phy_chanpllrng[i] = (uint8_t)SpiReadSingleAddressRegister(dev,REG_AX5043_PLLRANGINGA);
     }
-    if (dev->config->axradio_phy_vcocalib) {
-        Ax5043SetRegisters_TX(dev);
-        SpiWriteSingleAddressRegister(dev,REG_AX5043_MODULATION, 0x08);
-        SpiWriteLongAddressRegister(dev,REG_AX5043_FSKDEV2, 0x00);
-        SpiWriteLongAddressRegister(dev,REG_AX5043_FSKDEV1, 0x00);
-        SpiWriteLongAddressRegister(dev,REG_AX5043_FSKDEV0, 0x00);
-        SpiWriteSingleAddressRegister(dev,REG_AX5043_PLLLOOP, (SpiReadSingleAddressRegister(dev,REG_AX5043_PLLLOOP) | 0x04));
-        {
-            uint8_t x = SpiReadLongAddressRegister(dev,REG_AX5043_0xF35);
-            x |= 0x80;
-            if (2 & (uint8_t)~x)
-                ++x;
-            SpiWriteLongAddressRegister(dev,REG_AX5043_0xF35, x);
-        }
-        SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_SYNTH_TX);
-        {
-            uint8_t  vcoisave = SpiReadLongAddressRegister(dev,REG_AX5043_PLLVCOI);
-            uint8_t j = 2;
-            for (i = 0; i < CHANNEL_NUM; ++i) {
-                dev->axradio_phy_chanvcoi[i] = 0;
-                if (dev->axradio_phy_chanpllrng[i] & 0x20)
-                    continue;
-                SpiWriteSingleAddressRegister(dev,REG_AX5043_PLLRANGINGA, (dev->axradio_phy_chanpllrng[i] & 0x0F));
-                {
-                    uint32_t f = dev->config->axradio_phy_chanfreq[i];
-                    SpiWriteSingleAddressRegister(dev,REG_AX5043_FREQA0, f);
-                    SpiWriteSingleAddressRegister(dev,REG_AX5043_FREQA1, (f >> 8));
-                    SpiWriteSingleAddressRegister(dev,REG_AX5043_FREQA2, (f >> 16));
-                    SpiWriteSingleAddressRegister(dev,REG_AX5043_FREQA3, (f >> 24));
-                }
-                do {
-                    if (dev->config->axradio_phy_chanvcoiinit[0]) {
-                        uint8_t x = dev->config->axradio_phy_chanvcoiinit[i];
-                        if (!(dev->config->axradio_phy_chanpllrnginit[0] & 0xF0))
-                            x += (dev->axradio_phy_chanpllrng[i] & 0x0F) - (dev->config->axradio_phy_chanpllrnginit[i] & 0x0F);
-                        dev->axradio_phy_chanvcoi[i] = axradio_adjustvcoi(dev,x);
-                    } else {
-                        dev->axradio_phy_chanvcoi[i] = axradio_calvcoi(dev);
-                    }
-                } while (--j);
-                j = 1;
-            }
-            SpiWriteLongAddressRegister(dev,REG_AX5043_PLLVCOI, vcoisave);
-        }
-    }
     SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_POWERDOWN);
     InitAx5043REG(dev);
-    Ax5043SetRegisters_RX(dev);
     SpiWriteSingleAddressRegister(dev,REG_AX5043_PLLRANGINGA, (dev->axradio_phy_chanpllrng[0] & 0x0F));
     {
         uint32_t f = dev->config->axradio_phy_chanfreq[0];
@@ -610,25 +542,5 @@ uint8_t rf_startup(struct ax5043 *dev)
     dev->ubRFState = trxstate_rx;
     if (dev->axradio_phy_chanpllrng[0] & 0x20)
         return AXRADIO_ERR_RANGING;
-    return AXRADIO_ERR_NOERROR;
-}
-uint8_t rf_restart(struct ax5043 *dev)
-{
-    Ax5043_OFF(dev);
-    Ax5043_Spi_Reset(dev);
-    SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, 0x00);
-    SpiWriteSingleAddressRegister(dev,REG_AX5043_PINFUNCIRQ, 0x01);
-    SpiWriteSingleAddressRegister(dev,REG_AX5043_PINFUNCIRQ, 0x00);
-    SpiWriteSingleAddressRegister(dev,REG_AX5043_PINFUNCIRQ, 0x03);
-    InitAx5043REG(dev);
-    SpiWriteSingleAddressRegister(dev,REG_AX5043_PLLRANGINGA, (dev->axradio_phy_chanpllrng[0] & 0x0F));
-    {
-        uint32_t f = dev->config->axradio_phy_chanfreq[0];
-        SpiWriteSingleAddressRegister(dev,REG_AX5043_FREQA0, f);
-        SpiWriteSingleAddressRegister(dev,REG_AX5043_FREQA1, (f >> 8));
-        SpiWriteSingleAddressRegister(dev,REG_AX5043_FREQA2, (f >> 16));
-        SpiWriteSingleAddressRegister(dev,REG_AX5043_FREQA3, (f >> 24));
-    }
-    dev->ubRFState = trxstate_rx;
     return AXRADIO_ERR_NOERROR;
 }

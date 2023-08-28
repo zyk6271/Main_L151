@@ -49,8 +49,7 @@ void RadioSend(uint32_t Taget_Id,uint8_t counter,uint8_t Command,uint8_t Data)
     buf[29] = ((check&0xf) < 10)?  (check&0xf) + '0' : (check&0xf) - 10 + 'A';
     buf[30] = '\r';
     buf[31] = '\n';
-    Normal_send(&rf_433,buf,32);
-    rf_433_send_timer_start();
+    RF_Send(&rf_433,buf,32);
     rt_free(buf);
 }
 
@@ -63,8 +62,7 @@ void GatewaySyncSend(uint8_t ack,uint8_t type,uint32_t device_id,uint8_t rssi,ui
 {
     char *buf = rt_malloc(64);
     sprintf(buf,"A{%02d,%02d,%08ld,%08ld,%08ld,%03d,%02d}A",ack,type,Gateway_ID,Self_Id,device_id,rssi,bat);
-    Normal_send(&rf_433,buf,43);
-    rf_433_send_timer_start();
+    RF_Send(&rf_433,buf,43);
     rt_free(buf);
 }
 void GatewayWarningEnqueue(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t warn_id,uint8_t value)
@@ -76,8 +74,7 @@ void GatewayWarningSend(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t warn
 {
     char *buf = rt_malloc(64);
     sprintf(buf,"B{%02d,%08ld,%08ld,%08ld,%03d,%03d,%02d}B",ack,Gateway_ID,Self_Id,device_id,rssi,warn_id,value);
-    Normal_send(&rf_433,buf,44);
-    rf_433_send_timer_start();
+    RF_Send(&rf_433,buf,44);
     rt_free(buf);
 }
 void GatewayControlEnqueue(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t control,uint8_t value)
@@ -89,8 +86,7 @@ void GatewayControlSend(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t cont
 {
     char *buf = rt_malloc(64);
     sprintf(buf,"C{%02d,%08ld,%08ld,%08ld,%03d,%03d,%02d}C",ack,Gateway_ID,Self_Id,device_id,rssi,control,value);
-    Normal_send(&rf_433,buf,44);
-    rf_433_send_timer_start();
+    RF_Send(&rf_433,buf,44);
     rt_free(buf);
 }
 void RadioEnqueue(uint8_t ack,uint32_t type,uint32_t Taget_Id,uint8_t counter,uint8_t Command,uint8_t Data)
@@ -208,12 +204,12 @@ void RadioDequeue(void *paramaeter)
     }
 }
 
-void RadioDequeueTaskInit(void)
+void RadioQueue_Init(void)
 {
     int *p;
     p=(int *)(0x0801FFF0);//这就是已知的地址，要强制类型转换
     Self_Id = *p;//从Flash加载ID
-    if(Self_Id==0xFFFFFFFF || Self_Id==0)
+    if(Self_Id ==0xFFFFFFFF || Self_Id==0)
     {
         Self_Id = Self_Default_Id;
     }
