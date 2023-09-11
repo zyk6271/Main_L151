@@ -161,7 +161,7 @@ void Device_Learn(Message buf)
                     Gateway_Reload();
                 }
                 LOG_D("Include This Device，Send Confirmed\r\n");
-                just_ring();    //响一声
+                ring_once();    //响一声
                 Device_AliveChange(buf.From_ID,1);
                 Relearn();
                 RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,2);
@@ -267,7 +267,7 @@ void DataSolve(Message buf)
             RadioEnqueue(0,1,buf.From_ID,buf.Counter,5,1);
             Moto_Open(OtherOpen);
             Last_Close_Flag=0;
-            just_ring();
+            ring_once();
         }
         else
         {
@@ -299,7 +299,7 @@ void DataSolve(Message buf)
             Warning_Disable();
             Last_Close_Flag=1;
             Moto_Close(OtherOff);
-            just_ring();
+            ring_once();
         }
         if(buf.From_ID == GetDoorID())
         {
@@ -357,7 +357,7 @@ void GatewayDataSolve(int rssi,uint8_t *rx_buffer,uint8_t rx_len)
             case 1://延迟
                 break;
             case 2://网关开
-                just_ring();
+                ring_once();
                 if(GetNowStatus()==Close || GetNowStatus()==Open)
                 {
                     if(Rx_message.Data)

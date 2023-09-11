@@ -20,7 +20,7 @@
 #include "Config_433.h"
 
 #define DBG_TAG "radio_433"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 struct ax5043 rf_433;
@@ -77,23 +77,26 @@ void rf_433_driver_init(void)
     rf_startup(&rf_433);
     vcoi_rng_get(&rf_433);
     AX5043ReceiverON(&rf_433);
-    just_ring();
 }
 void rf_433_send_timer_callback(void *parameter)
 {
     if(rf_433.ubRFState != trxstate_rx)
     {
-        LOG_W("rf_433 Send timeout\r\n");
+        LOG_E("rf_433 Send timeout\r\n");
         SpiWriteSingleAddressRegister(&rf_433,REG_AX5043_RADIOEVENTMASK0, 0x00);
+        rf_restart(&rf_433);
         AX5043Receiver_Continuous(&rf_433);
     }
 }
-
 void rf_433_send_timer_start(void)
 {
     rt_timer_start(rf_433_send_timer);
 }
 
+void rf_433_irq_clean(void)
+{
+    rt_sem_control(IRQ1_Sem,RT_IPC_CMD_RESET,0);
+}
 void rf_433_task_callback(void *parameter)
 {
     while(1)
@@ -102,12 +105,16 @@ void rf_433_task_callback(void *parameter)
         result = rt_sem_take(IRQ1_Sem, RT_WAITING_FOREVER);
         if (result == RT_EOK)
         {
+            uint32_t irq_req = SpiReadSingleAddressRegister(&rf_433,REG_AX5043_IRQREQUEST1)<<8 | SpiReadSingleAddressRegister(&rf_433,REG_AX5043_IRQREQUEST0);
+            uint32_t irq_msk = SpiReadSingleAddressRegister(&rf_433,REG_AX5043_IRQMASK1)<<8 | SpiReadSingleAddressRegister(&rf_433,REG_AX5043_IRQMASK0);
+            LOG_D("irq_req is %04X,irq_msk is %04X\r\n",irq_req,irq_msk);
             switch (rf_433.ubRFState)
             {
             case trxstate_rx: //0x01
                 ReceiveData(&rf_433);
                 if (rf_433.RxLen != 0)
                 {
+                    LOG_D("ReceiveData %s\r\n",buffer);
                     rf433_rx_callback(rf_433.ubRssi,rf_433.RXBuff,rf_433.RxLen-1);
                 }
                 AX5043Receiver_Continuous(&rf_433);
@@ -180,4 +187,5 @@ void RF_Init(void)
     rt_thread_startup(rf_433_task);
     rf_433_driver_init();
     RadioQueue_Init();
+    ring_once();
 }

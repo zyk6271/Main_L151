@@ -343,7 +343,7 @@ void key_down(void)
     agile_led_start(singlebeep);
     agile_led_start(singleled0);
 }
-void just_ring(void)
+void ring_once(void)
 {
     agile_led_start(singlebeep);
 }

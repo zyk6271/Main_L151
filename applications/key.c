@@ -80,7 +80,7 @@ void Key_Reponse_Callback(void *parameter)
             case Close:
                 if(Last_Close_Flag==0)
                 {
-                    just_ring();
+                    ring_once();
                     Moto_Open(NormalOpen);
                 }
                 else
@@ -90,7 +90,7 @@ void Key_Reponse_Callback(void *parameter)
                 LOG_D("Valve Open With ON\r\n");
                 break;
             case Open:
-                just_ring();
+                ring_once();
                 LOG_D("Valve Already Open With ON\r\n");
                 break;
             case SlaverLowPower:
@@ -114,7 +114,7 @@ void Key_Reponse_Callback(void *parameter)
                 LOG_D("MasterWaterAlarmActive With ON\r\n");
                 break;
             case MotoFail:
-                just_ring();
+                ring_once();
                 break;
             case Learn:
                 break;
@@ -156,7 +156,7 @@ void Key_Reponse_Callback(void *parameter)
                 case SlaverLowPower:
                     break;
                 case SlaverUltraLowPower:
-                    just_ring();
+                    ring_once();
                     break;
                 case SlaverWaterAlarmActive:
                     beep_stop();

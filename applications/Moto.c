@@ -81,7 +81,7 @@ void Moto_Open(uint8_t ActFlag)
             ControlUpload_GW(1,0,1,1);
             rt_timer_start(Moto_Detect_Timer);
         }
-        just_ring();
+        ring_once();
         Delay_Timer_Stop();
     }
     else if(Global_Device.LastFlag == OtherOff && ActFlag == NormalOpen)
@@ -109,7 +109,7 @@ void Moto_Close(uint8_t ActFlag)
         rt_pin_write(Turn1,0);
         rt_pin_irq_enable(Senor2, PIN_IRQ_DISABLE);
         rt_pin_write(Turn2,0);
-        just_ring();
+        ring_once();
         Delay_Timer_Stop();
         rt_timer_stop(Moto1_Timer_Act);
         rt_timer_stop(Moto2_Timer_Act);
@@ -122,7 +122,7 @@ void Moto_Close(uint8_t ActFlag)
     {
         Now_Status = Close;
         ValveStatus=0;
-        just_ring();
+        ring_once();
         Delay_Timer_Stop();
         LOG_D("Moto is alreay otheroff\r\n");
     }

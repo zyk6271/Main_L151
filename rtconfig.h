@@ -135,6 +135,10 @@
 /* Wiced WiFi */
 
 /* end of Wiced WiFi */
+
+/* CYW43012 WiFi */
+
+/* end of CYW43012 WiFi */
 /* end of Wi-Fi */
 
 /* IoT Cloud */
@@ -166,18 +170,12 @@
 /* u8g2: a monochrome graphic library */
 
 /* end of u8g2: a monochrome graphic library */
-
-/* PainterEngine: A cross-platform graphics application framework written in C language */
-
-/* end of PainterEngine: A cross-platform graphics application framework written in C language */
 /* end of multimedia packages */
 
 /* tools packages */
 
 #define PKG_USING_EASYFLASH
 #define PKG_EASYFLASH_ENV
-#define PKG_EASYFLASH_ENV_AUTO_UPDATE
-#define PKG_EASYFLASH_ENV_VER_NUM 0
 #define PKG_EASYFLASH_ERASE_GRAN 4096
 #define PKG_EASYFLASH_WRITE_GRAN_1BIT
 #define PKG_EASYFLASH_WRITE_GRAN 1
@@ -251,6 +249,10 @@
 
 /* end of AI packages */
 
+/* Signal Processing and Control Algorithm Packages */
+
+/* end of Signal Processing and Control Algorithm Packages */
+
 /* miscellaneous packages */
 
 /* project laboratory */
@@ -265,49 +267,6 @@
 
 /* end of entertainment: terminal games and other interesting software packages */
 /* end of miscellaneous packages */
-
-/* Arduino libraries */
-
-
-/* Projects */
-
-/* end of Projects */
-
-/* Sensors */
-
-/* end of Sensors */
-
-/* Display */
-
-/* end of Display */
-
-/* Timing */
-
-/* end of Timing */
-
-/* Data Processing */
-
-/* end of Data Processing */
-
-/* Data Storage */
-
-/* Communication */
-
-/* end of Communication */
-
-/* Device Control */
-
-/* end of Device Control */
-
-/* Other */
-
-/* Signal IO */
-
-/* end of Signal IO */
-
-/* Uncategorized */
-
-/* end of Arduino libraries */
 /* end of RT-Thread online packages */
 
 /* samples: kernel and components samples */
