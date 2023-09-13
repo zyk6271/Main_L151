@@ -1,37 +1,38 @@
-# agile_led
+# Agile Led
 
 ## 1、介绍
 
-agile_led是基于RT-Thread实现的led软件包，提供led操作的API。
+Agile Led 是基于 RT-Thread 实现的 led 软件包，提供 led 操作的 API。
 
-### 1.1 特性
+### 1.1、特性
 
-1. 代码简洁易懂，充分使用RT-Thread提供的API
+1. 代码简洁易懂，充分使用 RT-Thread 提供的 API
 2. 详细注释
 3. 线程安全
 4. 断言保护
-5. API操作简单
+5. API 操作简单
 
-### 1.2 目录结构
+### 1.2、目录结构
 
 | 名称 | 说明 |
 | ---- | ---- |
+| doc | 文档目录 |
 | examples | 例子目录 |
 | inc  | 头文件目录 |
 | src  | 源代码目录 |
 
-### 1.3 许可证
+### 1.3、许可证
 
-agile_led package 遵循 LGPLv2.1 许可，详见 `LICENSE` 文件。
+Agile Led package 遵循 LGPLv2.1 许可，详见 `LICENSE` 文件。
 
-### 1.4 依赖
+### 1.4、依赖
 
 - RT-Thread 3.0+
 - RT-Thread 4.0+
 
-## 2、如何打开 agile_led
+## 2、如何打开 Agile Led
 
-使用 agile_led package 需要在 RT-Thread 的包管理器中选择它，具体路径如下：
+使用 Agile Led package 需要在 RT-Thread 的包管理器中选择它，具体路径如下：
 
 ```
 RT-Thread online packages
@@ -41,147 +42,38 @@ RT-Thread online packages
 
 然后让 RT-Thread 的包管理器自动更新，或者使用 `pkgs --update` 命令更新包到 BSP 中。
 
-## 3、使用 agile_led
+## 3、使用 Agile Led
 
-在打开 agile_led package 后，当进行 bsp 编译时，它会被加入到 bsp 工程中进行编译。
+- 帮助文档请查看 [doc/doxygen/Agile_Led.chm](./doc/doxygen/Agile_Led.chm)
 
-### 3.1、API说明
+如果未使能 PKG_AGILE_LED_USING_THREAD_AUTO_INIT:
 
-1. 创建led对象
+1. agile_led_env_init 初始化环境
 
-```C
-agile_led_t *agile_led_create(rt_base_t pin, rt_base_t active_logic, const char *light_mode, int32_t loop_cnt);
-```
+2. 创建一个线程，周期调用 agile_led_process，建议周期时间不要太长
 
-|参数|注释|
-|----|----|
-|pin|控制led的引脚|
-|active_logic|led有效电平(PIN_HIGH/PIN_LOW)|
-|light_mode|闪烁模式字符串|
-|loop_cnt|循环次数(负数为永久循环)|
+- agile_led_create / agile_led_init 创建 / 初始化对象
+- agile_led_start 启动运行
+- agile_led_dynamic_change_light_mode / agile_led_static_change_light_mode 更改模式
 
-|返回|注释|
-|----|----|
-|!=RT_NULL|agile_led对象指针|
-|RT_NULL|异常|
+  该操作也可在启动运行前执行
 
-2. 删除led对象
+- 如果需要感知对象执行结束，agile_led_set_compelete_callback 设置回调函数
+- 过程中需要强制停止，使用 agile_led_stop
+- agile_led_on / agile_led_off / agile_led_toggle 单独操作对象
 
-```C
-int agile_led_delete(agile_led_t *led);
-```
-
-|参数|注释|
-|----|----|
-|led|led对象指针|
-
-|返回|注释|
-|----|----|
-|RT_EOK|成功|
-
-3. 启动led对象,根据设置的模式执行动作
-
-```C
-int agile_led_start(agile_led_t *led);
-```
-
-|参数|注释|
-|----|----|
-|led|led对象指针|
-
-|返回|注释|
-|----|----|
-|RT_EOK|成功|
-|!=RT_OK|异常|
-
-4. 停止led对象
-
-```C
-int agile_led_stop(agile_led_t *led);
-```
-
-|参数|注释|
-|----|----|
-|led|led对象指针|
-
-|返回|注释|
-|----|----|
-|RT_EOK|成功|
-
-5. 设置led对象的模式
-
-```C
-int agile_led_set_light_mode(agile_led_t *led, const char *light_mode, int32_t loop_cnt);
-```
-
-|参数|注释|
-|----|----|
-|led|led对象指针|
-|light_mode|闪烁模式字符串|
-|loop_cnt|循环次数(负数为永久循环)|
-
-|返回|注释|
-|----|----|
-|RT_EOK|成功|
-|!=RT_EOK|异常|
-
-6. 设置led对象操作完成的回调函数
-
-```C
-int agile_led_set_compelete_callback(agile_led_t *led, void (*compelete)(agile_led_t *led));
-```
-
-|参数|注释|
-|----|----|
-|led|led对象指针|
-|compelete|操作完成回调函数|
-
-|返回|注释|
-|----|----|
-|RT_EOK|成功|
-
-7. led对象电平翻转
-
-```C
-void agile_led_toggle(agile_led_t *led);
-```
-
-|参数|注释|
-|----|----|
-|led|led对象指针|
-
-8. led对象亮
-
-```C
-void agile_led_on(agile_led_t *led);
-```
-
-|参数|注释|
-|----|----|
-|led|led对象指针|
-
-9. led对象灭
-
-```C
-void agile_led_off(agile_led_t *led);
-```
-
-|参数|注释|
-|----|----|
-|led|led对象指针|
-
-### 3.2、示例
+### 3.1、示例
 
 使用示例在 [examples](./examples) 下。
 
-## 4、注意事项
+### 3.2、Doxygen 文档生成
 
-1. 调用 `agile_led_create` API创建完led对象后，调用其他API确保led对象创建成功，否则被断言。
-2. 调用 `agile_led_create` 和 `agile_led_set_light_mode` API时，参数 `light_mode` 可以为RT_NULL。
-3. `light_mode` 确保时字符串形式，如 `"100,50,10,60"` 或 `"100,50,10,60,"` ,只支持正整数，按照亮灭亮灭...规律。
+- 使用 `Doxywizard` 打开 [Doxyfile](./doc/doxygen/Doxyfile) 运行，生成的文件在 [doxygen/output](./doc/doxygen/output) 下。
+- 需要更改 `Graphviz` 路径。
+- `HTML` 生成未使用 `chm` 格式的，如果使能需要更改 `hhc.exe` 路径。
 
-## 5、联系方式 & 感谢
+## 4、联系方式 & 感谢
 
-* 维护：马龙伟
-* 主页：<https://github.com/loogg/agile_led>
-* 邮箱：<2544047213@qq.com>
+- 维护：马龙伟
+- 主页：<https://github.com/loogg/agile_led>
+- 邮箱：<2544047213@qq.com>

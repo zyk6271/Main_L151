@@ -424,7 +424,7 @@ static bool get_env_from_cache(const char *name, size_t name_len, uint32_t *addr
  */
 static uint32_t continue_ff_addr(uint32_t start, uint32_t end)
 {
-    uint8_t buf[32], last_data = 0x00;
+    uint8_t buf[EF_READ_BUF_SIZE], last_data = 0x00;
     size_t i, addr = start, read_size;
 
     for (; start < end; start += sizeof(buf)) {
@@ -507,7 +507,7 @@ static uint32_t get_next_env_addr(sector_meta_data_t sector, env_node_obj_t pre_
             addr = find_next_env_addr(addr, sector->addr + SECTOR_SIZE - SECTOR_HDR_DATA_SIZE);
 
             if (addr > sector->addr + SECTOR_SIZE || pre_env->len == 0) {
-                //TODO ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½
+                //TODO ÉÈÇøÁ¬ÐøÄ£Ê½
                 return FAILED_ADDR;
             }
         } else {
@@ -522,7 +522,7 @@ static uint32_t get_next_env_addr(sector_meta_data_t sector, env_node_obj_t pre_
 static EfErrCode read_env(env_node_obj_t env)
 {
     struct env_hdr_data env_hdr;
-    uint8_t buf[32];
+    uint8_t buf[EF_READ_BUF_SIZE];
     uint32_t calc_crc32 = 0, crc_data_len, env_name_addr;
     EfErrCode result = EF_NO_ERR;
     size_t len, size;
@@ -542,7 +542,7 @@ static EfErrCode read_env(env_node_obj_t env)
         env->crc_is_ok = false;
         return EF_READ_ERR;
     } else if (env->len > SECTOR_SIZE - SECTOR_HDR_DATA_SIZE && env->len < ENV_AREA_SIZE) {
-        //TODO ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ë³¤ï¿½ï¿½Ã»ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        //TODO ÉÈÇøÁ¬ÐøÄ£Ê½£¬»òÕßÐ´Èë³¤¶ÈÃ»ÓÐÐ´ÈëÍêÕû
         EF_ASSERT(0);
     }
 
@@ -787,6 +787,8 @@ static size_t get_env(const char *key, void *value_buf, size_t buf_len, size_t *
         if (value_buf){
             ef_port_read(env.addr.value, (uint32_t *) value_buf, read_len);
         }
+    } else if (value_len) {
+        *value_len = 0;
     }
 
     return read_len;
@@ -1284,9 +1286,13 @@ static EfErrCode align_write(uint32_t addr, const uint32_t *buf, size_t size)
 #endif
 
     memset(align_data, 0xFF, align_data_size);
-    result = ef_port_write(addr, buf, EF_WG_ALIGN_DOWN(size));
+    align_remain = EF_WG_ALIGN_DOWN(size);//use align_remain temporary to save aligned size.
 
-    align_remain = size - EF_WG_ALIGN_DOWN(size);
+    if(align_remain > 0){//it may be 0 in this function.
+        result = ef_port_write(addr, buf, align_remain);
+    }
+
+    align_remain = size - align_remain;
     if (result == EF_NO_ERR && align_remain) {
         memcpy(align_data, (uint8_t *)buf + EF_WG_ALIGN_DOWN(size), align_remain);
         result = ef_port_write(addr + EF_WG_ALIGN_DOWN(size), (uint32_t *) align_data, align_data_size);
@@ -1724,7 +1730,7 @@ static bool check_and_recovery_env_cb(env_node_obj_t env, void *arg1, void *arg2
     } else if (env->status == ENV_PRE_WRITE) {
         uint8_t status_table[ENV_STATUS_TABLE_SIZE];
         /* the ENV has not write finish, change the status to error */
-        //TODO ï¿½ï¿½ï¿½ï¿½ï¿½ì³£ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬×°ï¿½ï¿½Í¼
+        //TODO »æÖÆÒì³£´¦ÀíµÄ×´Ì¬×°»»Í¼
         write_status(env->addr.start, status_table, ENV_STATUS_NUM, ENV_ERR_HDR);
         return true;
     }

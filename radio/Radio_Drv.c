@@ -16,7 +16,7 @@
 #include "Radio_Drv.h"
 
 #define DBG_TAG "radio_drv"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 #define RADIO_SPI1_NSS_PORT GPIOA

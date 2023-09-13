@@ -33,13 +33,11 @@ void led_Init(void)
         singleled0 = agile_led_create(LED3_PIN, PIN_LOW, "200,1", 1);
         lossled0 = agile_led_create(LED3_PIN, PIN_LOW, "200,200,200,5000", -1);
         led0_three = agile_led_create(LED3_PIN, PIN_LOW, "200,200", 3);
-        LOG_D("LED_0 Init Success\r\n");
     }
 
     if(led1 == RT_NULL)
     {
         led1 = agile_led_create(LED0_PIN, PIN_LOW, "200,200", -1);
-        LOG_D("LED_1 Init Success\r\n");
     }
 
     if(beep == RT_NULL)
@@ -48,18 +46,16 @@ void led_Init(void)
         singlebeep = agile_led_create(BEEP_PIN, PIN_HIGH, "200,1", 1);
         beep_three = agile_led_create(BEEP_PIN, PIN_HIGH, "200,200", 3);
         learnbeep = agile_led_create(BEEP_PIN, PIN_HIGH, "50,50,200,200", 3);
-        LOG_D("Beep Init Success\r\n");
+        agile_led_start(singlebeep);
     }
     if(wifi_G == RT_NULL)
     {
         wifi_G = agile_led_create(LED4_PIN, PIN_LOW, "200,200", -1);
         wifi_G_Com = agile_led_create(LED4_PIN, PIN_LOW, "200,200", -1);
-        LOG_D("wifi_G Init Success\r\n");
     }
     if(wifi_R == RT_NULL)
     {
         wifi_R = agile_led_create(LED5_PIN, PIN_LOW, "200,200", -1);
-        LOG_D("wifi_R Init Success\r\n");
     }
 }
 void loss_led_start(void)

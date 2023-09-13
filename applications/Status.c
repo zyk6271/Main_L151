@@ -21,7 +21,7 @@
 #include "gateway.h"
 
 #define DBG_TAG "status"
-#define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 enum Device_Status Now_Status=Close;
@@ -79,27 +79,26 @@ void Warning_Disable(void)
     NowStatusEvent.last_id = 0;
     NowStatusEvent.priority = 0;
     BackToNormal();
-    LOG_I("Warning is Disable\r\n");
 }
 void SlaverLowBatteryWarning(void *parameter)
 {
     beep_start(0,15);//红灯,蜂鸣器一下
     //Now_Status = SlaverLowPower;
-    LOG_I("SlaverLowBatteryWarning\r\n");
+    LOG_W("SlaverLowBatteryWarning\r\n");
 }
 void SlaverUltraLowBatteryWarning(void *parameter)
 {
     Moto_Close(OtherOff);
     beep_start(0,15);//红灯,蜂鸣器一下
     Now_Status = SlaverUltraLowPower;
-    LOG_I("SlaverUltraLowBatteryWarning\r\n");
+    LOG_W("SlaverUltraLowBatteryWarning\r\n");
 }
 void SlaverWaterAlarmWarning(void *parameter)
 {
     Moto_Close(OtherOff);
     beep_start(0,2);//红灯,蜂鸣器三下
     Now_Status = SlaverWaterAlarmActive;
-    LOG_I("SlaverWaterAlarmWarning\r\n");
+    LOG_W("SlaverWaterAlarmWarning\r\n");
 }
 void MasterLostPeakWarning(void *parameter)
 {
@@ -107,12 +106,12 @@ void MasterLostPeakWarning(void *parameter)
     WarUpload_GW(1,0,3,1);//掉落报警
     beep_start(0,1);//红灯,蜂鸣器三下
     loss_led_start();
-    LOG_I("MasterLostPeakWarning\r\n");
+    LOG_W("MasterLostPeakWarning\r\n");
 }
 void MasterStatusChangeToDeAvtive(void)
 {
     Now_Status = MasterWaterAlarmDeActive;
-    LOG_I("MasterStatusChangeToDeAvtive\r\n");
+    LOG_W("MasterStatusChangeToDeAvtive\r\n");
 }
 void MasterWaterAlarmWarning(void *parameter)
 {
@@ -120,7 +119,7 @@ void MasterWaterAlarmWarning(void *parameter)
     WarUpload_GW(1,0,1,1);//主控水警
     beep_start(0,2);//红灯,蜂鸣器三下
     Now_Status = MasterWaterAlarmActive;
-    LOG_I("MasterWaterAlarmWarning\r\n");
+    LOG_W("MasterWaterAlarmWarning\r\n");
 }
 void NTCWarningEvent_Callback(void *parameter)
 {
@@ -144,7 +143,7 @@ void Remote_Open(void)
         Moto_Open(OtherOpen);
     }
     else {
-        LOG_I("Remote_Open Fail,Now is %d",Now_Status);
+        LOG_W("Remote_Open Fail,Now is %d",Now_Status);
     }
 }
 void Remote_Close(void)
@@ -174,7 +173,7 @@ void OfflineWarning(void *parameter)
     {
         Moto_Close(NormalOff);
         Now_Status = Offline;
-        LOG_I("OfflineWarning\r\n");
+        LOG_W("OfflineWarning\r\n");
         beep_start(0,5);
     }
     else
@@ -187,14 +186,14 @@ void Moto1FailCallback(void *parameter)
     WarUpload_GW(1,0,2,2);//MOTO1报警
     beep_start(0,9);
     Now_Status = MotoFail;
-    LOG_I("MotoFail\r\n");
+    LOG_W("MotoFail\r\n");
 }
 void Moto2FailCallback(void *parameter)
 {
     WarUpload_GW(1,0,2,3);//MOTO2报警
     beep_start(0,9);
     Now_Status = MotoFail;
-    LOG_I("MotoFail\r\n");
+    LOG_W("MotoFail\r\n");
 }
 void OfflineDisableWarning(void)
 {
@@ -229,7 +228,6 @@ void WarningInit(void)
     WarningEventInit(8,2,&NTCWarningEvent,NTCWarningEvent_Callback);
     WarningEventInit(0,0,&NowStatusEvent,RT_NULL);//本地存储器
     Delay_Timer = rt_timer_create("Delay_Timer", Delay_Timer_Callback, RT_NULL, 4*60*60*1000,RT_TIMER_FLAG_SOFT_TIMER|RT_TIMER_FLAG_ONE_SHOT);
-    LOG_I("Warning Event Init Success\r\n");
 }
 uint8_t Detect_Learn(void)
 {

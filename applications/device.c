@@ -85,7 +85,8 @@ void K0_LongSem_Release(void *parameter)
         }
         else
         {
-            LOG_I("K0 Long Counter is %d", K0_Long_Sem_Counter++);
+            K0_Long_Sem_Counter++;
+            LOG_D("K0 Long Counter is %d", K0_Long_Sem_Counter);
         }
     }
 }
@@ -109,7 +110,8 @@ void K1_LongSem_Release(void *parameter)
         }
         else
         {
-            LOG_I("K1 Long Counter is %d", K1_Long_Sem_Counter++);
+            K1_Long_Sem_Counter++;
+            LOG_D("K1 Long Counter is %d", K1_Long_Sem_Counter);
         }
     }
 }
@@ -171,7 +173,7 @@ void RF_Switch_Pin_Init(void)
     ANT_SW_Status = rt_pin_read(ANT_SW);
     rt_pin_write(ANT_EXT, !ANT_SW_Status);
     rt_pin_write(ANT_INT, ANT_SW_Status);
-    LOG_I("ANT_EXT is %d , ANT_INT is %d\r\n", !ANT_SW_Status, ANT_SW_Status);
+    LOG_D("ANT_EXT is %d , ANT_INT is %d\r\n", !ANT_SW_Status, ANT_SW_Status);
 }
 void RF_Switch(void)
 {
@@ -199,7 +201,6 @@ void button_task_entry(void *parameter)
     Button_Attach(&Key1, BUTTON_LONG, K1_LongSem_Release);
     Button_Attach(&Key0, BUTTON_LONG_FREE, K0_LongFree_Release);
     Button_Attach(&Key1, BUTTON_LONG_FREE, K1_LongFree_Release);
-    LOG_D("Button Init Success\r\n");
     while (1)
     {
         RF_Switch();

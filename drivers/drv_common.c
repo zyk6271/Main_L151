@@ -13,11 +13,11 @@
 
 #ifdef RT_USING_FINSH
 #include <finsh.h>
-static void reboot(uint8_t argc, char **argv)
+static void reboot(void)
 {
     rt_hw_cpu_reset();
 }
-FINSH_FUNCTION_EXPORT_ALIAS(reboot, __cmd_reboot, Reboot System);
+MSH_CMD_EXPORT(reboot,reboot);
 #endif /* RT_USING_FINSH */
 
 /* SysTick configuration */
@@ -51,18 +51,6 @@ void SysTick_Handler(void)
 uint32_t HAL_GetTick(void)
 {
     return rt_tick_get() * 1000 / RT_TICK_PER_SECOND;
-}
-
-void HAL_SuspendTick(void)
-{
-}
-
-void HAL_ResumeTick(void)
-{
-}
-
-void HAL_Delay(__IO uint32_t Delay)
-{
 }
 
 /* re-implement tick interface for STM32 HAL */

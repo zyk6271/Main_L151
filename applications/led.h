@@ -21,7 +21,7 @@ void beep_start(uint8_t led_id,int mode);
 void beep_stop(void);
 void key_down(void);
 void Relearn(void);
-void just_ring(void);
+void ring_once(void);
 void learn_fail_ring(void);
 void beeplive(void);
 void beepback(void);

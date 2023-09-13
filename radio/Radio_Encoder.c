@@ -213,7 +213,7 @@ void RadioQueue_Init(void)
     {
         Self_Id = Self_Default_Id;
     }
-    LOG_I("Self_Id is %ld\r\n",Self_Id);
+    LOG_I("Device RF ID is %ld\r\n",Self_Id);
     Radio_QueueTask = rt_thread_create("Radio_QueueTask", RadioDequeue, RT_NULL, 1024, 10, 10);
     if(Radio_QueueTask)rt_thread_startup(Radio_QueueTask);
 }

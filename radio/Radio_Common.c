@@ -113,19 +113,30 @@ void AX5043SetOperationMode_RX(struct ax5043 *dev)
     PwrStatus status;
     rt_tick_t start_time = 0;
     rt_tick_t timeout = 0;
+    uint8_t retry = 3;
 __restart:
+    retry--;
+    if(retry == 0)
+    {
+        LOG_E("AX5043SetOperationMode_RX retry stop: Could not set svmodem\r\n");
+        return;
+    }
     status = (PwrStatus)SpiReadSingleAddressRegister(dev,REG_AX5043_POWSTAT);
     start_time = rt_tick_get(); // 记录开始时间
-    timeout = 50; // 设置超时时间为2秒，假设每秒有 RT_TICK_PER_SECOND 个时钟节拍
+    timeout = 50; // 设置超时时间为50ms
     do {
         SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_XTAL_ON); //AX5043_PWRMODE = AX5043_PWRSTATE_XTAL_ON;    Crystal Oscillator enabled
         rt_thread_mdelay(10);
         status = (PwrStatus)SpiReadSingleAddressRegister(dev,REG_AX5043_POWSTAT);
     } while(status.svmodem != 0x00 && ((rt_tick_get() - start_time) < timeout));
     if (status.svmodem != 0x00) {
-        LOG_E("AX5043SetOperationMode_RX Timeout error: Could not set svmodem to 0x00");
+        LOG_E("AX5043SetOperationMode_RX Timeout error: Could not set svmodem to 0x00\r\n");
         rf_restart(dev);
-        goto __restart; //重新开始状态切换
+        goto __restart;
+    }
+    else
+    {
+        LOG_D("SetOperationMode_RX set svmodem to 0x00 spend %dms\r\n",rt_tick_get() - start_time);
     }
     SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_FIFO_ON); //AX5043_PWRMODE = AX5043_PWRSTATE_FIFO_ON;    FIFO enabled
     SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_FULL_RX); //AX5043_PWRMODE = AX5043_PWRSTATE_FULL_RX;
@@ -136,9 +147,13 @@ __restart:
         status = (PwrStatus)SpiReadSingleAddressRegister(dev,REG_AX5043_POWSTAT);
     }
     if (status.svmodem != 0x01) {
-        LOG_E("AX5043SetOperationMode_RX Timeout error: Could not set svmodem to 0x01");
+        LOG_E("AX5043SetOperationMode_RX Timeout error: Could not set svmodem to 0x01\r\n");
         rf_restart(dev);
-        goto __restart; //重新开始状态切换
+        goto __restart;
+    }
+    else
+    {
+        LOG_D("SetOperationMode_RX set svmodem to 0x01 spend %dms\r\n",rt_tick_get() - start_time);
     }
 }
 
@@ -147,19 +162,30 @@ void AX5043SetOperationMode_TX(struct ax5043 *dev)
     PwrStatus status;
     rt_tick_t start_time = 0;
     rt_tick_t timeout = 0;
+    uint8_t retry = 3;
 __restart:
+    retry--;
+    if(retry == 0)
+    {
+        LOG_E("AX5043SetOperationMode_TX retry stop: Could not set svmodem\r\n");
+        return;
+    }
     status = (PwrStatus)SpiReadSingleAddressRegister(dev,REG_AX5043_POWSTAT);
     start_time = rt_tick_get(); // 记录开始时间
-    timeout = 50; // 设置超时时间为2秒，假设每秒有 RT_TICK_PER_SECOND 个时钟节拍
+    timeout = 50; // 设置超时时间为50ms
     do {
         SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_XTAL_ON); //AX5043_PWRMODE = AX5043_PWRSTATE_XTAL_ON;    Crystal Oscillator enabled
         rt_thread_mdelay(10);
         status = (PwrStatus)SpiReadSingleAddressRegister(dev,REG_AX5043_POWSTAT);
     } while(status.svmodem != 0x00 && ((rt_tick_get() - start_time) < timeout));
     if (status.svmodem != 0x00) {
-        LOG_E("AX5043SetOperationMode_TX Timeout error: Could not set svmodem to 0x00");
+        LOG_E("AX5043SetOperationMode_TX Timeout error: Could not set svmodem to 0x00\r\n");
         rf_restart(dev);
-        goto __restart; //重新开始状态切换
+        goto __restart;
+    }
+    else
+    {
+        LOG_D("SetOperationMode_TX set svmodem to 0x00 spend %dms\r\n",rt_tick_get() - start_time);
     }
     SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_FIFO_ON); //AX5043_PWRMODE = AX5043_PWRSTATE_FIFO_ON;    FIFO enabled
     SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_FULL_TX); //AX5043_PWRMODE = AX5043_PWRSTATE_FULL_RX;
@@ -170,9 +196,13 @@ __restart:
         status = (PwrStatus)SpiReadSingleAddressRegister(dev,REG_AX5043_POWSTAT);
     }
     if (status.svmodem != 0x01) {
-        LOG_E("AX5043SetOperationMode_TX Timeout error: Could not set svmodem to 0x01");
+        LOG_E("AX5043SetOperationMode_TX Timeout error: Could not set svmodem to 0x01\r\n");
         rf_restart(dev);
-        goto __restart; //重新开始状态切换
+        goto __restart;
+    }
+    else
+    {
+        LOG_D("SetOperationMode_TX set svmodem to 0x01 spend %dms\r\n",rt_tick_get() - start_time);
     }
 }
 
@@ -615,5 +645,5 @@ void rf_restart(struct ax5043 *dev)
         SpiWriteSingleAddressRegister(dev,REG_AX5043_FREQA3, (f >> 24));
     }
     rf_433_irq_clean();
-    LOG_I("RF Module is to be restart\r\n");
+    LOG_I("ax5043 is restart\r\n");
 }

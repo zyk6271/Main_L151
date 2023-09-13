@@ -40,7 +40,6 @@ struct pin_irq_map
     IRQn_Type irqno;
 };
 
-
 static const struct pin_index pins[] = 
 {
 #if defined(GPIOA)

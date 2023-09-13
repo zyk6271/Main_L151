@@ -91,6 +91,8 @@
 /* backup area start address */
 #define EF_START_ADDR             PKG_EASYFLASH_START_ADDR
 
+#define EF_READ_BUF_SIZE          32
+
 /* ENV area size. It's at least one empty sector for GC. So it's definition must more then or equal 2 flash sector size. */
 #define ENV_AREA_SIZE             (EF_ERASE_MIN_SIZE * 4) /* default is the double erase min size */
 
@@ -98,5 +100,4 @@
 #ifdef PKG_EASYFLASH_DEBUG
 #define PRINT_DEBUG
 #endif
-
 #endif /* EF_CFG_H_ */

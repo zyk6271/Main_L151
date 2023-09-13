@@ -36,7 +36,6 @@ void DetectFactory(void)
     {
         Factory_Init();
     }
-    LOG_I("DetectFactory Flag is %d\r\n",Factory_Flag);
 }
 void Stop_Factory_Cycle(void)
 {

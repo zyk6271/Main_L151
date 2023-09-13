@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2006-2021, RT-Thread Development Team
+ * Copyright (c) 2006-2023, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author       Notes
- * 2021-06-09     RealThread   first version
+ * 2023-09-01     RealThread   first version
  */
 
 #ifndef __BOARD_H__
@@ -243,7 +243,7 @@ extern "C"
  *                 such as     #define HAL_RTC_MODULE_ENABLED
  *
  */
-//#define BSP_USING_ONCHIP_RTC
+/*#define BSP_USING_ONCHIP_RTC*/
 
 /*-------------------------- RTC CONFIG END --------------------------*/
 
@@ -360,7 +360,7 @@ extern "C"
  *
  */
 
-/*#define BSP_USING_ON_CHIP_FLASH*/
+#define BSP_USING_ON_CHIP_FLASH
 
 /*-------------------------- ON_CHIP_FLASH CONFIG END --------------------------*/
 

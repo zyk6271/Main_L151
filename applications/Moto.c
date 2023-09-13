@@ -40,10 +40,9 @@ extern Device_Info Global_Device;
 
 void Moto_InitOpen(uint8_t ActFlag)
 {
-    LOG_I("Moto Open Init Now is is %d , act is %d\r\n",Global_Device.LastFlag,ActFlag);
+    LOG_D("Moto Open Init Now is is %d , act is %d\r\n",Global_Device.LastFlag,ActFlag);
     if((Global_Device.LastFlag == OtherOff && ActFlag == OtherOpen)||(Global_Device.LastFlag != OtherOff))
     {
-        LOG_D("Moto is Open\r\n");
         Now_Status = Open;
         led_Long_Start(1);//绿灯
         ValveStatus=1;
@@ -65,10 +64,8 @@ void Moto_InitOpen(uint8_t ActFlag)
 }
 void Moto_Open(uint8_t ActFlag)
 {
-    LOG_I("Moto Open Now is is %d , act is %d\r\n",Global_Device.LastFlag,ActFlag);
     if((Global_Device.LastFlag == OtherOff && ActFlag == OtherOpen)||(Global_Device.LastFlag != OtherOff))
     {
-        LOG_D("Moto is Open\r\n");
         Now_Status = Open;
         led_Long_Start(1);//绿灯
         ValveStatus=1;
@@ -92,10 +89,8 @@ void Moto_Open(uint8_t ActFlag)
 }
 void Moto_Close(uint8_t ActFlag)
 {
-    LOG_I("Moto Close Now is is %d , act is %d\r\n",Global_Device.LastFlag,ActFlag);
     if(Global_Device.LastFlag != OtherOff )
     {
-        LOG_D("Moto is Close\r\n");
         Now_Status = Close;
         led_Stop(1);//绿灯
         ValveStatus=0;
@@ -229,14 +224,13 @@ void Moto_Init(void)
     if(Flash_Get_SlaveAlarmFlag())
     {
         Warning_Enable_Num(2);
-        LOG_I("Moto is Init Fail,Last is Slaver Alarm\r\n");
+        LOG_W("Moto is Init Fail,Last is Slaver Alarm\r\n");
         return;
     }
     if(Global_Device.LastFlag != OtherOff)
     {
         Moto_InitOpen(NormalOpen);
     }
-    LOG_D("Moto is Init Success,Flag is %d\r\n",Global_Device.LastFlag);
 }
 void Moto_Detect(void)
 {

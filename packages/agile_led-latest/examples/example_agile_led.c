@@ -1,159 +1,136 @@
 #include <agile_led.h>
-#include <drv_gpio.h>
 #include <stdlib.h>
 #ifdef RT_USING_FINSH
 #include <finsh.h>
 #endif
 
-#define LED0_PIN    GET_PIN(C, 6) 
-#define LED1_PIN    GET_PIN(B, 15) 
-#define LED2_PIN    GET_PIN(B, 14) 
+#ifdef RT_USING_HEAP
 
-static agile_led_t *led0 = RT_NULL;
-static agile_led_t *led1 = RT_NULL;
-static agile_led_t *led2 = RT_NULL;
+static agile_led_t *_dled = RT_NULL;
 
-static void led_create(void)
+static void dled_create(int argc, char **argv)
 {
-    if(led0 == RT_NULL)
-    {
-        led0 = agile_led_create(LED0_PIN, PIN_LOW, "100,200", -1);
+    int pin = 0;
+    int active = 0;
+
+    if (argc < 3) {
+        rt_kprintf("dled_create      --use dled_create [pin] [active]\r\n");
+        return;
     }
 
-    if(led1 == RT_NULL)
-    {
-        led1 = agile_led_create(LED1_PIN, PIN_LOW, "200,100", -1);
+    pin = atoi(argv[1]);
+    active = atoi(argv[2]);
+
+    if (_dled) {
+        agile_led_delete(_dled);
+        _dled = RT_NULL;
     }
 
-    if(led2 == RT_NULL)
-    {
-        led2 = agile_led_create(LED2_PIN, PIN_LOW, "100,100", -1);
+    _dled = agile_led_create(pin, active, "100,200", -1);
+}
+
+static void dled_delete(void)
+{
+    if (_dled) {
+        agile_led_delete(_dled);
+        _dled = RT_NULL;
     }
 }
 
-static void led_delete(void)
+static void dled_start(void)
 {
-    if(led0)
-    {
-        agile_led_delete(led0);
-        led0 = RT_NULL;
-    }
-
-    if(led1)
-    {
-        agile_led_delete(led1);
-        led1 = RT_NULL;
-    }
-
-    if(led2)
-    {
-        agile_led_delete(led2);
-        led2 = RT_NULL;
-    }
+    if (_dled)
+        agile_led_start(_dled);
 }
 
-static void led_start(int argc, char**argv)
+static void dled_stop(void)
 {
-    int led_index = 0;
-    agile_led_t *led = RT_NULL;
-    if(argc < 2)
-    {
-        rt_kprintf("led_start      --use led_start (0/1/2)\r\n");
-        return;
-    }
-    led_index = atoi(argv[1]);
-    switch (led_index)
-    {
-    case 0:
-        led = led0;
-        break;
-
-    case 1:
-        led = led1;
-        break;
-
-    case 2:
-        led = led2;
-        break;
-
-    default:
-        break;
-    }
-    if(led == RT_NULL)
-        return;
-    agile_led_start(led);
+    if (_dled)
+        agile_led_stop(_dled);
 }
 
-static void led_stop(int argc, char**argv)
+static void dled_set_mode(int argc, char **argv)
 {
-    int led_index = 0;
-    agile_led_t *led = RT_NULL;
-    if(argc < 2)
-    {
-        rt_kprintf("led_stop      --use led_stop (0/1/2)\r\n");
-        return;
-    }
-    led_index = atoi(argv[1]);
-    switch (led_index)
-    {
-    case 0:
-        led = led0;
-        break;
-
-    case 1:
-        led = led1;
-        break;
-
-    case 2:
-        led = led2;
-        break;
-
-    default:
-        break;
-    }
-    if(led == RT_NULL)
-        return;
-    agile_led_stop(led);
-}
-
-static void led_set_mode(int argc, char**argv)
-{
-    int led_index = 0;
     int loop_cnt = 0;
-    agile_led_t *led = RT_NULL;
-    if(argc < 4)
-    {
-        rt_kprintf("led_set_mode      --use led_set_mode (0/1/2) [mode] [loop_cnt]\r\n");
+
+    if (argc < 3) {
+        rt_kprintf("dled_set_mode      --use dled_set_mode [mode] [loop_cnt]\r\n");
         return;
     }
-    led_index = atoi(argv[1]);
-    loop_cnt = atoi(argv[3]);
-    switch (led_index)
-    {
-    case 0:
-        led = led0;
-        break;
 
-    case 1:
-        led = led1;
-        break;
+    loop_cnt = atoi(argv[2]);
 
-    case 2:
-        led = led2;
-        break;
-
-    default:
-        break;
-    }
-    if(led == RT_NULL)
-        return;
-    agile_led_set_light_mode(led, argv[2], loop_cnt);
+    if (_dled)
+        agile_led_dynamic_change_light_mode(_dled, argv[1], loop_cnt);
 }
 
 #ifdef RT_USING_FINSH
-MSH_CMD_EXPORT(led_create, create led);
-MSH_CMD_EXPORT(led_delete, delete led);
-MSH_CMD_EXPORT(led_start, start led);
-MSH_CMD_EXPORT(led_stop, stop led);
-MSH_CMD_EXPORT(led_set_mode, set led mode);
+MSH_CMD_EXPORT(dled_create, create led);
+MSH_CMD_EXPORT(dled_delete, delete led);
+MSH_CMD_EXPORT(dled_start, start led);
+MSH_CMD_EXPORT(dled_stop, stop led);
+MSH_CMD_EXPORT(dled_set_mode, set led mode);
+#endif
+
+#endif /* RT_USING_HEAP */
+
+static agile_led_t _sled;
+static uint32_t _sled_light_arr[10] = {100, 200};
+
+static void sled_init(int argc, char **argv)
+{
+    int pin = 0;
+    int active = 0;
+
+    if (argc < 3) {
+        rt_kprintf("sled_init      --use sled_init [pin] [active]\r\n");
+        return;
+    }
+
+    pin = atoi(argv[1]);
+    active = atoi(argv[2]);
+
+    agile_led_stop(&_sled);
+
+    agile_led_init(&_sled, pin, active, _sled_light_arr, 2, -1);
+}
+
+static void sled_start(void)
+{
+    agile_led_start(&_sled);
+}
+
+static void sled_stop(void)
+{
+    agile_led_stop(&_sled);
+}
+
+static void sled_set_mode(int argc, char **argv)
+{
+    int loop_cnt = 0;
+    int arr_num = 0;
+
+    if (argc < 3) {
+        rt_kprintf("sled_set_mode      --use sled_set_mode [mode1] [mode2] ... [loop_cnt]\r\n");
+        return;
+    }
+
+    arr_num = argc - 2;
+    if (arr_num > 10)
+        arr_num = 10;
+
+    for (int i = 0; i < arr_num; i++) {
+        _sled_light_arr[i] = atoi(argv[i + 1]);
+    }
+
+    loop_cnt = atoi(argv[argc - 1]);
+
+    agile_led_static_change_light_mode(&_sled, _sled_light_arr, arr_num, loop_cnt);
+}
+
+#ifdef RT_USING_FINSH
+MSH_CMD_EXPORT(sled_init, init led);
+MSH_CMD_EXPORT(sled_start, start led);
+MSH_CMD_EXPORT(sled_stop, stop led);
+MSH_CMD_EXPORT(sled_set_mode, set led mode);
 #endif

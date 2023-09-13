@@ -314,8 +314,6 @@ static rt_uint32_t spixfer(struct rt_spi_device *device, struct rt_spi_message *
         send_buf = (rt_uint8_t *)message->send_buf + already_send_length;
         recv_buf = (rt_uint8_t *)message->recv_buf + already_send_length;
         
-        HAL_SPI_Abort(spi_handle);
-
         /* start once data exchange in DMA mode */
         if (message->send_buf && message->recv_buf)
         {

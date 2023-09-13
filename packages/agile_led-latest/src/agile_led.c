@@ -173,7 +173,7 @@ int agile_led_delete(agile_led_t *led)
 *                   !=RT_OK:异常
 */
 int agile_led_start(agile_led_t *led)
-{ 
+{
     RT_ASSERT(led);
     rt_mutex_take(lock_mtx, RT_WAITING_FOREVER);
     if(led->active)
@@ -260,7 +260,7 @@ int agile_led_set_light_mode(agile_led_t *led, const char *light_mode, int32_t l
 {
     RT_ASSERT(led);
     rt_mutex_take(lock_mtx, RT_WAITING_FOREVER);
-    
+
     if (light_mode)
     {
         if (led->light_arr)

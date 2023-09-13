@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * Copyright (c) 2006-2022, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -12,7 +12,7 @@
  * 2013-06-18   aozima    add restore MSP feature.
  * 2013-07-09   aozima    enhancement hard fault exception handler.
  */
- 
+
     .cpu    cortex-m3
     .fpu    softvfp
     .syntax unified
@@ -22,7 +22,7 @@
     .equ    SCB_VTOR, 0xE000ED08            /* Vector Table Offset Register */
     .equ    ICSR, 0xE000ED04                /* interrupt control state register */
     .equ    PENDSVSET_BIT, 0x10000000       /* value to trigger PendSV exception */
-    
+
     .equ    SHPR3, 0xE000ED20               /* system priority register (3) */
     .equ    PENDSV_PRI_LOWEST, 0xFFFF0000   /* PendSV and SysTick priority value (lowest) */
 
@@ -90,7 +90,7 @@ PendSV_Handler:
     /* get rt_thread_switch_interrupt_flag */
     LDR     R0, =rt_thread_switch_interrupt_flag
     LDR     R1, [R0]
-    CBZ     R1, pendsv_exit         /* pendsv aLReady handled */
+    CBZ     R1, pendsv_exit         /* pendsv already handled */
 
     /* clear rt_thread_switch_interrupt_flag to 0 */
     MOV     R1, #0
@@ -162,6 +162,10 @@ rt_hw_context_switch_to:
     CPSIE   F
     CPSIE   I
 
+    /* ensure PendSV exception taken place before subsequent operation */
+    DSB
+    ISB
+
     /* never reach here! */
 
 /* compatible with old version */
@@ -179,9 +183,6 @@ HardFault_Handler:
     TST     lr, #0x04               /* if(!EXC_RETURN[2]) */
     BEQ     _get_sp_done
     MRS     r0, psp                 /* get fault context from thread. */
-	//MOV     r0, lr                  /* get lr */
-    //MOV     r1, sp                  /* get stack pointer (current is MSP) */
-    //BL      cm_backtrace_fault
 _get_sp_done:
 
     STMFD   r0!, {r4 - r11}         /* push r4 - r11 register */

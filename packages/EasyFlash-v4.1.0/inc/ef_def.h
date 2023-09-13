@@ -34,8 +34,8 @@ extern "C" {
 #endif
 
 /* EasyFlash software version number */
-#define EF_SW_VERSION                  "4.1.0"
-#define EF_SW_VERSION_NUM              0x40100
+#define EF_SW_VERSION                  "4.1.1"
+#define EF_SW_VERSION_NUM              0x40101
 
 /*
  * ENV version number defined by user.

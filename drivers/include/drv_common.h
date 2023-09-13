@@ -14,7 +14,7 @@
 #include <rtthread.h>
 #include <rthw.h>
 #include <board.h>
-#include <stm32l1xx.h>
+#include <stm32l151xba.h>
 
 #ifdef __cplusplus
 extern "C"

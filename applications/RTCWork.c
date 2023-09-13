@@ -125,6 +125,7 @@ void RTC_Init(void)
     RtcHandle.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
     if (HAL_RTC_Init(&RtcHandle) != HAL_OK)
     {
+
     }
     RTC_AlarmConfig();
 }

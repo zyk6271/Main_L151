@@ -4,25 +4,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <spi_flash.h>
-#include <drv_spi.h>
 #include "rthw.h"
 #include "pin_config.h"
-#include "FlashWork.h"
+#include "flashwork.h"
 #include "status.h"
 #include "led.h"
 #include "gateway.h"
+#include <spi_flash.h>
+#include <drv_spi.h>
 
 #define DBG_TAG "flash"
 #define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
-typedef struct _env_list {
-    char *key;
-} env_list;
-
+rt_spi_flash_device_t w25q16;
 Device_Info Global_Device={0};
-rt_spi_flash_device_t fm25q16;
 char read_value_temp[64] = {0};
 
 void flash_Init(void)
@@ -30,8 +26,8 @@ void flash_Init(void)
     rt_err_t status;
     extern rt_spi_flash_device_t rt_sfud_flash_probe(const char *spi_flash_dev_name, const char *spi_dev_name);
     rt_hw_spi_device_attach("spi2", "spi20", GPIOB, GPIO_PIN_12);
-    fm25q16 = rt_sfud_flash_probe("norflash0", "spi20");
-    if (RT_NULL == fm25q16)
+    w25q16 = rt_sfud_flash_probe("norflash0", "spi20");
+    if (RT_NULL == w25q16)
     {
         LOG_E("sfud fail\r\n");
         return;
@@ -43,7 +39,6 @@ void flash_Init(void)
         return;
     };
     LoadDevice2Memory();
-    LOG_I("Storage Init Success\r\n");
 }
 uint8_t Get_LearnNums_Valid(void)
 {
@@ -182,7 +177,7 @@ void Flash_Key_Change(uint32_t key,uint32_t value)
     ef_set_env(Temp_KeyBuf, Temp_ValueBuf);
     rt_free(Temp_KeyBuf);
     rt_free(Temp_ValueBuf);
-    LOG_D("Writing %ld to key %ld \r\n", value,key);
+    LOG_I("Writing %ld to key %ld \r\n", value,key);
 }
 void Flash_LearnNums_Change(uint32_t value)
 {
@@ -552,13 +547,12 @@ uint8_t Update_Device_Rssi(uint32_t Device_ID,int rssi)//更新Rssi
             {
                 Global_Device.Rssi[num] = rssi_temp;
                 Device_RssiChange(Device_ID,Global_Device.Rssi[num]);
-                LOG_I("Device rssi %d is Write to %d",Global_Device.Rssi[num],Global_Device.ID[num]);
+                LOG_D("Device rssi %d is Write to %d",Global_Device.Rssi[num],Global_Device.ID[num]);
             }
             return RT_EOK;
         }
         num--;
     }
-    LOG_E("Device Rssi %d is Increase Fail",Global_Device.ID[num]);
     return RT_ERROR;
 }
 uint8_t Clear_Device_Time(uint32_t Device_ID)//更新时间戳为0
@@ -771,7 +765,7 @@ void LoadDevice2Memory(void)//数据载入到内存中
     Global_Device.DoorNum = Flash_Get_Key_Value(88888888);
     Global_Device.GatewayNum = Flash_Get_Key_Value(88887777);
     Global_Device.LastFlag = Flash_Get_Moto_Flag();
-    LOG_I("Num is %d",Global_Device.Num);
+    LOG_I("Total %d devices in flash",Global_Device.Num);
 }
 void DeleteAllDevice(void)//数据载入到内存中
 {

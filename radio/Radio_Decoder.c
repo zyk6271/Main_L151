@@ -93,6 +93,7 @@ void Stop_Learn(void)
         Gateway_Sync();
     }
 }
+
 void Device_Learn(Message buf)
 {
     if(buf.Command == 3)
@@ -107,7 +108,7 @@ void Device_Learn(Message buf)
                 {
                     if(Add_Device(buf.From_ID)==RT_EOK)
                     {
-                        LOG_I("Slaver Write to Flash With ID %d\r\n",buf.From_ID);
+                        LOG_D("Slaver Write to Flash With ID %d\r\n",buf.From_ID);
                         RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,1);
                     }
                     else
@@ -120,7 +121,7 @@ void Device_Learn(Message buf)
                 {
                     if(Add_DoorDevice(buf.From_ID)==RT_EOK)
                     {
-                        LOG_I("Door Write to Flash With ID %d\r\n",buf.From_ID);
+                        LOG_D("Door Write to Flash With ID %d\r\n",buf.From_ID);
                         RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,1);
                     }
                     else
@@ -133,7 +134,7 @@ void Device_Learn(Message buf)
                 {
                     if(Add_GatewayDevice(buf.From_ID)==RT_EOK)
                     {
-                        LOG_I("Gateway Write to Flash With ID %d\r\n",buf.From_ID);
+                        LOG_D("Gateway Write to Flash With ID %d\r\n",buf.From_ID);
                         RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,1);
                     }
                     else
@@ -146,7 +147,7 @@ void Device_Learn(Message buf)
             else//存在该值
             {
                 RadioEnqueue(0,1,buf.From_ID,buf.Counter,3,1);
-                LOG_I("Include This Device，Send Ack\r\n");
+                LOG_D("Include This Device，Send Ack\r\n");
             }
             break;
         case 2:
@@ -311,7 +312,7 @@ void DataSolve(Message buf)
         }
         break;
     case 8://延迟
-        LOG_I("Delay Open %d From %ld\r\n",buf.Data,buf.From_ID);
+        LOG_D("Delay Open %d From %ld\r\n",buf.Data,buf.From_ID);
         RadioEnqueue(0,1,buf.From_ID,buf.Counter,8,buf.Data);
         if(buf.Data)
         {
@@ -326,7 +327,7 @@ void DataSolve(Message buf)
         }
         break;
     case 9://终端测水线掉落
-        LOG_I("Slave Lost %d From %ld\r\n",buf.Data,buf.From_ID);
+        LOG_D("Slave Lost %d From %ld\r\n",buf.Data,buf.From_ID);
         RadioEnqueue(0,1,buf.From_ID,buf.Counter,9,buf.Data);
         WarUpload_GW(1,buf.From_ID,9,buf.Data);
         break;
@@ -377,18 +378,18 @@ void GatewayDataSolve(int rssi,uint8_t *rx_buffer,uint8_t rx_len)
                 }
                 break;
             case 3://心跳应答
-                LOG_I("Heart Reponse\r\n");
+                LOG_D("Heart Reponse\r\n");
                 ControlUpload_GW(1,0,4,ValveStatus);
                 break;
             case 4://请求同步
-                LOG_I("Request Sync\r\n");
+                LOG_D("Request Sync\r\n");
                 Gateway_Sync();
                 break;
             case 5://请求同步
-                LOG_I("Ack Reponse\r\n");
+                LOG_D("Ack Reponse\r\n");
                 break;
             case 6://删除指定设备
-                LOG_I("Delete Device %ld\r\n",Rx_message.Device_ID);
+                LOG_D("Delete Device %ld\r\n",Rx_message.Device_ID);
                 Delete_Device(Rx_message.Device_ID);
                 break;
             case 7://应答

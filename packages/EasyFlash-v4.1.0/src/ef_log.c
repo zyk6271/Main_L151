@@ -411,6 +411,23 @@ size_t ef_log_get_used_size(void) {
 }
 
 /**
+ * Get log flash total size.
+ *
+ * @return log flash total size. @note NOT contain sector headers
+ */
+size_t ef_log_get_total_size(void) {
+    size_t header_total_num = 0;
+    /* must be call this function after initialize OK */
+    if (!init_ok) {
+        return 0;
+    }
+
+    header_total_num = LOG_AREA_SIZE / EF_ERASE_MIN_SIZE;
+
+    return LOG_AREA_SIZE - header_total_num * LOG_SECTOR_HEADER_SIZE;
+}
+
+/**
  * Sequential reading log data. It will ignore sector headers.
  *
  * @param addr address
@@ -463,8 +480,7 @@ static uint32_t log_index2addr(size_t index) {
         if (log_start_addr + index + header_total_offset < log_area_start_addr + LOG_AREA_SIZE) {
             return log_start_addr + index + header_total_offset;
         } else {
-            return log_start_addr + index + header_total_offset - LOG_AREA_SIZE;
-
+            return (log_start_addr + index + header_total_offset) % LOG_AREA_SIZE;
         }
     }
 }
@@ -490,8 +506,14 @@ EfErrCode ef_log_read(size_t index, uint32_t *log, size_t size) {
         return result;
     }
 
-    EF_ASSERT(size % 4 == 0);
-    EF_ASSERT(index < cur_using_size);
+    if (size % 4 != 0) {
+        EF_DEBUG("Error: size must be word aligned.");
+        return EF_READ_ERR;
+    }
+    if (index >= cur_using_size) {
+        EF_DEBUG("Error: index out of ranges, current using size is %d", cur_using_size);
+        return EF_READ_ERR;
+    }
 
     if (index + size > cur_using_size) {
         EF_DEBUG("Warning: Log read size out of bound. Cut read size.\n");

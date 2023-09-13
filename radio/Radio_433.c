@@ -187,5 +187,4 @@ void RF_Init(void)
     rt_thread_startup(rf_433_task);
     rf_433_driver_init();
     RadioQueue_Init();
-    ring_once();
 }
