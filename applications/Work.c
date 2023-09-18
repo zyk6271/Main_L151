@@ -52,13 +52,16 @@ void WarningWithPeak(uint8_t status)
             break;
         case 1: //测水线掉落
             Warning_Enable_Num(3);
-            LOG_D("MasterLostPeakWarning\r\n");
             break;
         case 2: //测水线短路
             Warning_Enable_Num(4);
             break;
         case 3: //测水线短路解除
             MasterStatusChangeToDeAvtive();
+            break;
+        case 4: //测水线短路插入
+            loss_led_stop();
+            Warning_Enable_Num(4);
             break;
         }
     }
@@ -159,11 +162,11 @@ void waterscan_timer_callback(void *parameter)
         }
         else if (WarningPastStatus == 1 && WarningNowStatus == 2)
         {
-            if (WarningStatus != 1 << 3)
+            if (WarningStatus != 1 << 5)
             {
-                WarningWithPeak(2);
+                WarningWithPeak(4);
                 WarningPastStatus = WarningNowStatus;
-                WarningStatus = 1 << 3;
+                WarningStatus = 1 << 5;
             }
         }
     }
