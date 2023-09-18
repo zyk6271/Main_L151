@@ -190,7 +190,7 @@ rt_uint8_t Get_Button_State(Button_t *btn)
   * @version v1.0
   * @note    This function must be called in a certain period. The recommended period is 20~50ms.
   ***********************************************************/
-uint8_t LongFlag=0;
+
 void Button_Cycle_Process(Button_t *btn)
 {
   /* Get the current button level */

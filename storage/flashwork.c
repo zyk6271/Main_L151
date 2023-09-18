@@ -39,6 +39,7 @@ void flash_Init(void)
         return;
     };
     LoadDevice2Memory();
+    LOG_I("Storage Init Success\r\n");
 }
 uint8_t Get_LearnNums_Valid(void)
 {
@@ -153,7 +154,7 @@ uint32_t Flash_Get_Key_Value(uint32_t key)
     uint8_t read_len = 0;
     uint32_t read_value = 0;
     char *keybuf = rt_malloc(64);
-    sprintf(keybuf, "%ld", key);//将传入的数字转换成数组
+    rt_sprintf(keybuf, "%ld", key);//将传入的数字转换成数组
     memset(read_value_temp,0,64);
     read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
     if(read_len>0)
@@ -171,19 +172,19 @@ uint32_t Flash_Get_Key_Value(uint32_t key)
 void Flash_Key_Change(uint32_t key,uint32_t value)
 {
     char *Temp_KeyBuf = rt_malloc(64);
-    sprintf(Temp_KeyBuf, "%ld", key);
+    rt_sprintf(Temp_KeyBuf, "%ld", key);
     char *Temp_ValueBuf = rt_malloc(64);//申请临时buffer空间
-    sprintf(Temp_ValueBuf, "%ld", value);
+    rt_sprintf(Temp_ValueBuf, "%ld", value);
     ef_set_env(Temp_KeyBuf, Temp_ValueBuf);
     rt_free(Temp_KeyBuf);
     rt_free(Temp_ValueBuf);
-    LOG_I("Writing %ld to key %ld \r\n", value,key);
+    LOG_D("Writing %ld to key %ld \r\n", value,key);
 }
 void Flash_LearnNums_Change(uint32_t value)
 {
     const char *keybuf="Learn_Nums";
     char *Temp_ValueBuf = rt_malloc(64);
-    sprintf(Temp_ValueBuf, "%ld", value);
+    rt_sprintf(Temp_ValueBuf, "%ld", value);
     ef_set_env(keybuf, Temp_ValueBuf);
     rt_free(Temp_ValueBuf);
     LOG_D("Writing %ld to key %s\r\n", value,keybuf);
@@ -192,7 +193,7 @@ void Flash_Moto_Change(uint8_t value)
 {
     const char *keybuf="Moto";
     char *Temp_ValueBuf = rt_malloc(64);
-    sprintf(Temp_ValueBuf, "%d", value);
+    rt_sprintf(Temp_ValueBuf, "%d", value);
     ef_set_env(keybuf, Temp_ValueBuf);
     rt_free(Temp_ValueBuf);
     LOG_D("Writing %ld to key %s\r\n", value,keybuf);
@@ -202,7 +203,7 @@ uint8_t Device_RssiGet(uint32_t Device_ID)
     uint8_t read_len = 0;
     uint32_t read_value = 0;
     char *keybuf = rt_malloc(64);
-    sprintf(keybuf, "Rssi:%ld", Device_ID);//将传入的数字转换成数组
+    rt_sprintf(keybuf, "Rssi:%ld", Device_ID);//将传入的数字转换成数组
     memset(read_value_temp,0,64);
     read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
     if(read_len>0)
@@ -221,8 +222,8 @@ void Device_RssiChange(uint32_t Device_ID,uint8_t value)
 {
     char *Temp_KeyBuf = rt_malloc(64);
     char *Temp_ValueBuf = rt_malloc(64);
-    sprintf(Temp_KeyBuf, "Rssi:%ld", Device_ID);
-    sprintf(Temp_ValueBuf, "%d", value);
+    rt_sprintf(Temp_KeyBuf, "Rssi:%ld", Device_ID);
+    rt_sprintf(Temp_ValueBuf, "%d", value);
     ef_set_env(Temp_KeyBuf, Temp_ValueBuf);
     rt_free(Temp_KeyBuf);
     rt_free(Temp_ValueBuf);
@@ -273,7 +274,7 @@ uint8_t Flash_AliveGet(uint32_t Device_ID)
     uint8_t read_len = 0;
     uint32_t read_value = 0;
     char *keybuf = rt_malloc(64);
-    sprintf(keybuf, "alive:%ld", Device_ID);//将传入的数字转换成数组
+    rt_sprintf(keybuf, "alive:%ld", Device_ID);//将传入的数字转换成数组
     memset(read_value_temp,0,64);
     read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
     if(read_len>0)
@@ -292,8 +293,8 @@ void Device_SlaveAlarmChange(uint32_t Device_ID,uint8_t value)
 {
     char *Temp_KeyBuf = rt_malloc(64);
     char *Temp_ValueBuf = rt_malloc(64);
-    sprintf(Temp_KeyBuf, "SlaveAlarm:%ld", Device_ID);
-    sprintf(Temp_ValueBuf, "%d", value);
+    rt_sprintf(Temp_KeyBuf, "SlaveAlarm:%ld", Device_ID);
+    rt_sprintf(Temp_ValueBuf, "%d", value);
     ef_set_env(Temp_KeyBuf, Temp_ValueBuf);
     rt_free(Temp_KeyBuf);
     rt_free(Temp_ValueBuf);
@@ -304,7 +305,7 @@ uint8_t Flash_Get_SlaveAlarm(uint32_t Device_ID)
     uint8_t read_len = 0;
     uint32_t read_value = 0;
     char *keybuf = rt_malloc(64);
-    sprintf(keybuf, "SlaveAlarm:%ld", Device_ID);//将传入的数字转换成数组
+    rt_sprintf(keybuf, "SlaveAlarm:%ld", Device_ID);//将传入的数字转换成数组
     memset(read_value_temp,0,64);
     read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
     if(read_len>0)
@@ -323,8 +324,8 @@ void Flash_AliveChange(uint32_t Device_ID,uint8_t value)
 {
     char *Temp_KeyBuf = rt_malloc(64);
     char *Temp_ValueBuf = rt_malloc(64);
-    sprintf(Temp_KeyBuf, "alive:%ld", Device_ID);
-    sprintf(Temp_ValueBuf, "%d", value);
+    rt_sprintf(Temp_KeyBuf, "alive:%ld", Device_ID);
+    rt_sprintf(Temp_ValueBuf, "%d", value);
     ef_set_env(Temp_KeyBuf, Temp_ValueBuf);
     rt_free(Temp_KeyBuf);
     rt_free(Temp_ValueBuf);
@@ -335,7 +336,7 @@ uint8_t Device_BatGet(uint32_t Device_ID)
     uint8_t read_len = 0;
     uint32_t read_value = 0;
     char *keybuf = rt_malloc(64);
-    sprintf(keybuf, "Bat:%ld", Device_ID);//将传入的数字转换成数组
+    rt_sprintf(keybuf, "Bat:%ld", Device_ID);//将传入的数字转换成数组
     memset(read_value_temp,0,64);
     read_len = ef_get_env_blob(keybuf, read_value_temp, 64, NULL);
     if(read_len>0)
@@ -354,8 +355,8 @@ void Device_BatChange(uint32_t Device_ID,uint8_t value)
 {
     char *Temp_KeyBuf = rt_malloc(64);
     char *Temp_ValueBuf = rt_malloc(64);
-    sprintf(Temp_KeyBuf, "Bat:%ld", Device_ID);
-    sprintf(Temp_ValueBuf, "%d", value);
+    rt_sprintf(Temp_KeyBuf, "Bat:%ld", Device_ID);
+    rt_sprintf(Temp_ValueBuf, "%d", value);
     ef_set_env(Temp_KeyBuf, Temp_ValueBuf);
     rt_free(Temp_KeyBuf);
     rt_free(Temp_ValueBuf);
@@ -446,7 +447,6 @@ uint32_t GetDoorID(void)
     }
     else
     {
-        LOG_D("Not Include Door Device ID\r\n");
         return 0;
     }
 }
@@ -476,7 +476,6 @@ uint32_t GetGatewayID(void)
     }
     else
     {
-        LOG_D("Not Include Gateway Device ID\r\n");
         return 0;
     }
 }

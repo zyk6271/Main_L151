@@ -231,6 +231,7 @@ void Moto_Init(void)
     {
         Moto_InitOpen(NormalOpen);
     }
+    LOG_D("Moto is Init Success,Flag is %d\r\n",Global_Device.LastFlag);
 }
 void Moto_Detect(void)
 {

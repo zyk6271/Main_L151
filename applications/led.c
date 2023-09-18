@@ -103,16 +103,17 @@ void wifi_led(uint8_t num)
         agile_led_set_light_mode(wifi_R, "200,0", -1);
         agile_led_start(wifi_R);
         break;
-    case 3://正在通讯
-        agile_led_stop(wifi_G);
-        agile_led_set_light_mode(wifi_G, "50,50", 1);
-        if(Gateway_ID)
-        {
-            agile_led_set_compelete_callback(wifi_G,wifi_G_resume_callback);
-        }
-        agile_led_start(wifi_G);
-        break;
     }
+}
+void wifi_communication_blink(void)
+{
+    agile_led_stop(wifi_G);
+    agile_led_set_light_mode(wifi_G, "50,50", 1);
+    if(Gateway_ID)
+    {
+        agile_led_set_compelete_callback(wifi_G,wifi_G_resume_callback);
+    }
+    agile_led_start(wifi_G);
 }
 void beep_start(uint8_t led_id,int mode)
 {

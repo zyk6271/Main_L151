@@ -159,15 +159,7 @@ uint8_t Read_K1_Level(void)
         return rt_pin_read(K1);
     }
 }
-void Detect_KO_K1(void)
-{
-    if (K1_Long_Sem_Counter > 5 && K0_Long_Sem_Counter > 5)
-    {
-        K0_OnceFlag = 1;
-        K1_OnceFlag = 1;
-        k0_K1_LongSem_Release();
-    }
-}
+
 void RF_Switch_Pin_Init(void)
 {
     ANT_SW_Status = rt_pin_read(ANT_SW);

@@ -19,9 +19,10 @@
 
 uint8_t Factory_Flag;
 rt_timer_t Factory_Cycle = RT_NULL;
+
 void Factory_Cycle_Callback(void *parameter)
 {
-    RadioEnqueue(0,1,98989898,1,9,0);
+    RadioEnqueue(98989898,1,9,0);
 }
 void Factory_Init(void)
 {

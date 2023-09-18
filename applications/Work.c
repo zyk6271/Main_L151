@@ -157,6 +157,15 @@ void waterscan_timer_callback(void *parameter)
                 WarningStatus = 1 << 4;
             }
         }
+        else if (WarningPastStatus == 1 && WarningNowStatus == 2)
+        {
+            if (WarningStatus != 1 << 3)
+            {
+                WarningWithPeak(2);
+                WarningPastStatus = WarningNowStatus;
+                WarningStatus = 1 << 3;
+            }
+        }
     }
 }
 void WaterScan_IO_Init(void)

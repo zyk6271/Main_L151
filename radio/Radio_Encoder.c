@@ -10,210 +10,180 @@
 #include <rtthread.h>
 #include <rtdevice.h>
 #include <stdio.h>
-#include <string.h>
-#include "led.h"
-#include "drv_spi.h"
+#include "radio_encoder.h"
 #include "AX5043.h"
-#include "Radio_Encoder.h"
-#include "flashwork.h"
 
-#define DBG_TAG "radio_encoder"
-#define DBG_LVL DBG_INFO
+#define DBG_TAG "RADIO_ENCODER"
+#define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
-rt_thread_t Radio_QueueTask = RT_NULL;
-rt_timer_t AckCheck_t = RT_NULL;
-Radio_Queue Main_Queue={0};
+static rt_mq_t rf_en_mq;
+static struct rt_completion rf_ack;
+rt_thread_t rf_encode_t = RT_NULL;
+
+uint32_t RadioID = 0;
+uint32_t Self_Default_Id = 10000000;
 
 extern uint32_t Gateway_ID;
-uint32_t Self_Id = 0;
-uint32_t Self_Default_Id = 10000000;
-uint32_t Self_Counter = 0;
-
 extern struct ax5043 rf_433;
 
-void RadioSend(uint32_t Taget_Id,uint8_t counter,uint8_t Command,uint8_t Data)
+char radio_send_buf[255];
+
+void RadioEnqueue(uint32_t Taget_Id, uint8_t Counter, uint8_t Command, uint8_t Data)
 {
-    char *buf = rt_malloc(64);
-    uint8_t check = 0;
-    if(counter<255)counter++;
-    else counter=0;
+    Radio_Normal_Format Send_Buf = {0};
 
-    sprintf(buf,"{%08ld,%08ld,%03d,%02d,%d}",Taget_Id,Self_Id,counter,Command,Data);
+    Send_Buf.Type = 0;
+    Send_Buf.Ack = 0;
+    Send_Buf.Taget_ID = Taget_Id;
+    Send_Buf.Counter = Counter;
+    Send_Buf.Command = Command;
+    Send_Buf.Data = Data;
 
-    for(uint8_t i = 0 ; i < 28 ; i ++)
+    rt_mq_send(rf_en_mq, &Send_Buf, sizeof(Radio_Normal_Format));
+}
+
+void GatewaySyncEnqueue(uint8_t ack,uint8_t command,uint32_t device_id,uint8_t rssi,uint8_t bat)
+{
+    Radio_Normal_Format Send_Buf = {0};
+
+    if(Gateway_ID != 0)
     {
-        check += buf[i];
+        Send_Buf.Type = 1;
+        Send_Buf.Ack = ack;
+        Send_Buf.Command = command;
+        Send_Buf.Payload_ID = device_id;
+        Send_Buf.Rssi = rssi;
+        Send_Buf.Data = bat;
+
+        rt_mq_send(rf_en_mq, &Send_Buf, sizeof(Radio_Normal_Format));
     }
-    buf[28] = ((check>>4) < 10)?  (check>>4) + '0' : (check>>4) - 10 + 'A';
-    buf[29] = ((check&0xf) < 10)?  (check&0xf) + '0' : (check&0xf) - 10 + 'A';
-    buf[30] = '\r';
-    buf[31] = '\n';
-    RF_Send(&rf_433,buf,32);
-    rt_free(buf);
 }
 
-void GatewaySyncEnqueue(uint8_t ack,uint8_t type,uint32_t device_id,uint8_t rssi,uint8_t bat)
-{
-    if(Gateway_ID==0)return;
-    RadioEnqueue(ack,2,device_id,type,rssi,bat);
-}
-void GatewaySyncSend(uint8_t ack,uint8_t type,uint32_t device_id,uint8_t rssi,uint8_t bat)
-{
-    char *buf = rt_malloc(64);
-    sprintf(buf,"A{%02d,%02d,%08ld,%08ld,%08ld,%03d,%02d}A",ack,type,Gateway_ID,Self_Id,device_id,rssi,bat);
-    RF_Send(&rf_433,buf,43);
-    rt_free(buf);
-}
 void GatewayWarningEnqueue(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t warn_id,uint8_t value)
 {
-    if(Gateway_ID==0)return;
-    RadioEnqueue(ack,3,device_id,rssi,warn_id,value);
+    Radio_Normal_Format Send_Buf = {0};
+    if(Gateway_ID != 0)
+    {
+        Send_Buf.Type = 2;
+        Send_Buf.Ack = ack;
+        Send_Buf.Payload_ID = device_id;
+        Send_Buf.Rssi = rssi;
+        Send_Buf.Command = warn_id;
+        Send_Buf.Data = value;
+
+        rt_mq_send(rf_en_mq, &Send_Buf, sizeof(Radio_Normal_Format));
+    }
 }
-void GatewayWarningSend(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t warn_id,uint8_t value)
-{
-    char *buf = rt_malloc(64);
-    sprintf(buf,"B{%02d,%08ld,%08ld,%08ld,%03d,%03d,%02d}B",ack,Gateway_ID,Self_Id,device_id,rssi,warn_id,value);
-    RF_Send(&rf_433,buf,44);
-    rt_free(buf);
-}
+
 void GatewayControlEnqueue(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t control,uint8_t value)
 {
-    if(Gateway_ID==0)return;
-    RadioEnqueue(ack,4,device_id,rssi,control,value);
-}
-void GatewayControlSend(uint8_t ack,uint32_t device_id,uint8_t rssi,uint8_t control,uint8_t value)
-{
-    char *buf = rt_malloc(64);
-    sprintf(buf,"C{%02d,%08ld,%08ld,%08ld,%03d,%03d,%02d}C",ack,Gateway_ID,Self_Id,device_id,rssi,control,value);
-    RF_Send(&rf_433,buf,44);
-    rt_free(buf);
-}
-void RadioEnqueue(uint8_t ack,uint32_t type,uint32_t Taget_Id,uint8_t counter,uint8_t Command,uint8_t Data)
-{
-    uint8_t NumTemp = Main_Queue.TargetNum;
-    if(NumTemp<20)
+    Radio_Normal_Format Send_Buf = {0};
+    if(Gateway_ID != 0)
     {
-        NumTemp ++;
-        LOG_D("Queue Num Increase,Value is %d\r\n",NumTemp);
+        Send_Buf.Type = 3;
+        Send_Buf.Ack = ack;
+        Send_Buf.Payload_ID = device_id;
+        Send_Buf.Rssi = rssi;
+        Send_Buf.Command = control;
+        Send_Buf.Data = value;
+
+        rt_mq_send(rf_en_mq, &Send_Buf, sizeof(Radio_Normal_Format));
     }
-    else
-    {
-        LOG_E("Queue is Full,Value is %d\r\n",NumTemp);
-        return;
-    }
-    Main_Queue.ack[NumTemp] = ack;
-    Main_Queue.type[NumTemp] = type;
-    Main_Queue.Taget_Id[NumTemp] = Taget_Id;
-    Main_Queue.counter[NumTemp] = counter;
-    Main_Queue.Command[NumTemp] = Command;
-    Main_Queue.Data[NumTemp] = Data;
-    Main_Queue.TargetNum++;
-    LOG_D("Enqueue Success\r\n");
 }
-void RadioDequeue(void *paramaeter)
+
+void SendPrepare(Radio_Normal_Format Send)
 {
-    while(1)
+    rt_memset(radio_send_buf, 0, sizeof(radio_send_buf));
+    uint8_t check = 0;
+    switch(Send.Type)
     {
-        if(Main_Queue.NowNum == Main_Queue.TargetNum)
+    case 0:
+        Send.Counter++ <= 255 ? Send.Counter : 0;
+        rt_sprintf(radio_send_buf, "{%08ld,%08ld,%03d,%02d,%d}", Send.Taget_ID, RadioID, Send.Counter, Send.Command, Send.Data);
+        for (uint8_t i = 0; i < 28; i++)
         {
-            Main_Queue.NowNum = 0;
-            Main_Queue.TargetNum = 0;
-            Main_Queue.SendNum = 0;
+            check += radio_send_buf[i];
         }
-        if(Main_Queue.TargetNum>Main_Queue.NowNum)
+        radio_send_buf[28] = ((check >> 4) < 10) ? (check >> 4) + '0' : (check >> 4) - 10 + 'A';
+        radio_send_buf[29] = ((check & 0xf) < 10) ? (check & 0xf) + '0' : (check & 0xf) - 10 + 'A';
+        radio_send_buf[30] = '\r';
+        radio_send_buf[31] = '\n';
+        break;
+    case 1://Sync
+        rt_sprintf(radio_send_buf,"A{%02d,%02d,%08ld,%08ld,%08ld,%03d,%02d}A",Send.Ack,Send.Command,Gateway_ID,RadioID,Send.Payload_ID,Send.Rssi,Send.Data);
+        wifi_communication_blink();
+        break;
+    case 2://Warn
+        rt_sprintf(radio_send_buf,"B{%02d,%08ld,%08ld,%08ld,%03d,%03d,%02d}B",Send.Ack,Gateway_ID,RadioID,Send.Payload_ID,Send.Rssi,Send.Command,Send.Data);
+        wifi_communication_blink();
+        break;
+    case 3://Control
+        rt_sprintf(radio_send_buf,"C{%02d,%08ld,%08ld,%08ld,%03d,%03d,%02d}C",Send.Ack,Gateway_ID,RadioID,Send.Payload_ID,Send.Rssi,Send.Command,Send.Data);
+        wifi_communication_blink();
+        break;
+    }
+}
+
+void ack_refresh(void)
+{
+    LOG_I("ack_refresh\r\n");
+    rt_completion_done(&rf_ack);
+}
+
+void rf_encode_entry(void *paramaeter)
+{
+    Radio_Normal_Format Send_Data;
+    while (1)
+    {
+        if (rt_mq_recv(rf_en_mq,&Send_Data, sizeof(Radio_Normal_Format), RT_WAITING_FOREVER) == RT_EOK)
         {
-            if(Main_Queue.ack[Main_Queue.NowNum+1]==1)
+            rt_completion_init(&rf_ack);
+            SendPrepare(Send_Data);
+            LOG_D("RF_Send to:%d,command:%d,data:%d\r\n",Send_Data.Taget_ID,Send_Data.Command,Send_Data.Data);
+            RF_Send(&rf_433,radio_send_buf, rt_strlen(radio_send_buf));
+            if(Send_Data.Ack)
             {
-                if(Main_Queue.trials[Main_Queue.NowNum+1]==0)
+                for(uint8_t i = 0; i < 3; i++)
                 {
-                    Main_Queue.SendNum = Main_Queue.NowNum+1;
-                    Main_Queue.trials[Main_Queue.NowNum+1]=1;
-                    LOG_D("Ack First try\r\n");
-                }
-                else if(Main_Queue.trials[Main_Queue.NowNum+1]>0 && Main_Queue.trials[Main_Queue.NowNum+1]<=3)
-                {
-                    if(AckCheck(Gateway_ID)==0)
+                    LOG_D("RF_Send retry num %d\r\n",i);
+                    if(rt_completion_wait(&rf_ack, 500) != RT_EOK)
                     {
-                        if(Main_Queue.trials[Main_Queue.NowNum+1]==3)
-                        {
-                            Main_Queue.trials[Main_Queue.NowNum+1]=0;
-                            Main_Queue.NowNum++;
-                            Main_Queue.SendNum = Main_Queue.NowNum;
-                            LOG_D("Ack Retry Stop\r\n");
-                            continue;
-                        }
-                        else if(Main_Queue.trials[Main_Queue.NowNum+1]<3)
-                        {
-                            ChangeMaxPower(&rf_433);
-                            Main_Queue.SendNum = Main_Queue.NowNum+1;
-                            Main_Queue.trials[Main_Queue.NowNum+1]++;
-                            LOG_D("Ack Retry again\r\n");
-                        }
+                        RF_Send(&rf_433,radio_send_buf, rt_strlen(radio_send_buf));
                     }
                     else
                     {
-                        Main_Queue.trials[Main_Queue.NowNum+1]=0;
-                        Main_Queue.NowNum++;
-                        Main_Queue.SendNum = Main_Queue.NowNum;
-                        LOG_D("Ack Ok\r\n");
-                        continue;
+                        break;
                     }
                 }
             }
             else
             {
-                Main_Queue.NowNum++;
-                Main_Queue.SendNum = Main_Queue.NowNum;
-                LOG_D("No Ack Send\r\n");
+                rt_thread_mdelay(500);
             }
-            AckClear(Gateway_ID);
-            switch(Main_Queue.type[Main_Queue.SendNum])
-            {
-            case 1:
-                RadioSend(Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                LOG_D("Normal Send With Now Num %d,Target Num is %d,Target_Id %ld,counter %d,command %d,data %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                rt_thread_mdelay(100);
-                break;
-            case 2:
-                rt_thread_mdelay(200);
-                GatewaySyncSend(Main_Queue.ack[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                LOG_D("GatewaySync With Now Num %d,Target Num is %d,Type is %d,Target_Id %ld,rssi %d,bat %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Main_Queue.counter[Main_Queue.SendNum],Gateway_ID,Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                rt_thread_mdelay(300);
-                wifi_led(3);
-                break;
-            case 3:
-                rt_thread_mdelay(200);
-                GatewayWarningSend(Main_Queue.ack[Main_Queue.SendNum],Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                LOG_D("GatewayWarningSend With Now Num %d,Target Num is %d,Target_Id %ld,Rssi is %d,warn_id %d,value %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Gateway_ID,Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                rt_thread_mdelay(300);
-                wifi_led(3);
-                break;
-            case 4:
-                rt_thread_mdelay(200);
-                GatewayControlSend(Main_Queue.ack[Main_Queue.SendNum],Main_Queue.Taget_Id[Main_Queue.SendNum],Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                LOG_D("GatewayControl With Now Num %d,Target Num is %d,Target_Id %ld,Rssi is %d,control %d,value %d\r\n",Main_Queue.SendNum,Main_Queue.TargetNum,Gateway_ID,Main_Queue.counter[Main_Queue.SendNum],Main_Queue.Command[Main_Queue.SendNum],Main_Queue.Data[Main_Queue.SendNum]);
-                rt_thread_mdelay(300);
-                wifi_led(3);
-                break;
-            default:break;
-            }
-            BackNormalPower(&rf_433);
         }
-        rt_thread_mdelay(50);
     }
 }
 
+void Print_RadioID(void)
+{
+    LOG_I("Radio ID is %d\r\n", RadioID);
+}
+MSH_CMD_EXPORT(Print_RadioID,Print_RadioID);
+
 void RadioQueue_Init(void)
 {
-    int *p;
-    p=(int *)(0x0801FFF0);//这就是已知的地址，要强制类型转换
-    Self_Id = *p;//从Flash加载ID
-    if(Self_Id ==0xFFFFFFFF || Self_Id==0)
+    RadioID = *((int *)(0x0801FFF0));//这就是已知的地址，要强制类型转换
+    if (RadioID == 0xFFFFFFFF || RadioID == 0)
     {
-        Self_Id = Self_Default_Id;
+        RadioID = Self_Default_Id;
     }
-    LOG_I("Device RF ID is %ld\r\n",Self_Id);
-    Radio_QueueTask = rt_thread_create("Radio_QueueTask", RadioDequeue, RT_NULL, 1024, 10, 10);
-    if(Radio_QueueTask)rt_thread_startup(Radio_QueueTask);
+    Print_RadioID();
+
+    rf_en_mq = rt_mq_create("rf_en_mq", sizeof(Radio_Normal_Format), 10, RT_IPC_FLAG_PRIO);
+    rf_encode_t = rt_thread_create("radio_send", rf_encode_entry, RT_NULL, 1024, 9, 10);
+    if (rf_encode_t)
+    {
+        rt_thread_startup(rf_encode_t);
+    }
 }
