@@ -23,8 +23,6 @@
 #define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
-extern uint8_t ValveStatus;
-
 uint8_t WarningNowStatus = 0;
 uint8_t WarningPastStatus = 0;
 uint8_t WarningStatus = 0;

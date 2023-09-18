@@ -701,50 +701,6 @@ void Offline_React(uint32_t ID)
     }
     LOG_D("Detect_All_Time OK\r\n");
 }
-uint8_t AckCheck(uint32_t device)
-{
-    uint16_t num = Global_Device.Num;
-    if(!num)return 0;
-    while(num)
-    {
-        if(Global_Device.ID[num]==device)
-        {
-            return Global_Device.Reponse[num];
-        }
-        num--;
-    }
-    return 0;
-}
-void AckClear(uint32_t device)
-{
-    uint16_t num = Global_Device.Num;
-    if(!num)return;
-    while(num)
-    {
-        if(Global_Device.ID[num]==device)
-        {
-            Global_Device.Reponse[num] = 0;
-            return;
-        }
-        num--;
-    }
-    return;
-}
-void AckSet(uint32_t device)
-{
-    uint16_t num = Global_Device.Num;
-    if(!num)return;
-    while(num)
-    {
-        if(Global_Device.ID[num]==device)
-        {
-            Global_Device.Reponse[num] = 1;
-            return;
-        }
-        num--;
-    }
-    return;
-}
 void LoadDevice2Memory(void)//数据载入到内存中
 {
     memset(&Global_Device,0,sizeof(Global_Device));

@@ -26,7 +26,6 @@
 
 enum Device_Status Now_Status=Close;
 extern uint8_t ValveStatus;
-extern uint32_t RadioID;
 
 WariningEvent NowStatusEvent;
 WariningEvent SlaverLowPowerEvent;

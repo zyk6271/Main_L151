@@ -393,7 +393,6 @@ void GatewayDataSolve(int rssi,uint8_t *rx_buffer,uint8_t rx_len)
                 Delete_Device(Rx_message.Device_ID);
                 break;
             case 7://应答
-                AckSet(Rx_message.From_ID);
                 break;
             }
         }

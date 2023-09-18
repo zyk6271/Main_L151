@@ -10,7 +10,6 @@ typedef struct
     uint32_t Num;
     uint32_t DoorNum;
     uint32_t GatewayNum;
-    uint8_t  Reponse[20];
     uint8_t  Bat[20];
     uint8_t  Rssi[20];
     uint8_t  SlaveAlarm[20];

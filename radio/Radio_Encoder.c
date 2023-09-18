@@ -147,7 +147,7 @@ void rf_encode_entry(void *paramaeter)
                 for(uint8_t i = 0; i < 3; i++)
                 {
                     LOG_D("RF_Send retry num %d\r\n",i);
-                    if(rt_completion_wait(&rf_ack, 500) != RT_EOK)
+                    if(rt_completion_wait(&rf_ack, 400) != RT_EOK)
                     {
                         RF_Send(&rf_433,radio_send_buf, rt_strlen(radio_send_buf));
                     }
@@ -159,7 +159,7 @@ void rf_encode_entry(void *paramaeter)
             }
             else
             {
-                rt_thread_mdelay(500);
+                rt_thread_mdelay(400);
             }
         }
     }
