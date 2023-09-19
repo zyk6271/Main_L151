@@ -105,9 +105,6 @@ void rf_433_task_callback(void *parameter)
         result = rt_sem_take(IRQ1_Sem, RT_WAITING_FOREVER);
         if (result == RT_EOK)
         {
-            uint32_t irq_req = SpiReadSingleAddressRegister(&rf_433,REG_AX5043_IRQREQUEST1)<<8 | SpiReadSingleAddressRegister(&rf_433,REG_AX5043_IRQREQUEST0);
-            uint32_t irq_msk = SpiReadSingleAddressRegister(&rf_433,REG_AX5043_IRQMASK1)<<8 | SpiReadSingleAddressRegister(&rf_433,REG_AX5043_IRQMASK0);
-            LOG_D("irq_req is %04X,irq_msk is %04X\r\n",irq_req,irq_msk);
             switch (rf_433.ubRFState)
             {
             case trxstate_rx: //0x01
