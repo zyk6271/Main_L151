@@ -18,7 +18,9 @@
 #include <rtdbg.h>
 
 static rt_mq_t rf_en_mq;
-static struct rt_completion rf_ack;
+static struct rt_completion rf_ack_sem;
+static struct rt_completion rf_txdone_sem;
+
 rt_thread_t rf_encode_t = RT_NULL;
 
 uint32_t RadioID = 0;
@@ -129,9 +131,14 @@ void SendPrepare(Radio_Normal_Format Send)
     }
 }
 
-void ack_refresh(void)
+void rf_recvack_callback(void)
 {
-    rt_completion_done(&rf_ack);
+    rt_completion_done(&rf_ack_sem);
+}
+
+void rf_txdone_callback(void)
+{
+    rt_completion_done(&rf_txdone_sem);
 }
 
 void rf_encode_entry(void *paramaeter)
@@ -141,28 +148,50 @@ void rf_encode_entry(void *paramaeter)
     {
         if (rt_mq_recv(rf_en_mq,&Send_Data, sizeof(Radio_Normal_Format), RT_WAITING_FOREVER) == RT_EOK)
         {
-            rt_completion_init(&rf_ack);
+            /*
+             * Clear RF Flag
+             */
+            rt_completion_init(&rf_ack_sem);
+            rt_completion_init(&rf_txdone_sem);
+            /*
+             * Start RF Send
+             */
             SendPrepare(Send_Data);
             RF_Send(&rf_433,radio_send_buf, rt_strlen(radio_send_buf));
+            /*
+             * Wait RF TxDone
+             */
+            rt_completion_wait(&rf_txdone_sem,200);
             if(Send_Data.Ack)
             {
                 for(uint8_t i = 1; i <= 3; i++)
                 {
-                    if(rt_completion_wait(&rf_ack, 400) != RT_EOK)
+                    /*
+                     * Wait RF Reponse
+                     */
+                    if(rt_completion_wait(&rf_ack_sem, 400) != RT_EOK)
                     {
+                        LOG_D("RF_Send retry num %d\r\n",i);
+                        /*
+                         * Clear RF Flag
+                         */
+                        rt_completion_init(&rf_ack_sem);
+                        rt_completion_init(&rf_txdone_sem);
+                        /*
+                         * Start RF Send
+                         */
                         SendPrepare(Send_Data);
                         RF_Send(&rf_433,radio_send_buf, rt_strlen(radio_send_buf));
-                        LOG_D("RF_Send retry num %d\r\n",i);
+                        /*
+                         * Wait RF TxDone
+                         */
+                        rt_completion_wait(&rf_txdone_sem,200);
                     }
                     else
                     {
                         break;
                     }
                 }
-            }
-            else
-            {
-                rt_thread_mdelay(400);
             }
         }
     }
