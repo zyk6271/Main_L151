@@ -95,6 +95,7 @@ void Gateway_Sync(void)
 {
     ControlUpload_GW(1,0,5,ValveStatus);
     PowerOn_Upload();
+    Gateway_Sync_Num = 1;
     rt_timer_start(Gateway_Sync_t);
 }
 void Gateway_RemoteDelete(void)

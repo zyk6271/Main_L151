@@ -17,7 +17,7 @@
 #include "drv_common.h"
 #include "board.h"
 
-#define MCU_VER "1.2.7"
+#define MCU_VER "1.2.8"
 
 int main(void)
 {
