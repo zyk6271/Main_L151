@@ -126,7 +126,6 @@ __restart:
     timeout = 50; // 设置超时时间为50ms
     do {
         SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_XTAL_ON); //AX5043_PWRMODE = AX5043_PWRSTATE_XTAL_ON;    Crystal Oscillator enabled
-        rt_thread_mdelay(10);
         status = (PwrStatus)SpiReadSingleAddressRegister(dev,REG_AX5043_POWSTAT);
     } while(status.svmodem != 0x00 && ((rt_tick_get() - start_time) < timeout));
     if (status.svmodem != 0x00) {
@@ -143,7 +142,6 @@ __restart:
     start_time = rt_tick_get();
     while(status.svmodem != 0x01 && (rt_tick_get() - start_time) < timeout)
     {
-        rt_thread_mdelay(10);
         status = (PwrStatus)SpiReadSingleAddressRegister(dev,REG_AX5043_POWSTAT);
     }
     if (status.svmodem != 0x01) {
@@ -175,7 +173,6 @@ __restart:
     timeout = 50; // 设置超时时间为50ms
     do {
         SpiWriteSingleAddressRegister(dev,REG_AX5043_PWRMODE, AX5043_PWRSTATE_XTAL_ON); //AX5043_PWRMODE = AX5043_PWRSTATE_XTAL_ON;    Crystal Oscillator enabled
-        rt_thread_mdelay(10);
         status = (PwrStatus)SpiReadSingleAddressRegister(dev,REG_AX5043_POWSTAT);
     } while(status.svmodem != 0x00 && ((rt_tick_get() - start_time) < timeout));
     if (status.svmodem != 0x00) {
@@ -192,7 +189,6 @@ __restart:
     start_time = rt_tick_get();
     while(status.svmodem != 0x01 && (rt_tick_get() - start_time) < timeout)
     {
-        rt_thread_mdelay(10);
         status = (PwrStatus)SpiReadSingleAddressRegister(dev,REG_AX5043_POWSTAT);
     }
     if (status.svmodem != 0x01) {
