@@ -14,7 +14,6 @@ static agile_led_t *beep_three = RT_NULL;
 static agile_led_t *led0_three = RT_NULL;
 static agile_led_t *lossled0 = RT_NULL;
 static agile_led_t *wifi_G = RT_NULL;
-static agile_led_t *wifi_G_Com = RT_NULL;
 static agile_led_t *wifi_R = RT_NULL;
 
 #define DBG_TAG "led"
@@ -51,7 +50,6 @@ void led_Init(void)
     if(wifi_G == RT_NULL)
     {
         wifi_G = agile_led_create(LED4_PIN, PIN_LOW, "200,200", -1);
-        wifi_G_Com = agile_led_create(LED4_PIN, PIN_LOW, "200,200", -1);
     }
     if(wifi_R == RT_NULL)
     {
@@ -73,8 +71,8 @@ void beep_three_times(void)
 }
 void wifi_G_resume_callback(agile_led_t *led)
 {
-    extern uint8_t Heart_Flag;
-    if(Heart_Flag)
+    extern uint8_t Heart_Status;
+    if(Heart_Status)
     {
         wifi_led(1);
     }

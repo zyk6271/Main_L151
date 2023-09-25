@@ -353,6 +353,10 @@ void GatewayDataSolve(int rssi,uint8_t *rx_buffer,uint8_t rx_len)
         {
             LOG_D("GatewayDataSolve from:%d,command:%d,data:%d,rssi:%d\r\n",Rx_message.From_ID,Rx_message.Command,Rx_message.Data,rssi);
             Heart_Refresh(Rx_message.From_ID);
+            if(Rx_message.From_ID == GetGatewayID())
+            {
+                wifi_communication_blink();
+            }
             switch(Rx_message.Command)
             {
             case 1://延迟

@@ -27,7 +27,8 @@ extern struct ax5043 rf_433;
 rt_timer_t Heart_Check_t = RT_NULL;
 rt_timer_t Heart_Test_t = RT_NULL;
 rt_timer_t Gateway_Sync_t = RT_NULL;
-uint8_t Heart_Flag = 0;
+uint8_t Heart_Status = 0;
+uint8_t Heart_Recv_Flag = 0;
 uint8_t Heart_Check_Count = 0;
 uint8_t Gateway_Sync_Num = 1;
 uint32_t Gateway_ID = 0;
@@ -106,28 +107,30 @@ void Heart_Refresh(uint32_t ID)
 {
     if(ID == Gateway_ID)
     {
-        Heart_Flag = 1;
+        Heart_Recv_Flag = 1;
+        Heart_Status = 1;
         LOG_D("Gateway Heart_Refresh\r\n");
     }
 }
 void Heart_Check(void *parameter)
 {
-    if(Heart_Flag)
+    if(Heart_Recv_Flag)
     {
-        Heart_Flag = 0;
+        Heart_Recv_Flag = 0;
         wifi_led(1);
         LOG_I("Gateway Heart Check Success\r\n");
     }
     else
     {
         wifi_led(2);
+        Heart_Status = 0;
         LOG_W("Gateway Heart Check Fail\r\n");
     }
 }
 void Heart_Test(void *parameter)
 {
     extern uint8_t ValveStatus;
-    if(Heart_Flag)
+    if(Heart_Recv_Flag)
     {
         rt_timer_stop(Heart_Test_t);
         wifi_led(1);
